@@ -115,6 +115,21 @@ function PromotionalBanner() {
 }
 
 function NearbyStores() {
+  const [favorites, setFavorites] = React.useState<Set<number>>(new Set());
+  const { colors } = useTheme();
+
+  const toggleFavorite = (storeId: number) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(storeId)) {
+        newFavorites.delete(storeId);
+      } else {
+        newFavorites.add(storeId);
+      }
+      return newFavorites;
+    });
+  };
+
   return (
     <View style={{ marginTop: 24 }}>
       <Text style={styles.sectionTitle}>Nearby Stores</Text>
@@ -125,7 +140,17 @@ function NearbyStores() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.storeCard}>
-            <Image source={{ uri: item.image }} style={styles.storeImage} />
+            <View style={styles.storeImageContainer}>
+              <Image source={{ uri: item.image }} style={styles.storeImage} />
+              <TouchableOpacity 
+                style={[styles.favoriteButton, { backgroundColor: colors.surface }]}
+                onPress={() => toggleFavorite(item.id)}
+              >
+                <Text style={styles.favoriteIcon}>
+                  {favorites.has(item.id) ? '❤️' : '🤍'}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <Text style={styles.storeName}>{item.name}</Text>
             <Text style={styles.storeMeta}>{item.rating} ★ · {item.deliveryTime} · {item.distance}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 }}>
@@ -133,6 +158,11 @@ function NearbyStores() {
                 <Text key={idx} style={styles.storeCategory}>{cat}</Text>
               ))}
             </View>
+            {favorites.has(item.id) && (
+              <View style={[styles.favoriteLabel, { backgroundColor: colors.error + '22' }]}>
+                <Text style={[styles.favoriteLabelText, { color: colors.error }]}>Favorite</Text>
+              </View>
+            )}
           </View>
         )}
         style={{ marginTop: 8 }}
@@ -186,11 +216,44 @@ function PopularCategories() {
   );
 }
 
-export default function CustomerHome() {
+function UserHeader({ navigation }: any) {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.userHeader, { borderBottomColor: colors.primary + '22' }]}>
+      <View style={styles.userInfo}>
+        <View style={[styles.userAvatar, { backgroundColor: colors.primary + '22' }]}>
+          <Text style={[styles.userInitials, { color: colors.primary }]}>KA</Text>
+        </View>
+        <View>
+          <Text style={[styles.welcomeText, { color: colors.onBackground + '88' }]}>Welcome back,</Text>
+          <Text style={[styles.userName, { color: colors.onBackground }]}>Kwame Asante</Text>
+        </View>
+      </View>
+      <View style={styles.headerActions}>
+        <TouchableOpacity 
+          style={[styles.headerButton, { backgroundColor: colors.surface }]}
+          onPress={() => navigation.navigate('UserPreferences')}
+        >
+          <Text style={styles.headerButtonIcon}>⚙️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.headerButton, { backgroundColor: colors.surface }]}
+          onPress={() => {/* Navigate to notifications */}}
+        >
+          <Text style={styles.headerButtonIcon}>🔔</Text>
+          <View style={[styles.notificationBadge, { backgroundColor: colors.error }]} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+export default function CustomerHome({ navigation }: any) {
   const [chatbotVisible, setChatbotVisible] = React.useState(false);
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <UserHeader navigation={navigation} />
         <SearchBar />
         <PromotionalBanner />
         <NearbyStores />
@@ -284,10 +347,44 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
+  storeImageContainer: {
+    position: 'relative',
+    marginBottom: 8,
+  },
   storeImage: {
     width: '100%',
     height: 80,
     borderRadius: 12,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  favoriteIcon: {
+    fontSize: 16,
+  },
+  favoriteLabel: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  favoriteLabelText: {
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   storeName: {
     fontWeight: 'bold',
@@ -349,6 +446,65 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 6,
+  },
+  userHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  userInitials: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  welcomeText: {
+    fontSize: 14,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  headerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  headerButtonIcon: {
+    fontSize: 20,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   categoriesGrid: {
     flexDirection: 'row',

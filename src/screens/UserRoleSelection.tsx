@@ -13,7 +13,7 @@ const roles = [
     icon: '🛒',
     benefits: ['Browse local stores', 'Fast delivery', 'Secure payments', 'Track orders'],
     accent: '#2E7D32',
-    route: 'CustomerHome',
+    route: 'CustomerTabs',
   },
   {
     key: 'shopper',
@@ -22,7 +22,7 @@ const roles = [
     icon: '🚚',
     benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
     accent: '#FF9800',
-    route: 'StoreBrowse',
+    route: 'ShopperHome',
   },
   {
     key: 'store',
@@ -31,7 +31,7 @@ const roles = [
     icon: '🏬',
     benefits: ['Inventory management', 'Reach more customers', 'Analytics dashboard', 'Automated orders'],
     accent: '#388E3C',
-    route: 'CartCheckout',
+    route: 'StoreOwnerHome',
   },
 ];
 

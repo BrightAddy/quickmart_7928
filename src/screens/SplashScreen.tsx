@@ -3,6 +3,7 @@ import { View, ActivityIndicator, Image, StyleSheet, Animated, Easing, Text } fr
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../theme/theme';
+import { AdinkraLoader, KenteAccent, GhanaGradient } from '../components/UI';
 
 const loadingTexts = [
   'Initializing...',
@@ -47,7 +48,7 @@ export default function SplashScreen({ navigation }: Props) {
       setLoadingIdx((idx) => (idx + 1) % loadingTexts.length);
     }, 900);
     const timer = setTimeout(() => {
-      navigation.replace('UserRoleSelection');
+      navigation.replace('Onboarding');
     }, 1800);
     return () => {
       clearTimeout(timer);
@@ -82,12 +83,12 @@ export default function SplashScreen({ navigation }: Props) {
         <Text style={styles.brandSubtitle}>Your favorite groceries, delivered fast</Text>
       </Animated.View>
       <View style={{ height: 40 }} />
-      <Animated.View style={{ alignItems: 'center', marginTop: 24, transform: [{ rotate }] }}>
-        <View style={styles.spinnerCircle}>
-          <ActivityIndicator color={colors.onPrimary} size="small" />
-        </View>
-      </Animated.View>
-      <Text style={styles.loadingText}>{loadingTexts[loadingIdx]}</Text>
+      <AdinkraLoader size={60} symbol="gye_nyame" />
+      <Text style={[styles.loadingText, { color: colors.onPrimary + 'cc' }]}>{loadingTexts[loadingIdx]}</Text>
+      
+      {/* Add cultural accents */}
+      <KenteAccent style={{ position: 'absolute', top: 50, left: 20 }} animated />
+      <KenteAccent style={{ position: 'absolute', bottom: 100, right: 30, width: 40, height: 40 }} />
     </View>
   );
 }
