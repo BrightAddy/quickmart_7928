@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "platforms": ["ios", "android"],
+    "name": "QuickMart",
+    "slug": "quickmart-7928",
+    "scheme": "quickmart",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
+
+
