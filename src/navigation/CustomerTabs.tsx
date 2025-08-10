@@ -6,6 +6,7 @@ import StoreBrowse from '../screens/StoreBrowse';
 import CartCheckout from '../screens/CartCheckout';
 import Orders from '@/screens/Orders';
 import Profile from '@/screens/Profile';
+import Search from '../screens/Search';
 import { useTheme } from '../theme/theme';
 import { Text } from 'react-native';
 
@@ -23,7 +24,7 @@ export default function CustomerTabs() {
       }}
     >
       <Tab.Screen name="Home" component={CustomerHome} options={{ tabBarIcon: () => <Text>🏠</Text> }} />
-      <Tab.Screen name="Browse" component={StoreBrowse} options={{ tabBarIcon: () => <Text>🛍️</Text> }} />
+      <Tab.Screen name="Search" component={Search} options={{ tabBarIcon: () => <Text>🔎</Text> }} />
       <Tab.Screen name="Orders" component={Orders} options={{ tabBarIcon: () => <Text>📦</Text> }} />
       <Tab.Screen name="Cart" component={CartCheckout} options={{ tabBarIcon: () => <Text>🛒</Text> }} />
       <Tab.Screen name="Profile" component={Profile} options={{ tabBarIcon: () => <Text>👤</Text> }} />

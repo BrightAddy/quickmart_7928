@@ -14,6 +14,7 @@ export type RootStackParamList = {
   StoreOwnerHome: undefined;
   OrderTracking: { id: string } | undefined;
   PaymentMethods: undefined;
+  Notifications: undefined;
 };
 
 

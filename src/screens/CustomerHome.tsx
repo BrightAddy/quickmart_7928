@@ -238,7 +238,7 @@ function UserHeader({ navigation }: any) {
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.headerButton, { backgroundColor: colors.surface }]}
-          onPress={() => {/* Navigate to notifications */}}
+          onPress={() => navigation.navigate('Notifications')}
         >
           <Text style={styles.headerButtonIcon}>🔔</Text>
           <View style={[styles.notificationBadge, { backgroundColor: colors.error }]} />
