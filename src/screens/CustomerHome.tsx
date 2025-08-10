@@ -114,7 +114,7 @@ function PromotionalBanner() {
   );
 }
 
-function NearbyStores() {
+function NearbyStores({ navigation }: any) {
   const [favorites, setFavorites] = React.useState<Set<number>>(new Set());
   const { colors } = useTheme();
 
@@ -139,7 +139,7 @@ function NearbyStores() {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.storeCard}>
+          <TouchableOpacity style={styles.storeCard} onPress={() => navigation.navigate('StoreBrowse', { store: item })}>
             <View style={styles.storeImageContainer}>
               <Image source={{ uri: item.image }} style={styles.storeImage} />
               <TouchableOpacity 
@@ -163,7 +163,7 @@ function NearbyStores() {
                 <Text style={[styles.favoriteLabelText, { color: colors.error }]}>Favorite</Text>
               </View>
             )}
-          </View>
+          </TouchableOpacity>
         )}
         style={{ marginTop: 8 }}
       />
@@ -256,7 +256,7 @@ export default function CustomerHome({ navigation }: any) {
         <UserHeader navigation={navigation} />
         <SearchBar />
         <PromotionalBanner />
-        <NearbyStores />
+        <NearbyStores navigation={navigation} />
         <QuickReorder />
         <PopularCategories />
         <View style={{ height: 40 }} />

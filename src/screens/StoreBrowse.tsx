@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet, Image, TextInput, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal, ImageUploadButton, ImageScanModal, ImageRecognitionResult, GhanaianLoader, KenteAccent } from '../components/UI';
 import { useTheme } from '../theme/theme';
+import { useCart } from '../context/CartContext';
 
-const storeData = {
+const defaultStoreData = {
   name: 'Fresh Market Accra',
   rating: 4.5,
   deliveryTime: '25-35 min',
@@ -133,39 +134,62 @@ function CategoryChips({ selected, onSelect }: any) {
   );
 }
 
-function ProductCard({ product, onAddToCart }: any) {
+function ProductCard({ product, onPress }: any) {
+  const { items, addItem, updateQty, removeItem } = useCart();
+  const inCart = items.find((i) => i.id === product.id);
+  const qty = inCart?.qty || 0;
+  const canAdd = product.inStock !== false;
   return (
-    <View style={styles.productCard}>
+    <TouchableOpacity style={styles.productCard} onPress={onPress} activeOpacity={0.9}>
       <KenteAccent style={{ top: -10, right: -10 }} />
       <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
       <Text style={styles.productName}>{product.name}</Text>
       <Text style={styles.productPrice}>GHS {product.price.toFixed(2)}</Text>
       <Text style={styles.productMeta}>{product.rating} ★ {product.inStock ? 'In Stock' : 'Out of Stock'}</Text>
-      <TouchableOpacity style={[styles.addBtn, !product.inStock && { backgroundColor: '#ccc' }]} disabled={!product.inStock} onPress={onAddToCart}>
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>Add to Cart</Text>
-      </TouchableOpacity>
-    </View>
+
+      {qty > 0 ? (
+        <View style={styles.stepperBar}>
+          <TouchableOpacity style={styles.stepIcon} onPress={() => qty > 1 ? updateQty(product.id, qty - 1) : removeItem(product.id)}>
+            <Text style={styles.stepIconText}>−</Text>
+          </TouchableOpacity>
+          <Text style={styles.stepQty}>{qty}</Text>
+          <TouchableOpacity style={styles.stepIcon} onPress={() => updateQty(product.id, qty + 1)}>
+            <Text style={styles.stepIconText}>＋</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={[styles.addBtn, !canAdd && { backgroundColor: '#ccc' }]}
+          disabled={!canAdd}
+          onPress={() => addItem({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, category: product.category, unitLabel: '1 KG' }, 1)}
+        >
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>Add to Cart</Text>
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
   );
 }
 
 function FloatingCartBadge({ count, onPress }: any) {
   if (!count) return null;
   return (
-    <TouchableOpacity style={styles.cartBadge} onPress={onPress}>
-      <Text style={{ color: 'white', fontWeight: 'bold' }}>🛒 {count}</Text>
+    <TouchableOpacity style={styles.cartBadge} onPress={onPress} activeOpacity={0.9}>
+      <Text style={styles.cartBadgeIcon}>🛒</Text>
+      <Text style={styles.cartBadgeCount}>{count}</Text>
     </TouchableOpacity>
   );
 }
 
-export default function StoreBrowse({ navigation }: any) {
+export default function StoreBrowse({ navigation, route }: any) {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
-  const [cartCount, setCartCount] = useState(0);
+  // cart count comes from global cart
   const [loading, setLoading] = useState(false);
   const [chatbotVisible, setChatbotVisible] = React.useState(false);
   const [imageScanVisible, setImageScanVisible] = React.useState(false);
   const [recognitionResult, setRecognitionResult] = React.useState<any>(null);
   const [showResult, setShowResult] = React.useState(false);
+  const { addItem, totalCount } = useCart();
 
   const filteredProducts = useMemo(() => {
     let prods = allProducts;
@@ -181,15 +205,21 @@ export default function StoreBrowse({ navigation }: any) {
   const handleImageRecognition = (result: any) => {
     setRecognitionResult(result);
     setShowResult(true);
-    setCartCount((c: number) => c + 1);
   };
+
+  const store = route?.params?.store ? {
+    name: route.params.store.name,
+    rating: route.params.store.rating,
+    deliveryTime: route.params.store.deliveryTime,
+    imageUrl: route.params.store.image,
+  } : defaultStoreData;
 
   return (
     <Screen>
       <FlatList
         ListHeaderComponent={
           <>
-            <StoreHeader store={storeData} />
+            <StoreHeader store={store} />
             <SearchBar 
               value={search} 
               onChange={setSearch} 
@@ -206,7 +236,7 @@ export default function StoreBrowse({ navigation }: any) {
         columnWrapperStyle={{ gap: 12, paddingHorizontal: 8 }}
         contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         renderItem={({ item }) => (
-          <ProductCard product={item} onAddToCart={() => setCartCount((c: number) => c + 1)} />
+          <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { product: item })} />
         )}
         ListEmptyComponent={loading ? (
           <View style={{ alignItems: 'center', marginTop: 40 }}>
@@ -221,7 +251,7 @@ export default function StoreBrowse({ navigation }: any) {
             </View>
         )}
       />
-      <FloatingCartBadge count={cartCount} onPress={() => navigation.navigate('CartCheckout')} />
+      <FloatingCartBadge count={totalCount} onPress={() => navigation.navigate('CartCheckout')} />
       <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
       <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
       <ImageScanModal 
@@ -256,7 +286,13 @@ const styles = StyleSheet.create({
   productPrice: { color: '#2E7D32', fontWeight: 'bold', marginTop: 2 },
   productMeta: { fontSize: 13, color: '#888', marginTop: 2 },
   addBtn: { backgroundColor: '#2E7D32', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8, marginTop: 8 },
-  cartBadge: { position: 'absolute', right: 18, bottom: 24, backgroundColor: '#2E7D32', borderRadius: 24, paddingHorizontal: 18, paddingVertical: 10, elevation: 4, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } },
+  stepperBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', backgroundColor: '#D7F4D9', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, marginTop: 8 },
+  stepIcon: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#2E7D32', alignItems: 'center', justifyContent: 'center' },
+  stepIconText: { color: 'white', fontWeight: '900' },
+  stepQty: { fontWeight: '800', color: '#0f172a' },
+  cartBadge: { position: 'absolute', right: 16, bottom: 20, backgroundColor: '#16a34a', borderRadius: 999, paddingHorizontal: 20, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', gap: 8, elevation: 6, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 6 } },
+  cartBadgeIcon: { color: 'white', fontSize: 18 },
+  cartBadgeCount: { color: 'white', fontWeight: '900', fontSize: 16 },
 });
 
 

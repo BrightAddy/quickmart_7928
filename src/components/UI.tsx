@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { TouchableOpacity, Modal, Animated, Easing, StyleSheet, View as RNView, Text as RNText, TextInput, FlatList, ViewProps, TextProps } from 'react-native';
+import { TouchableOpacity, Modal, Animated, Easing, StyleSheet, View as RNView, Text as RNText, TextInput, FlatList, ViewProps, TextProps, PanResponder, Dimensions } from 'react-native';
 import { useTheme } from '../theme/theme';
 
 // Ghanaian-inspired loading animation component
@@ -263,6 +263,48 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
   const { colors } = useTheme();
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
+  const window = Dimensions.get('window');
+  const BUTTON_SIZE = 56;
+  const MARGIN = 24;
+  const initialX = window.width - BUTTON_SIZE - MARGIN;
+  const initialY = window.height - BUTTON_SIZE - (MARGIN + 160);
+  const position = useRef(new Animated.ValueXY({ x: initialX, y: initialY })).current;
+  const offsetRef = useRef({ x: initialX, y: initialY });
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_evt, gesture) => Math.abs(gesture.dx) + Math.abs(gesture.dy) > 3,
+      onPanResponderGrant: () => {
+        // no-op, using absolute offsets model
+      },
+      onPanResponderMove: (_evt, gesture) => {
+        const nextX = offsetRef.current.x + gesture.dx;
+        const nextY = offsetRef.current.y + gesture.dy;
+        position.setValue({ x: nextX, y: nextY });
+      },
+      onPanResponderRelease: (_evt, gesture) => {
+        const rawX = offsetRef.current.x + gesture.dx;
+        const rawY = offsetRef.current.y + gesture.dy;
+        const leftEdge = 8;
+        const rightEdge = window.width - BUTTON_SIZE - 8;
+        const clampedY = Math.max(8, Math.min(rawY, window.height - BUTTON_SIZE - 8));
+        const centerX = rawX + BUTTON_SIZE / 2;
+        const targetX = centerX < window.width / 2 ? leftEdge : rightEdge;
+        const traveled = Math.abs(gesture.dx) + Math.abs(gesture.dy);
+
+        Animated.spring(position, {
+          toValue: { x: targetX, y: clampedY },
+          bounciness: 12,
+          speed: 14,
+          useNativeDriver: false,
+        }).start(() => {
+          offsetRef.current = { x: targetX, y: clampedY };
+          if (traveled < 6) onPress();
+        });
+      },
+      onPanResponderTerminationRequest: () => false,
+    })
+  ).current;
   
   useEffect(() => {
     // Gentle bounce animation
@@ -283,8 +325,15 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
   }, []);
 
   return (
-    <Animated.View style={{ position: 'absolute', right: 24, bottom: 32, zIndex: 100, transform: [{ scale: bounceAnim }] }}>
-      <Animated.View 
+    <Animated.View
+      style={{ position: 'absolute', left: 0, top: 0, zIndex: 100, transform: [{ translateX: position.x }, { translateY: position.y }] }}
+      {...panResponder.panHandlers}
+      accessibilityLabel="Open AI Assistant"
+      accessibilityHint="Drag to reposition. Tap to open assistant."
+      accessibilityRole="button"
+    >
+      <Animated.View style={{ transform: [{ scale: bounceAnim }] }}>
+        <Animated.View 
         style={{
           position: 'absolute',
           width: 72, height: 72,
@@ -295,7 +344,6 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
         }}
       />
       <TouchableOpacity
-        onPress={onPress}
         style={{ 
           backgroundColor: colors.primary, 
           borderRadius: 32, 
@@ -310,12 +358,10 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
           elevation: 8
         }}
         activeOpacity={0.85}
-        accessibilityLabel="Open AI Assistant"
-        accessibilityHint="Get help with your shopping and orders"
-        accessibilityRole="button"
       >
         <RNText style={{ fontSize: 28, color: 'white' }}>💬</RNText>
       </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 };

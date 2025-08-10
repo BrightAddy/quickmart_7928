@@ -19,32 +19,32 @@ type AppTheme = {
 
 const lightTheme: AppTheme = {
   colors: {
-    primary: '#2E7D32', // Forest Green (Ghana flag inspired)
-    primaryVariant: '#1B5E20',
-    secondary: '#FFB300', // Golden Yellow (Ghana flag inspired)
-    background: '#F8F9FA', // Slightly warmer white
+    primary: '#2DCCD3',
+    primaryVariant: '#1DB6BD',
+    secondary: '#7C9CF1',
+    background: '#F5F7FA',
     surface: '#FFFFFF',
-    error: '#DC143C', // Crimson Red (Ghana flag inspired)
+    error: '#DC143C',
     onPrimary: '#FFFFFF',
     onSecondary: '#000000',
-    onBackground: '#1A1A1A', // Richer black
-    onSurface: '#1A1A1A',
+    onBackground: '#0F172A',
+    onSurface: '#0F172A',
     onError: '#FFFFFF'
   }
 };
 
 const darkTheme: AppTheme = {
   colors: {
-    primary: '#4CAF50',
-    primaryVariant: '#2E7D32',
-    secondary: '#FFB74D',
-    background: '#121212',
-    surface: '#1E1E1E',
+    primary: '#2DCCD3',
+    primaryVariant: '#1DB6BD',
+    secondary: '#7C9CF1',
+    background: '#0B0F16',
+    surface: '#121826',
     error: '#EF5350',
     onPrimary: '#000000',
     onSecondary: '#000000',
-    onBackground: '#FFFFFF',
-    onSurface: '#FFFFFF',
+    onBackground: '#F8FAFC',
+    onSurface: '#F8FAFC',
     onError: '#000000'
   }
 };
