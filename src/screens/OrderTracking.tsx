@@ -21,6 +21,8 @@ export default function OrderTracking({ route, navigation }: any) {
   const order = getOrder(route.params?.id);
   
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const riderProgress = useRef(new Animated.Value(0)).current;
+  const riderAnimationRef = useRef<Animated.CompositeAnimation | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showChat, setShowChat] = useState(false);
   const [messageText, setMessageText] = useState('');
@@ -55,10 +57,28 @@ export default function OrderTracking({ route, navigation }: any) {
           }),
         ])
       ).start();
+
+      // Start rider animation along mocked route
+      riderAnimationRef.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(riderProgress, {
+            toValue: 1,
+            duration: 20000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(riderProgress, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      riderAnimationRef.current.start();
     }
 
     return () => {
       clearInterval(interval);
+      riderAnimationRef.current?.stop();
     };
   }, [order?.status]);
 
@@ -73,6 +93,13 @@ export default function OrderTracking({ route, navigation }: any) {
       </Screen>
     );
   }
+
+  // Width of the mocked route area (left/right padding = 60 as in styles.routeContainer)
+  const routeWidth = screenWidth - 120;
+  const riderTranslateX = riderProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, Math.max(0, routeWidth - 32)], // 32 = marker size
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -207,6 +234,18 @@ export default function OrderTracking({ route, navigation }: any) {
           <View style={styles.routeContainer}>
             <View style={styles.routeLine} />
           </View>
+
+          {/* Rider moving along mocked route (no Google Maps needed) */}
+          <Animated.View
+            style={[
+              styles.riderMarker,
+              { top: 100 - 16, left: 60, transform: [{ translateX: riderTranslateX }] },
+            ]}
+          >
+            <View style={[styles.locationIcon, { backgroundColor: colors.primary }]}> 
+              <Text style={styles.locationIconText}>🚚</Text>
+            </View>
+          </Animated.View>
 
           {/* Pickup Location */}
           <View style={[styles.locationMarker, styles.pickupLocation]}>
@@ -513,6 +552,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 3,
     borderTopColor: '#10b981',
     borderStyle: 'dashed',
+  },
+  riderMarker: {
+    position: 'absolute',
+    width: 32,
+    height: 32,
   },
   locationMarker: {
     position: 'absolute',

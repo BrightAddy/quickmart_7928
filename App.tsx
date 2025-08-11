@@ -32,6 +32,7 @@ import { OrderProvider } from './src/context/OrderContext';
 import Checkout from './src/screens/Checkout';
 import EditProfile from './src/screens/EditProfile';
 import LoyaltyPoints from './src/screens/LoyaltyPoints';
+import ManageAddresses from './src/screens/ManageAddresses';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -66,6 +67,7 @@ export default function App() {
                 <Stack.Screen name="Checkout" component={Checkout} />
                 <Stack.Screen name="EditProfile" component={EditProfile} />
                 <Stack.Screen name="LoyaltyPoints" component={LoyaltyPoints} />
+                <Stack.Screen name="ManageAddresses" component={ManageAddresses} />
                 </Stack.Navigator>
               </NavigationContainer>
             </OrderProvider>
