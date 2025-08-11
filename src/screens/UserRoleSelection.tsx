@@ -5,7 +5,17 @@ import { RootStackParamList } from '../navigation/types';
 import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal } from '../components/UI';
 import { useTheme } from '../theme/theme';
 
-const roles = [
+type RoleDef = {
+  key: 'customer' | 'shopper' | 'store';
+  title: { en: string; fr: string };
+  description: { en: string; fr: string };
+  icon: string;
+  benefits: string[];
+  accent: string;
+  route: keyof RootStackParamList;
+};
+
+const roles: RoleDef[] = [
   {
     key: 'customer',
     title: { en: 'Customer', fr: 'Client' },
@@ -22,7 +32,7 @@ const roles = [
     icon: '🚚',
     benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
     accent: '#FF9800',
-    route: 'ShopperHome',
+    route: 'ShopperTabs',
   },
   {
     key: 'store',
