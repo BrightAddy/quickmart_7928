@@ -1,13 +1,11 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Modal, TextInput, Alert, Share } from 'react-native';
+import React, { useMemo, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Share, LayoutChangeEvent } from 'react-native';
 import { Screen } from '../../components/UI';
 import { useTheme } from '../../theme/theme';
 
 const PERIODS = ['Today', 'Week', 'Month'] as const;
-const SEGMENTS = ['Overview', 'Breakdown', 'Activity', 'Payouts'] as const;
 
 type Period = typeof PERIODS[number];
-type Segment = typeof SEGMENTS[number];
 
 type TimePoint = { ts: string; base: number; tips: number; bonus: number };
 type Payout = { id: string; amount: number; date: string; status: 'Scheduled' | 'Paid' | 'Failed' };
@@ -16,8 +14,13 @@ type OrderLite = { id: string; date: string; store: string; base: number; tips: 
 export default function ShopperEarnings() {
   const { colors } = useTheme();
   const [period, setPeriod] = useState<Period>('Today');
-  const [segment, setSegment] = useState<Segment>('Overview');
-  const segUnderline = useRef(new Animated.Value(0)).current;
+  // removed segmented tabs
+
+  // Chart layout state (for responsive bars)
+  const [chartWidth, setChartWidth] = useState(0);
+  const chartInnerHeight = 140; // drawing height for bars/grid
+  const [showCashInfo, setShowCashInfo] = useState(false);
+  const [cashoutOpenKey, setCashoutOpenKey] = useState(0);
 
   const data = useMemo(() => ({
     Today: {
@@ -105,10 +108,7 @@ export default function ShopperEarnings() {
   const hourlyRate = current.summary.onlineHours ? current.summary.total / current.summary.onlineHours : 0;
   const ordersPerHour = current.summary.onlineHours ? current.summary.orders / current.summary.onlineHours : 0;
 
-  const switchSegment = (idx: number) => {
-    setSegment(SEGMENTS[idx]);
-    Animated.spring(segUnderline, { toValue: idx, useNativeDriver: true, stiffness: 180, damping: 18, mass: 0.7 } as any).start();
-  };
+  // no segments to switch
 
   const chartMax = Math.max(
     ...current.series.map(p => p.base + p.tips + p.bonus),
@@ -129,56 +129,103 @@ export default function ShopperEarnings() {
   return (
     <Screen style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
-        {/* Top segment: Overview | Breakdown | Activity | Payouts */}
-        <View style={[styles.segmentRow, { borderColor: colors.primary + '22' }]}> 
-          {SEGMENTS.map((s, i) => (
-            <TouchableOpacity key={s} style={styles.seg} onPress={() => switchSegment(i)}>
-              <Text style={[styles.segText, { color: segment === s ? colors.primary : '#6b7280' }]}>{s}</Text>
-            </TouchableOpacity>
-          ))}
-          <Animated.View style={[styles.underline, { backgroundColor: colors.primary, transform: [{ translateX: segUnderline.interpolate({ inputRange: [0,1,2,3], outputRange: [0, 90, 180, 270] }) }] }]} />
-        </View>
+        {/* Hero earnings card with period switch */}
+        <View style={[styles.heroCard, { borderColor: colors.primary + '22', backgroundColor: colors.surface }]}>
+          <View style={[styles.periodRow]}> 
+            {PERIODS.map(p => (
+              <TouchableOpacity key={p} onPress={() => setPeriod(p)} style={[styles.periodBtn, { backgroundColor: period === p ? colors.primary : '#eef2ff', borderColor: period === p ? colors.primary : '#e5e7eb' }]}>
+                <Text style={{ color: period === p ? '#fff' : colors.primary, fontWeight: '800' }}>{p}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        {/* Period switch */}
-        <View style={[styles.periodRow]}> 
-          {PERIODS.map(p => (
-            <TouchableOpacity key={p} onPress={() => setPeriod(p)} style={[styles.periodBtn, { backgroundColor: period === p ? colors.primary + '15' : '#f3f4f6', borderColor: period === p ? colors.primary : '#e5e7eb' }]}>
-              <Text style={{ color: period === p ? colors.primary : '#6b7280', fontWeight: '800' }}>{p}</Text>
-            </TouchableOpacity>
-          ))}
+          <Text style={[styles.heroLabel, { color: '#6b7280' }]}>Total Earnings</Text>
+          <Text style={[styles.heroValue, { color: '#111827' }]}>₵{current.summary.total.toFixed(2)}</Text>
+
+          <View style={styles.heroStatsRow}>
+            <MiniStat label="Base Pay" value={`₵${current.summary.base.toFixed(2)}`} tint="#4464EB" />
+            <MiniStat label="Tips" value={`₵${current.summary.tips.toFixed(2)}`} tint="#34d399" />
+            <MiniStat label="Orders" value={`${current.summary.orders}`} tint="#6b7280" />
+          </View>
         </View>
       </View>
 
-      {segment === 'Overview' && (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-          {/* Summary cards */}
-          <View style={styles.summaryGrid}>
-            <SummaryCard label="Total" value={`₵${current.summary.total.toFixed(2)}`} colors={colors} />
-            <SummaryCard label="Base" value={`₵${current.summary.base.toFixed(2)}`} colors={colors} />
-            <SummaryCard label="Tips" value={`₵${current.summary.tips.toFixed(2)}`} colors={colors} />
-            <SummaryCard label="Bonus" value={`₵${current.summary.bonus.toFixed(2)}`} colors={colors} />
-            <SummaryCard label="Hourly" value={`₵${hourlyRate.toFixed(2)}/h`} colors={colors} />
-            <SummaryCard label="Orders/hr" value={ordersPerHour.toFixed(1)} colors={colors} />
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+          {/* Available for Cashout */}
+          <View style={[styles.cashoutCardLite, { borderColor: colors.primary + '22', backgroundColor: colors.surface }]}> 
+            <Text style={[styles.cashoutTitleTop, { color: '#6b7280' }]}>Available for Cashout</Text>
+            <Text style={[styles.cashoutBig, { color: colors.primary }]}>₵{(current.summary.total * 0).toFixed(2)}</Text>
+
+            <TouchableOpacity onPress={() => setShowCashInfo(v => !v)} style={styles.cashInfoToggle}>
+              <Text style={[styles.cashInfoText, { color: colors.primary }]}>Cashout Information</Text>
+              <Text style={{ color: colors.primary }}>{showCashInfo ? '\u25B2' : '\u25BC'}</Text>
+            </TouchableOpacity>
+
+            {showCashInfo && (
+              <View style={{ marginTop: 6, backgroundColor: '#f9fafb', borderRadius: 10, padding: 10 }}>
+                <Text style={styles.infoLine}>• Cashouts arrive instantly to your mobile wallet.</Text>
+                <Text style={styles.infoLine}>• A small fee may apply depending on amount.</Text>
+                <Text style={styles.infoLine}>• Daily limit resets at 5:00 PM.</Text>
+              </View>
+            )}
+
+            <TouchableOpacity onPress={() => { setCashoutOpenKey(k => k + 1); }} style={[styles.cashoutBtn, { backgroundColor: '#4464EB' }]}>
+              <Text style={styles.cashoutBtnText}>Cash Out Now</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Trend (stacked bars) */}
           <Text style={[styles.sectionTitle, { color: '#111827' }]}>Earnings Trend</Text>
-          <View style={[styles.stackedChart, { borderColor: colors.primary + '22' }]}> 
-            {current.series.map((p, i) => {
-              const total = p.base + p.tips + p.bonus;
-              const totalH = Math.max(8, (total / chartMax) * 120);
-              const baseH = (p.base / total) * totalH;
-              const tipsH = (p.tips / total) * totalH;
-              const bonusH = (p.bonus / total) * totalH;
+          <View
+            style={[styles.stackedChart, { borderColor: colors.primary + '22' }]}
+            onLayout={(e: LayoutChangeEvent) => setChartWidth(e.nativeEvent.layout.width - 34 /* left axis padding */)}
+          >
+            {/* Y-axis grid */}
+            {[0, 0.25, 0.5, 0.75, 1].map((t) => {
+              const y = 12 + (1 - t) * chartInnerHeight; // 12 top padding inside chart
+              const val = Math.round(chartMax * t);
               return (
-                <View key={i} style={styles.stackBarWrapper}>
-                  <View style={[styles.stackSegment, { height: bonusH, backgroundColor: '#fde68a' }]} />
-                  <View style={[styles.stackSegment, { height: tipsH, backgroundColor: '#60a5fa' }]} />
-                  <View style={[styles.stackSegment, { height: baseH, backgroundColor: colors.primary }]} />
-                  <Text style={styles.stackLabel}>{p.ts}</Text>
-                </View>
+                <View key={t} style={{ position: 'absolute', left: 34, right: 12, top: y, height: 1, backgroundColor: colors.primary + '15' }} />
               );
             })}
+
+            {/* Y-axis labels */}
+            {[0, 0.25, 0.5, 0.75, 1].map((t) => {
+              const y = 6 + (1 - t) * chartInnerHeight; // small offset
+              const val = Math.round(chartMax * t);
+              return (
+                <Text key={`lbl-${t}`} style={{ position: 'absolute', left: 0, top: y - 6, width: 30, textAlign: 'right', fontSize: 10, color: '#6b7280' }}>₵{val}</Text>
+              );
+            })}
+
+            {/* Bars */}
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: chartInnerHeight + 12, marginTop: 12, paddingLeft: 34, gap: 12 }}>
+              {current.series.map((p, i) => {
+                const total = p.base + p.tips + p.bonus;
+                const totalH = Math.max(8, (total / chartMax) * chartInnerHeight);
+                const baseH = (p.base / Math.max(total, 1)) * totalH;
+                const tipsH = (p.tips / Math.max(total, 1)) * totalH;
+                const bonusH = (p.bonus / Math.max(total, 1)) * totalH;
+                // Bar width responsive to available space
+                const count = current.series.length;
+                const computedBarWidth = chartWidth ? Math.max(14, Math.min(28, (chartWidth - (count - 1) * 12) / count)) : 18;
+                return (
+                  <View key={i} style={[styles.stackBarWrapper, { width: computedBarWidth + 4 }]}> 
+                    <View style={[styles.stackSegment, { height: bonusH, width: computedBarWidth, backgroundColor: '#fbbf24' }]} />
+                    <View style={[styles.stackSegment, { height: tipsH, width: computedBarWidth, backgroundColor: '#34d399' }]} />
+                    <View style={[styles.stackSegment, { height: baseH, width: computedBarWidth, backgroundColor: colors.primary }]} />
+                    <Text style={styles.stackLabel}>{p.ts}</Text>
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Legend */}
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 8, paddingLeft: 34 }}>
+              <LegendDot color={colors.primary} label="Base" />
+              <LegendDot color="#34d399" label="Tips" />
+              <LegendDot color="#fbbf24" label="Bonus" />
+            </View>
           </View>
 
           {/* Actions */}
@@ -187,94 +234,35 @@ export default function ShopperEarnings() {
               <Text style={[styles.actionText, { color: colors.onPrimary }]}>Export CSV</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      )}
-
-      {segment === 'Breakdown' && (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-          <BreakdownRow label="Base Fare" amount={current.summary.base} colors={colors} />
-          <BreakdownRow label="Tips" amount={current.summary.tips} colors={colors} />
-          <BreakdownRow label="Incentives" amount={current.summary.bonus} colors={colors} />
-          <BreakdownRow label="Fees" amount={current.summary.fees} colors={colors} negative />
-
-          <Text style={[styles.sectionTitle, { color: '#111827', marginTop: 12 }]}>Recent Orders</Text>
-          {current.orders.map(o => (
-            <View key={o.id} style={[styles.orderRow, { borderColor: colors.primary + '22', backgroundColor: colors.surface }]}> 
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.orderId, { color: colors.onBackground }]}>{o.id} • {o.store}</Text>
-                <Text style={[styles.orderSub, { color: colors.onSurface + '99' }]}>{o.date}</Text>
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[styles.orderTotal, { color: colors.primary }]}>₵{o.total.toFixed(2)}</Text>
-                <Text style={[styles.orderBreakdown, { color: colors.onSurface + '99' }]}>B {o.base} / T {o.tips} / I {o.bonus}</Text>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-
-      {segment === 'Activity' && (
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-          <Text style={[styles.sectionTitle, { color: '#111827' }]}>Peak Hours</Text>
-          <View style={[styles.barChart, { borderColor: colors.primary + '22' }]}> 
-            {current.byHour.map((v, i) => {
-              const h = Math.max(8, (v / Math.max(...current.byHour, 1)) * 120);
-              return (
-                <View key={i} style={styles.hourBarWrap}>
-                  <View style={[styles.hourBar, { height: h, backgroundColor: colors.primary }]} />
-                  <Text style={styles.hourLabel}>{i * 2}</Text>
-                </View>
-              );
-            })}
-          </View>
-
-          <Text style={[styles.sectionTitle, { color: '#111827', marginTop: 12 }]}>By Zone</Text>
-          {current.byZone.map(z => (
-            <View key={z.zone} style={styles.zoneRow}>
-              <Text style={{ flex: 1 }}>{z.zone}</Text>
-              <View style={[styles.zoneBarBg, { backgroundColor: colors.primary + '22' }]}> 
-                <View style={[styles.zoneBarFill, { width: `${Math.min(100, (z.value / (current.byZone[0].value || 1)) * 100)}%`, backgroundColor: colors.primary }]} />
-              </View>
-              <Text style={[styles.zoneValue, { color: colors.onBackground }]}>₵{z.value}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      )}
-
-      {segment === 'Payouts' && (
-        <PayoutsView colors={colors} payouts={current.payouts} amountDue={current.summary.total * 0.8} />
-      )}
+        {/* Payouts */}
+        <Text style={[styles.sectionTitle, { color: '#111827', marginTop: 12 }]}>Payouts</Text>
+        <PayoutsView colors={colors} payouts={current.payouts} amountDue={current.summary.total * 0.8} openKey={cashoutOpenKey} />
+      </ScrollView>
     </Screen>
   );
 }
 
-function SummaryCard({ label, value, colors }: { label: string; value: string | number; colors: any }) {
-  return (
-    <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.primary + '22' }]}> 
-      <Text style={[styles.summaryLabel, { color: '#6b7280' }]}>{label}</Text>
-      <Text style={[styles.summaryValue, { color: '#111827' }]}>{value}</Text>
-    </View>
-  );
-}
+// deprecated helper components removed (summary/breakdown)
 
-function BreakdownRow({ label, amount, colors, negative }: { label: string; amount: number; colors: any; negative?: boolean }) {
-  return (
-    <View style={[styles.breakdownRow, { borderColor: colors.primary + '22' }]}> 
-      <Text style={styles.breakdownLabel}>{label}</Text>
-      <Text style={[styles.breakdownAmount, { color: negative ? '#ef4444' : '#111827' }]}>₵{amount.toFixed(2)}</Text>
-    </View>
-  );
-}
-
-function PayoutsView({ colors, payouts, amountDue }: { colors: any; payouts: Payout[]; amountDue: number }) {
+function PayoutsView({ colors, payouts, amountDue, openKey }: { colors: any; payouts: Payout[]; amountDue: number; openKey?: number }) {
   const [visible, setVisible] = useState(false);
   const [amount, setAmount] = useState(() => amountDue.toFixed(2));
   const fee = Math.max(1, Math.round((parseFloat(amount || '0') * 0.01 + Number.EPSILON) * 100) / 100);
+
+  useEffect(() => {
+    if (openKey && openKey > 0) {
+      setVisible(true);
+    }
+  }, [openKey]);
 
   const cashout = () => {
     setVisible(false);
     Alert.alert('Cashout requested', `₵${amount} • Fee ₵${fee.toFixed(2)}`);
   };
+
+  const max = Math.max(0, amountDue);
+  const parsed = parseFloat(amount || '0') || 0;
+  const disabled = parsed <= 0 || parsed > max;
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }}>
@@ -300,15 +288,35 @@ function PayoutsView({ colors, payouts, amountDue }: { colors: any; payouts: Pay
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
         <View style={styles.cashoutBackdrop}>
           <View style={[styles.cashoutCard, { backgroundColor: colors.surface }]}> 
-            <Text style={styles.cashoutTitle}>Instant Cashout</Text>
-            <TextInput value={amount} onChangeText={setAmount} keyboardType="decimal-pad" style={styles.cashoutInput} placeholder="Amount" />
-            <Text style={styles.cashoutFee}>Fee: ₵{fee.toFixed(2)}</Text>
-            <View style={styles.formActions}>
-              <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#e5e7eb' }]} onPress={() => setVisible(false)}>
-                <Text style={[styles.actionText, { color: '#111827' }]}>Cancel</Text>
+            <View style={styles.cashoutHeader}>
+              <Text style={styles.cashoutTitle}>Instant Cashout</Text>
+              <TouchableOpacity onPress={() => setVisible(false)} style={[styles.closeBtn, { backgroundColor: colors.primary + '12' }]}> 
+                <Text style={[styles.closeBtnText, { color: colors.primary }]}>✕</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#111827' }]} onPress={cashout}>
-                <Text style={[styles.actionText, { color: '#fff' }]}>Cashout</Text>
+            </View>
+
+            <View style={[styles.amountRow, { borderColor: colors.primary + '33' }]}>
+              <View style={[styles.currencyBadge, { backgroundColor: colors.primary + '15' }]}> 
+                <Text style={[styles.currencyText, { color: colors.primary }]}>₵</Text>
+              </View>
+              <TextInput value={amount} onChangeText={setAmount} keyboardType="decimal-pad" style={styles.amountInput} placeholder="0.00" />
+            </View>
+            <Text style={styles.cashoutFee}>Fee: ₵{fee.toFixed(2)}</Text>
+
+            <View style={styles.quickChips}>
+              {[0.25, 0.5, 0.75, 1].map((p) => (
+                <TouchableOpacity key={p} onPress={() => setAmount((max * p).toFixed(2))} style={[styles.chip, { backgroundColor: colors.primary + '12', borderColor: colors.primary + '33' }]}>
+                  <Text style={[styles.chipText, { color: colors.primary }]}>{Math.round(p * 100)}%</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.formActions}>
+              <TouchableOpacity style={[styles.ghostBtn, { borderColor: '#e5e7eb' }]} onPress={() => setVisible(false)}>
+                <Text style={[styles.ghostBtnText, { color: '#111827' }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity disabled={disabled} style={[styles.primaryBtn, { backgroundColor: colors.primary, opacity: disabled ? 0.5 : 1 }]} onPress={cashout}>
+                <Text style={[styles.primaryBtnText, { color: colors.onPrimary }]}>Cashout</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -318,51 +326,46 @@ function PayoutsView({ colors, payouts, amountDue }: { colors: any; payouts: Pay
   );
 }
 
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color }} />
+      <Text style={{ fontSize: 12, color: '#6b7280' }}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  segmentRow: { flexDirection: 'row', borderWidth: 1, borderRadius: 999, padding: 6, position: 'relative' },
-  seg: { flex: 1, alignItems: 'center', paddingVertical: 6 },
-  segText: { fontSize: 14, fontWeight: '800' },
-  underline: { position: 'absolute', height: 28, width: 80, borderRadius: 999, left: 6, top: 6 },
+  // segmented control removed
   periodRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   periodBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1 },
-
-  summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  summaryCard: { flexBasis: '47%', borderWidth: 1, borderRadius: 12, padding: 14 },
-  summaryLabel: { fontSize: 12 },
-  summaryValue: { fontSize: 18, fontWeight: '800', marginTop: 6 },
+  heroCard: { borderWidth: 1, borderRadius: 16, padding: 14, marginTop: 12 },
+  heroLabel: { fontSize: 12, marginTop: 8, textAlign: 'center' },
+  heroValue: { fontSize: 28, fontWeight: '900', textAlign: 'center', marginTop: 4 },
+  heroStatsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 },
 
   sectionTitle: { fontSize: 16, fontWeight: '800', marginTop: 16, marginBottom: 8 },
 
-  stackedChart: { flexDirection: 'row', alignItems: 'flex-end', borderWidth: 1, borderRadius: 12, padding: 12, gap: 14, height: 180 },
+  stackedChart: { borderWidth: 1, borderRadius: 12, padding: 12, paddingLeft: 12, height: 220 },
   stackBarWrapper: { alignItems: 'center', justifyContent: 'flex-end' },
-  stackSegment: { width: 18, borderTopLeftRadius: 6, borderTopRightRadius: 6 },
+  stackSegment: { borderTopLeftRadius: 8, borderTopRightRadius: 8 },
   stackLabel: { fontSize: 10, marginTop: 6 },
 
-  breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 8 },
-  breakdownLabel: { fontSize: 14, fontWeight: '700' },
-  breakdownAmount: { fontSize: 14, fontWeight: '800' },
-
-  orderRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 8 },
-  orderId: { fontSize: 14, fontWeight: '800' },
-  orderSub: { fontSize: 12, marginTop: 2 },
-  orderTotal: { fontSize: 16, fontWeight: '800' },
-  orderBreakdown: { fontSize: 10, marginTop: 2 },
-
-  barChart: { flexDirection: 'row', alignItems: 'flex-end', borderWidth: 1, borderRadius: 12, padding: 12, gap: 12, height: 180 },
-  hourBarWrap: { alignItems: 'center', justifyContent: 'flex-end' },
-  hourBar: { width: 20, borderRadius: 8 },
-  hourLabel: { fontSize: 10, marginTop: 6 },
-
-  zoneRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  zoneBarBg: { flex: 1, height: 12, borderRadius: 999, overflow: 'hidden' },
-  zoneBarFill: { height: 12, borderRadius: 999 },
-  zoneValue: { width: 64, textAlign: 'right', fontWeight: '700' },
+  // removed unused styles from old sections
 
   payoutCard: { borderWidth: 1, borderRadius: 12, padding: 14 },
   payoutTitle: { fontSize: 14, fontWeight: '800' },
   payoutAmount: { fontSize: 20, fontWeight: '800', marginVertical: 4 },
   withdrawBtn: { paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   withdrawText: { fontSize: 14, fontWeight: '800' },
+  cashoutCardLite: { borderWidth: 1, borderRadius: 16, padding: 14, marginBottom: 6 },
+  cashoutTitleTop: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  cashoutBig: { fontSize: 22, fontWeight: '900', textAlign: 'center', marginTop: 2 },
+  cashInfoToggle: { marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  cashInfoText: { fontSize: 12, fontWeight: '800' },
+  infoLine: { fontSize: 12, color: '#6b7280', marginTop: 4 },
+  cashoutBtn: { marginTop: 12, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  cashoutBtnText: { color: '#fff', fontWeight: '800' },
 
   payoutRow: { flexDirection: 'row', borderWidth: 1, borderRadius: 12, padding: 12, marginTop: 8, alignItems: 'center' },
   payoutDate: { flex: 1, fontSize: 12 },
@@ -370,14 +373,40 @@ const styles = StyleSheet.create({
   payoutValue: { width: 80, textAlign: 'right', fontWeight: '800' },
 
   cashoutBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', padding: 16 },
-  cashoutCard: { width: '100%', maxWidth: 360, borderRadius: 16, padding: 16 },
-  cashoutTitle: { fontSize: 16, fontWeight: '800', marginBottom: 8 },
-  cashoutInput: { borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  cashoutFee: { fontSize: 12, color: '#6b7280', marginTop: 8 },
+  cashoutCard: { width: '100%', maxWidth: 380, borderRadius: 20, padding: 16, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 12, elevation: 6 },
+  cashoutHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  cashoutTitle: { fontSize: 18, fontWeight: '900' },
+  closeBtn: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  closeBtnText: { fontSize: 16, fontWeight: '900' },
+  amountRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6, marginTop: 8 },
+  currencyBadge: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  currencyText: { fontSize: 14, fontWeight: '900' },
+  amountInput: { flex: 1, fontSize: 18, fontWeight: '800', paddingVertical: 8 },
+  cashoutFee: { fontSize: 12, color: '#6b7280', marginTop: 6 },
+  quickChips: { flexDirection: 'row', gap: 8, marginTop: 10 },
+  chip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
+  chipText: { fontSize: 12, fontWeight: '800' },
 
-  actionBtn: { paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
+  formActions: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  ghostBtn: { flex: 1, borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  ghostBtnText: { fontSize: 14, fontWeight: '800' },
+  primaryBtn: { flex: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  primaryBtnText: { fontSize: 14, fontWeight: '800' },
+  actionBtn: { paddingVertical: 10, borderRadius: 10, alignItems: 'center', paddingHorizontal: 12 },
   actionText: { fontSize: 14, fontWeight: '800' },
-  formActions: { flexDirection: 'row', gap: 10, marginTop: 12 },
 });
+
+
+function MiniStat({ label, value, tint }: { label: string; value: string; tint: string }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center' }}>
+      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: tint + '22' as any, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: tint, fontWeight: '900' }}>•</Text>
+      </View>
+      <Text style={{ fontSize: 10, color: '#6b7280', marginTop: 6 }}>{label}</Text>
+      <Text style={{ fontSize: 12, fontWeight: '800', marginTop: 2 }}>{value}</Text>
+    </View>
+  );
+}
 
 
