@@ -21,7 +21,7 @@ import Referral from './src/screens/Referral';
 import CustomerTabs from './src/navigation/CustomerTabs';
 import ShopperStack from './src/navigation/ShopperStack';
 import ShopperTabs from './src/navigation/ShopperTabs';
-import StoreOwnerStack from './src/navigation/StoreOwnerStack';
+import StoreOwnerTabs from './src/navigation/StoreOwnerTabs';
 import OrderTracking from './src/screens/OrderTracking';
 import PaymentMethods from './src/screens/PaymentMethods';
 import UserPreferencesScreen from './src/screens/UserPreferencesScreen';
@@ -58,7 +58,7 @@ export default function App() {
                 <Stack.Screen name="Referral" component={Referral} />
                 <Stack.Screen name="ShopperHome" component={ShopperStack} />
                 <Stack.Screen name="ShopperTabs" component={ShopperTabs} />
-                <Stack.Screen name="StoreOwnerHome" component={StoreOwnerStack} />
+                <Stack.Screen name="StoreOwnerHome" component={StoreOwnerTabs} />
                 <Stack.Screen name="OrderTracking" component={OrderTracking} />
                 <Stack.Screen name="PaymentMethods" component={PaymentMethods} />
                 <Stack.Screen name="UserPreferences" component={UserPreferencesScreen} />
