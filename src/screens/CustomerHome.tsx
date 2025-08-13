@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, FlatList } from 'react-native';
 import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal } from '../components/UI';
 import { useTheme } from '../theme/theme';
+import { useProducts } from '../context/ProductsContext';
 
 // --- Placeholder Data ---
 const promotions = [
@@ -115,10 +116,11 @@ function PromotionalBanner() {
 }
 
 function NearbyStores({ navigation }: any) {
-  const [favorites, setFavorites] = React.useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = React.useState<Set<string>>(new Set());
   const { colors } = useTheme();
+  const { stores } = useProducts();
 
-  const toggleFavorite = (storeId: number) => {
+  const toggleFavorite = (storeId: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(storeId)) {
@@ -134,14 +136,14 @@ function NearbyStores({ navigation }: any) {
     <View style={{ marginTop: 24 }}>
       <Text style={styles.sectionTitle}>Nearby Stores</Text>
       <FlatList
-        data={nearbyStores}
+        data={stores}
         horizontal
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.storeCard} onPress={() => navigation.navigate('StoreBrowse', { store: item })}>
             <View style={styles.storeImageContainer}>
-              <Image source={{ uri: item.image }} style={styles.storeImage} />
+              <Image source={{ uri: item.imageUrl }} style={styles.storeImage} />
               <TouchableOpacity 
                 style={[styles.favoriteButton, { backgroundColor: colors.surface }]}
                 onPress={() => toggleFavorite(item.id)}
@@ -160,12 +162,11 @@ function NearbyStores({ navigation }: any) {
             </View>
             {favorites.has(item.id) && (
               <View style={[styles.favoriteLabel, { backgroundColor: colors.error + '22' }]}>
-                <Text style={[styles.favoriteLabelText, { color: colors.error }]}>Favorite</Text>
+                <Text style={[styles.favoriteLabelText, { color: colors.error }]}>❤️ Favorite</Text>
               </View>
             )}
           </TouchableOpacity>
         )}
-        style={{ marginTop: 8 }}
       />
     </View>
   );

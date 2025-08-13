@@ -3,6 +3,7 @@ import { View, FlatList, TouchableOpacity, StyleSheet, Image, TextInput, Text, S
 import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal, ImageUploadButton, ImageScanModal, ImageRecognitionResult, GhanaianLoader, KenteAccent } from '../components/UI';
 import { useTheme } from '../theme/theme';
 import { useCart } from '../context/CartContext';
+import { useProducts } from '../context/ProductsContext';
 
 const defaultStoreData = {
   name: 'Fresh Market Accra',
@@ -183,36 +184,46 @@ function FloatingCartBadge({ count, onPress }: any) {
 export default function StoreBrowse({ navigation, route }: any) {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
-  // cart count comes from global cart
   const [loading, setLoading] = useState(false);
   const [chatbotVisible, setChatbotVisible] = React.useState(false);
   const [imageScanVisible, setImageScanVisible] = React.useState(false);
   const [recognitionResult, setRecognitionResult] = React.useState<any>(null);
   const [showResult, setShowResult] = React.useState(false);
   const { addItem, totalCount } = useCart();
+  const { getCustomerStoreProducts, getProductsByCategory, searchProducts } = useProducts();
 
+  const store = route?.params?.store ? {
+    id: route.params.store.id || 'store-001',
+    name: route.params.store.name,
+    rating: route.params.store.rating,
+    deliveryTime: route.params.store.deliveryTime,
+    imageUrl: route.params.store.image,
+  } : {
+    id: 'store-001',
+    name: 'Fresh Market Accra',
+    rating: 4.5,
+    deliveryTime: '25-35 min',
+    imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
+  };
+
+  // Get products from the shared context
+  const storeProducts = getCustomerStoreProducts(store.id);
+  
   const filteredProducts = useMemo(() => {
-    let prods = allProducts;
+    let prods = storeProducts;
     if (selectedCat !== 'All') {
-      prods = prods.filter((p) => p.category === selectedCat);
+      prods = getProductsByCategory(selectedCat, store.id);
     }
     if (search.trim()) {
-      prods = prods.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()));
+      prods = searchProducts(search.trim(), store.id);
     }
     return prods;
-  }, [search, selectedCat]);
+  }, [search, selectedCat, storeProducts, store.id, getProductsByCategory, searchProducts]);
 
   const handleImageRecognition = (result: any) => {
     setRecognitionResult(result);
     setShowResult(true);
   };
-
-  const store = route?.params?.store ? {
-    name: route.params.store.name,
-    rating: route.params.store.rating,
-    deliveryTime: route.params.store.deliveryTime,
-    imageUrl: route.params.store.image,
-  } : defaultStoreData;
 
   return (
     <Screen>
@@ -255,9 +266,10 @@ export default function StoreBrowse({ navigation, route }: any) {
       <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
       <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
       <ImageScanModal 
-        visible={imageScanVisible} 
-        onClose={() => setImageScanVisible(false)} 
-        onRecognized={handleImageRecognition} 
+        visible={imageScanVisible}
+        onClose={() => setImageScanVisible(false)}
+        onRecognized={handleImageRecognition}
+        mode="customer"
       />
       <ImageRecognitionResult 
         result={recognitionResult} 

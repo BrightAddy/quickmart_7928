@@ -33,6 +33,7 @@ import Checkout from './src/screens/Checkout';
 import EditProfile from './src/screens/EditProfile';
 import LoyaltyPoints from './src/screens/LoyaltyPoints';
 import ManageAddresses from './src/screens/ManageAddresses';
+import { ProductsProvider } from './src/context/ProductsContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -41,37 +42,39 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <CartProvider>
-            <OrderProvider>
-              <NavigationContainer>
-                <StatusBar style="dark" />
-                <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Splash" component={SplashScreen} />
-                <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-                <Stack.Screen name="UserRoleSelection" component={UserRoleSelection} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="CustomerHome" component={CustomerHome} />
-                <Stack.Screen name="StoreBrowse" component={StoreBrowse} />
-                <Stack.Screen name="CartCheckout" component={CartCheckout} />
-                <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
-                <Stack.Screen name="HelpCenter" component={HelpCenter} />
-                <Stack.Screen name="Referral" component={Referral} />
-                <Stack.Screen name="ShopperHome" component={ShopperStack} />
-                <Stack.Screen name="ShopperTabs" component={ShopperTabs} />
-                <Stack.Screen name="StoreOwnerHome" component={StoreOwnerTabs} />
-                <Stack.Screen name="OrderTracking" component={OrderTracking} />
-                <Stack.Screen name="PaymentMethods" component={PaymentMethods} />
-                <Stack.Screen name="UserPreferences" component={UserPreferencesScreen} />
-                <Stack.Screen name="Notifications" component={Notifications} />
-                <Stack.Screen name="ProductDetails" component={ProductDetails} />
-                <Stack.Screen name="Checkout" component={Checkout} />
-                <Stack.Screen name="EditProfile" component={EditProfile} />
-                <Stack.Screen name="LoyaltyPoints" component={LoyaltyPoints} />
-                <Stack.Screen name="ManageAddresses" component={ManageAddresses} />
-                </Stack.Navigator>
-              </NavigationContainer>
-            </OrderProvider>
-          </CartProvider>
+          <ProductsProvider>
+            <CartProvider>
+              <OrderProvider>
+                <NavigationContainer>
+                  <StatusBar style="dark" />
+                  <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Splash" component={SplashScreen} />
+                    <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                    <Stack.Screen name="UserRoleSelection" component={UserRoleSelection} />
+                    <Stack.Screen name="Login" component={LoginScreen} />
+                    <Stack.Screen name="CustomerHome" component={CustomerHome} />
+                    <Stack.Screen name="StoreBrowse" component={StoreBrowse} />
+                    <Stack.Screen name="CartCheckout" component={CartCheckout} />
+                    <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
+                    <Stack.Screen name="HelpCenter" component={HelpCenter} />
+                    <Stack.Screen name="Referral" component={Referral} />
+                    <Stack.Screen name="ShopperHome" component={ShopperStack} />
+                    <Stack.Screen name="ShopperTabs" component={ShopperTabs} />
+                    <Stack.Screen name="StoreOwnerHome" component={StoreOwnerTabs} />
+                    <Stack.Screen name="OrderTracking" component={OrderTracking} />
+                    <Stack.Screen name="PaymentMethods" component={PaymentMethods} />
+                    <Stack.Screen name="UserPreferences" component={UserPreferencesScreen} />
+                    <Stack.Screen name="Notifications" component={Notifications} />
+                    <Stack.Screen name="ProductDetails" component={ProductDetails} />
+                    <Stack.Screen name="Checkout" component={Checkout} />
+                    <Stack.Screen name="EditProfile" component={EditProfile} />
+                    <Stack.Screen name="LoyaltyPoints" component={LoyaltyPoints} />
+                    <Stack.Screen name="ManageAddresses" component={ManageAddresses} />
+                  </Stack.Navigator>
+                </NavigationContainer>
+              </OrderProvider>
+            </CartProvider>
+          </ProductsProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
