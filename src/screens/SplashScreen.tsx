@@ -13,6 +13,7 @@ export default function SplashScreen({ navigation }: Props) {
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
+  const ingredientsOpacity = useRef(new Animated.Value(0)).current;
   const progressWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -20,13 +21,13 @@ export default function SplashScreen({ navigation }: Props) {
     Animated.sequence([
       Animated.timing(logoScale, {
         toValue: 1,
-        duration: 800,
+        duration: 1000,
         easing: Easing.out(Easing.back(1.2)),
         useNativeDriver: true,
       }),
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 600,
+        duration: 800,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: true,
       })
@@ -35,8 +36,17 @@ export default function SplashScreen({ navigation }: Props) {
     // Text animation
     Animated.timing(textOpacity, {
       toValue: 1,
-      duration: 800,
-      delay: 400,
+      duration: 1000,
+      delay: 600,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+
+    // Ingredients animation
+    Animated.timing(ingredientsOpacity, {
+      toValue: 1,
+      duration: 1200,
+      delay: 800,
       easing: Easing.inOut(Easing.ease),
       useNativeDriver: true,
     }).start();
@@ -44,8 +54,8 @@ export default function SplashScreen({ navigation }: Props) {
     // Progress bar animation
     Animated.timing(progressWidth, {
       toValue: width - 80,
-      duration: 2000,
-      delay: 600,
+      duration: 2500,
+      delay: 1000,
       easing: Easing.inOut(Easing.ease),
       useNativeDriver: false,
     }).start();
@@ -53,20 +63,16 @@ export default function SplashScreen({ navigation }: Props) {
     // Navigate after animations
     const timer = setTimeout(() => {
       navigation.replace('Onboarding');
-    }, 2800);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.primary }]}>
-      {/* Background Pattern */}
-      <View style={styles.backgroundPattern}>
-        <View style={[styles.circle, styles.circle1]} />
-        <View style={[styles.circle, styles.circle2]} />
-        <View style={[styles.circle, styles.circle3]} />
-      </View>
-
+    <View style={[styles.container, { backgroundColor: '#F8F6F2' }]}>
+      {/* Wooden texture background */}
+      <View style={styles.woodenBackground} />
+      
       {/* Main Content */}
       <View style={styles.content}>
         <Animated.View
@@ -79,13 +85,38 @@ export default function SplashScreen({ navigation }: Props) {
           ]}
         >
           <View style={styles.logoBox}>
-            <Text style={styles.logoIcon}>🛒</Text>
+            <View style={styles.chefHat}>
+              <View style={styles.hatBase} />
+              <View style={styles.hatTop} />
+              <View style={styles.leaves}>
+                <Text style={styles.leaf1}>🌿</Text>
+                <Text style={styles.leaf2}>🌱</Text>
+              </View>
+              <View style={styles.ingredientLine} />
+            </View>
           </View>
         </Animated.View>
 
         <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
-          <Text style={styles.brandTitle}>QuickMart</Text>
-          <Text style={styles.brandSubtitle}>Fresh groceries delivered to your door</Text>
+          <Text style={styles.brandTitle}>Fresh</Text>
+          <Text style={styles.brandSubtitle}>Groceries</Text>
+          <Text style={styles.tagline}>Delivered to your door</Text>
+        </Animated.View>
+
+        {/* Fresh ingredients decoration */}
+        <Animated.View style={[styles.ingredientsContainer, { opacity: ingredientsOpacity }]}>
+          <View style={styles.ingredientRow}>
+            <Text style={styles.ingredient}>🍅</Text>
+            <Text style={styles.ingredient}>🥬</Text>
+            <Text style={styles.ingredient}>🧄</Text>
+            <Text style={styles.ingredient}>🌿</Text>
+          </View>
+          <View style={styles.ingredientRow}>
+            <Text style={styles.ingredient}>🥑</Text>
+            <Text style={styles.ingredient}>🥕</Text>
+            <Text style={styles.ingredient}>🍎</Text>
+            <Text style={styles.ingredient}>🥦</Text>
+          </View>
         </Animated.View>
       </View>
 
@@ -97,12 +128,12 @@ export default function SplashScreen({ navigation }: Props) {
               styles.progressFill, 
               { 
                 width: progressWidth,
-                backgroundColor: colors.onPrimary 
+                backgroundColor: '#8B4513'
               }
             ]} 
           />
         </View>
-        <Text style={styles.loadingText}>Loading your experience...</Text>
+        <Text style={styles.loadingText}>Preparing fresh ingredients...</Text>
       </View>
     </View>
   );
@@ -114,76 +145,126 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backgroundPattern: {
+  woodenBackground: {
     position: 'absolute',
     width: '100%',
     height: '100%',
-  },
-  circle: {
-    position: 'absolute',
-    borderRadius: 1000,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  circle1: {
-    width: 200,
-    height: 200,
-    top: -50,
-    right: -50,
-  },
-  circle2: {
-    width: 150,
-    height: 150,
-    bottom: 100,
-    left: -30,
-  },
-  circle3: {
-    width: 100,
-    height: 100,
-    top: height * 0.3,
-    right: 50,
+    backgroundColor: '#F8F6F2',
+    opacity: 0.8,
   },
   content: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+    paddingHorizontal: 40,
   },
   logoContainer: {
     alignItems: 'center',
     marginBottom: 40,
   },
   logoBox: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    width: 140,
+    height: 140,
+    borderRadius: 35,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#8B4513',
     shadowOpacity: 0.15,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    shadowRadius: 25,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: '#E8E0D8',
   },
-  logoIcon: {
-    fontSize: 60,
+  chefHat: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  hatBase: {
+    width: 60,
+    height: 20,
+    backgroundColor: '#8B4513',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#654321',
+  },
+  hatTop: {
+    width: 80,
+    height: 50,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: '#E8E0D8',
+    marginTop: -10,
+  },
+  leaves: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+  },
+  leaf1: {
+    fontSize: 20,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+  },
+  leaf2: {
+    fontSize: 16,
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  ingredientLine: {
+    position: 'absolute',
+    bottom: -5,
+    width: 40,
+    height: 3,
+    backgroundColor: '#FFA500',
+    borderRadius: 2,
   },
   textContainer: {
     alignItems: 'center',
+    marginBottom: 40,
   },
   brandTitle: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700',
-    color: '#fff',
+    color: '#8B4513',
+    textAlign: 'center',
+    letterSpacing: 2,
+    marginBottom: 4,
+    fontFamily: 'System',
+  },
+  brandSubtitle: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: '#228B22',
     textAlign: 'center',
     letterSpacing: 1.5,
     marginBottom: 8,
+    fontFamily: 'System',
   },
-  brandSubtitle: {
+  tagline: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#666666',
     textAlign: 'center',
-    letterSpacing: 0.5,
-    lineHeight: 22,
+    letterSpacing: 0.8,
+    fontStyle: 'italic',
+  },
+  ingredientsContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  ingredient: {
+    fontSize: 24,
+    marginHorizontal: 8,
+    opacity: 0.8,
   },
   progressContainer: {
     position: 'absolute',
@@ -194,19 +275,22 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     width: '100%',
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
+    height: 6,
+    backgroundColor: '#E8E0D8',
+    borderRadius: 3,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#D2B48C',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: 3,
   },
   loadingText: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#8B4513',
     fontSize: 14,
     letterSpacing: 0.5,
+    fontStyle: 'italic',
   },
 });
 
