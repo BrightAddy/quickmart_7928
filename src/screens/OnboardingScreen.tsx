@@ -6,14 +6,12 @@ import {
   Animated,
   Dimensions,
   TouchableOpacity,
-  Image,
   Easing,
   PanResponder,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { useTheme } from '../theme/theme';
-import { Screen, GhanaianLoader, KenteAccent } from '../components/UI';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
@@ -23,63 +21,35 @@ interface OnboardingSlide {
   id: string;
   title: string;
   description: string;
-  titleTwi?: string;
-  descriptionTwi?: string;
-  illustration: string;
-  backgroundColor: string;
-  features: string[];
+  produce: string[];
 }
 
 const onboardingData: OnboardingSlide[] = [
   {
     id: '1',
-    title: 'Welcome to QuickMart',
-    titleTwi: 'Akwaaba QuickMart',
-    description: 'Shop groceries from local stores in Ghana with ease',
-    descriptionTwi: 'Tɔ aduan fi mpɔtam hɔ stores wɔ Ghana mu a ɛyɛ mmerɛw',
-    illustration: '🛒',
-    backgroundColor: '#2E7D32',
-    features: ['Local Ghanaian stores', 'Fast delivery', 'Fresh products']
+    title: 'Wholesome Organics Without the Cost',
+    description: 'Get affordable organic groceries made for everyone, every single day.',
+    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
   },
   {
     id: '2',
-    title: 'AI-Powered Chat Support',
-    titleTwi: 'AI Chatbot Mmoa',
-    description: 'Get help in English, Twi, Ga, or Ewe anytime',
-    descriptionTwi: 'Nya mmoa wɔ Borɔfo, Twi, Ga, anaa Ewe mu bere biara',
-    illustration: '🤖',
-    backgroundColor: '#FFB300',
-    features: ['24/7 Support', 'Local languages', 'Smart assistance']
+    title: 'Fresh From Local Farms',
+    description: 'Connect directly with local farmers for the freshest produce delivered to your door.',
+    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
   },
   {
     id: '3',
-    title: 'Smart Image Recognition',
-    titleTwi: 'Smart Mfoni Recognition',
-    description: 'Scan products to verify and identify items instantly',
-    descriptionTwi: 'Scan nneɛma na wo ahu ne identify ntɛmntɛm',
-    illustration: '📸',
-    backgroundColor: '#DC143C',
-    features: ['Product verification', 'Quick identification', 'Inventory help']
-  },
-  {
-    id: '4',
-    title: 'Choose Your Role',
-    titleTwi: 'Paw Wo Role',
-    description: 'Customer, Shopper, or Store Owner - we support all',
-    descriptionTwi: 'Customer, Shopper, anaa Store Owner - yɛboa obiara',
-    illustration: '👥',
-    backgroundColor: '#2E7D32',
-    features: ['Multiple user types', 'Earn money', 'Grow business']
+    title: 'Smart Shopping Made Simple',
+    description: 'AI-powered recommendations help you find the best deals and freshest ingredients.',
+    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
   }
 ];
 
 export default function OnboardingScreen({ navigation }: Props) {
-  const { colors } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showTwi, setShowTwi] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const produceAnim = useRef(new Animated.Value(0)).current;
   const floatingAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -87,29 +57,29 @@ export default function OnboardingScreen({ navigation }: Props) {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 800,
+        duration: 1000,
         useNativeDriver: true,
       }),
-      Animated.spring(scaleAnim, {
+      Animated.timing(produceAnim, {
         toValue: 1,
-        friction: 8,
-        tension: 100,
+        duration: 1200,
+        delay: 300,
         useNativeDriver: true,
       })
     ]).start();
 
-    // Floating animation for illustrations
+    // Floating animation for produce
     Animated.loop(
       Animated.sequence([
         Animated.timing(floatingAnim, {
           toValue: 1,
-          duration: 2000,
+          duration: 3000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
         Animated.timing(floatingAnim, {
           toValue: 0,
-          duration: 2000,
+          duration: 3000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
@@ -122,19 +92,20 @@ export default function OnboardingScreen({ navigation }: Props) {
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: currentSlide,
-        duration: 300,
+        duration: 400,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 0.9,
-          duration: 150,
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
           useNativeDriver: true,
         }),
-        Animated.spring(scaleAnim, {
+        Animated.timing(fadeAnim, {
           toValue: 1,
-          friction: 8,
+          duration: 400,
+          delay: 200,
           useNativeDriver: true,
         })
       ])
@@ -169,138 +140,163 @@ export default function OnboardingScreen({ navigation }: Props) {
   const currentData = onboardingData[currentSlide];
   const floatingTransform = floatingAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -10],
+    outputRange: [0, -15],
   });
 
   return (
-    <Screen style={[styles.container, { backgroundColor: currentData.backgroundColor }]}>
-      <KenteAccent style={styles.kenteAccent} />
-      
-      {/* Skip Button */}
-      <TouchableOpacity 
-        style={styles.skipButton} 
-        onPress={skipOnboarding}
-        accessibilityLabel="Skip onboarding"
-        accessibilityHint="Skip the introduction and go to role selection"
-      >
-        <Text style={[styles.skipText, { color: colors.onPrimary }]}>Skip</Text>
-      </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#E8F5E8', '#F0F8F0', '#F8FCF8']}
+        style={styles.background}
+      />
 
-      {/* Language Toggle */}
-      <TouchableOpacity 
-        style={styles.languageToggle} 
-        onPress={() => setShowTwi(!showTwi)}
-        accessibilityLabel={showTwi ? "Switch to English" : "Switch to Twi"}
-      >
-        <Text style={[styles.languageText, { color: colors.onPrimary }]}>
-          {showTwi ? 'EN' : 'TWI'}
-        </Text>
-      </TouchableOpacity>
+             {/* Header */}
+       <View style={styles.header}>
+         <View style={styles.logoContainer}>
+           <View style={styles.logo}>
+             <Text style={styles.logoIcon}>🚚</Text>
+             <Text style={styles.logoLeaf}>🌿</Text>
+           </View>
+           <Text style={styles.appName}>QuickMart</Text>
+         </View>
 
+         <TouchableOpacity style={styles.skipButton} onPress={skipOnboarding}>
+           <Text style={styles.skipText}>Skip</Text>
+         </TouchableOpacity>
+       </View>
+
+      {/* Main Content */}
       <Animated.View 
         style={[
-          styles.slideContainer,
+          styles.content,
           {
             opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }]
           }
         ]}
         {...panResponder.panHandlers}
       >
-        {/* Illustration */}
+        {/* Produce Pile */}
         <Animated.View 
           style={[
-            styles.illustrationContainer,
-            { transform: [{ translateY: floatingTransform }] }
+            styles.produceContainer,
+            {
+              transform: [{ translateY: floatingTransform }],
+              opacity: produceAnim
+            }
           ]}
         >
-          <Text style={styles.illustration}>{currentData.illustration}</Text>
-          <View style={styles.illustrationGlow} />
-        </Animated.View>
-
-        {/* Content */}
-        <View style={styles.contentContainer}>
-          <Text style={[styles.title, { color: colors.onPrimary }]}>
-            {showTwi && currentData.titleTwi ? currentData.titleTwi : currentData.title}
-          </Text>
-          
-          <Text style={[styles.description, { color: colors.onPrimary + 'cc' }]}>
-            {showTwi && currentData.descriptionTwi ? currentData.descriptionTwi : currentData.description}
-          </Text>
-
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            {currentData.features.map((feature, index) => (
-              <Animated.View 
+          <View style={styles.producePile}>
+            {currentData.produce.map((item, index) => (
+              <Animated.Text
                 key={index}
                 style={[
-                  styles.featureItem,
+                  styles.produceItem,
                   {
-                    opacity: fadeAnim,
                     transform: [{
-                      translateX: fadeAnim.interpolate({
+                      translateY: produceAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [50, 0],
                       })
-                    }]
+                    }],
+                    opacity: produceAnim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [0, 0.5, 1],
+                    })
                   }
                 ]}
               >
-                <View style={[styles.featureDot, { backgroundColor: colors.onPrimary }]} />
-                <Text style={[styles.featureText, { color: colors.onPrimary + 'ee' }]}>
-                  {feature}
-                </Text>
-              </Animated.View>
+                {item}
+              </Animated.Text>
             ))}
           </View>
+          
+          {/* Misty base effect */}
+          <View style={styles.mistyBase} />
+        </Animated.View>
+
+        {/* Text Content */}
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{currentData.title}</Text>
+          <Text style={styles.description}>{currentData.description}</Text>
         </View>
       </Animated.View>
 
-      {/* Progress Indicator */}
-      <View style={styles.progressContainer}>
-        {onboardingData.map((_, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => setCurrentSlide(index)}
-            style={[
-              styles.progressDot,
-              {
-                backgroundColor: index === currentSlide 
-                  ? colors.onPrimary 
-                  : colors.onPrimary + '44',
-                transform: [{ scale: index === currentSlide ? 1.2 : 1 }]
-              }
-            ]}
-            accessibilityLabel={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </View>
+      {/* Bottom Section with Fade Effect */}
+      <View style={styles.bottomContainer}>
+        {/* Fade overlay */}
+        <LinearGradient
+          colors={['transparent', 'rgba(248, 252, 248, 0.8)', '#F8FCF8']}
+          style={styles.fadeOverlay}
+        />
+        
+        {/* Progress Dots */}
+        <View style={styles.progressContainer}>
+          {onboardingData.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.progressDot,
+                {
+                  backgroundColor: index === currentSlide ? '#4CAF50' : '#E0E0E0',
+                  transform: [{ scale: index === currentSlide ? 1.2 : 1 }]
+                }
+              ]}
+            />
+          ))}
+        </View>
 
-      {/* Next Button */}
-      <TouchableOpacity 
-        style={[styles.nextButton, { backgroundColor: colors.onPrimary }]}
-        onPress={nextSlide}
-        accessibilityLabel={currentSlide === onboardingData.length - 1 ? "Get started" : "Next slide"}
-      >
-        <Text style={[styles.nextButtonText, { color: currentData.backgroundColor }]}>
-          {currentSlide === onboardingData.length - 1 ? 'Get Started' : 'Next'}
-        </Text>
-        <Text style={styles.nextButtonIcon}>→</Text>
-      </TouchableOpacity>
-    </Screen>
+        {/* Next Button */}
+        <TouchableOpacity 
+          style={styles.nextButton}
+          onPress={nextSlide}
+        >
+          <Text style={styles.nextButtonText}>
+            {currentSlide === onboardingData.length - 1 ? 'Get Started' : 'Next'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
   },
-  kenteAccent: {
+  background: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    opacity: 0.3,
+    width: '100%',
+    height: '100%',
+  },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    position: 'relative',
+    marginRight: 8,
+  },
+  logoIcon: {
+    fontSize: 24,
+  },
+  logoLeaf: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    fontSize: 12,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FF8C00',
   },
   skipButton: {
     position: 'absolute',
@@ -308,90 +304,73 @@ const styles = StyleSheet.create({
     right: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 20,
-    zIndex: 10,
   },
   skipText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 16,
+    color: '#FF8C00',
+    fontWeight: '500',
   },
-  languageToggle: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  languageText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  slideContainer: {
+  content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 30,
-    paddingTop: 100,
-    paddingBottom: 120,
   },
-  illustrationContainer: {
+  produceContainer: {
     alignItems: 'center',
     marginBottom: 40,
     position: 'relative',
   },
-  illustration: {
-    fontSize: 120,
-    textAlign: 'center',
-  },
-  illustrationGlow: {
-    position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    top: -20,
-    left: -20,
-  },
-  contentContainer: {
+  producePile: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
+    width: 300,
+    height: 200,
+    position: 'relative',
+  },
+  produceItem: {
+    fontSize: 32,
+    margin: 4,
+    position: 'absolute',
+  },
+  mistyBase: {
+    position: 'absolute',
+    bottom: -20,
+    width: 250,
+    height: 40,
+    backgroundColor: 'rgba(232, 245, 232, 0.6)',
+    borderRadius: 20,
+  },
+  textContainer: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
+    color: '#000',
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 34,
   },
   description: {
     fontSize: 16,
+    color: '#666',
     textAlign: 'center',
-    marginBottom: 32,
     lineHeight: 24,
-    paddingHorizontal: 20,
   },
-  featuresContainer: {
-    alignSelf: 'stretch',
-    paddingHorizontal: 20,
+  bottomContainer: {
+    position: 'relative',
+    paddingBottom: 40,
   },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  featureDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 12,
-  },
-  featureText: {
-    fontSize: 14,
-    flex: 1,
+  fadeOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 120,
   },
   progressContainer: {
     flexDirection: 'row',
@@ -401,18 +380,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   progressDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   nextButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
     marginHorizontal: 30,
     paddingVertical: 16,
     borderRadius: 25,
-    marginBottom: 40,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -422,10 +399,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: 18,
     fontWeight: '600',
-    marginRight: 8,
-  },
-  nextButtonIcon: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#FFF',
   },
 });
