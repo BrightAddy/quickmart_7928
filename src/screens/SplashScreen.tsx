@@ -1,16 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, ActivityIndicator, Image, StyleSheet, Animated, Easing, Text } from 'react-native';
+import { View, StyleSheet, Animated, Easing, Text, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../theme/theme';
-import { AdinkraLoader, KenteAccent, GhanaGradient } from '../components/UI';
 
-const loadingTexts = [
-  'Initializing...',
-  'Loading preferences...',
-  'Preparing your experience...',
-  'Almost ready...'
-];
+const { width, height } = Dimensions.get('window');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
@@ -18,77 +12,98 @@ export default function SplashScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const spinnerRotate = useRef(new Animated.Value(0)).current;
-  const [loadingIdx, setLoadingIdx] = useState(0);
+  const textOpacity = useRef(new Animated.Value(0)).current;
+  const progressWidth = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    // Logo animation
+    Animated.sequence([
       Animated.timing(logoScale, {
         toValue: 1,
-        duration: 1200,
-        easing: Easing.elastic(1.2),
+        duration: 800,
+        easing: Easing.out(Easing.back(1.2)),
         useNativeDriver: true,
       }),
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 900,
+        duration: 600,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: true,
       })
     ]).start();
-    Animated.loop(
-      Animated.timing(spinnerRotate, {
-        toValue: 1,
-        duration: 1200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-    const textInterval = setInterval(() => {
-      setLoadingIdx((idx) => (idx + 1) % loadingTexts.length);
-    }, 900);
+
+    // Text animation
+    Animated.timing(textOpacity, {
+      toValue: 1,
+      duration: 800,
+      delay: 400,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+
+    // Progress bar animation
+    Animated.timing(progressWidth, {
+      toValue: width - 80,
+      duration: 2000,
+      delay: 600,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+
+    // Navigate after animations
     const timer = setTimeout(() => {
       navigation.replace('Onboarding');
-    }, 1800);
-    return () => {
-      clearTimeout(timer);
-      clearInterval(textInterval);
-    };
+    }, 2800);
+
+    return () => clearTimeout(timer);
   }, [navigation]);
 
-  const rotate = spinnerRotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg']
-  });
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.primary }]}>  
-      <Animated.View
-        style={{
-          transform: [
-            { scale: logoScale },
-          ],
-          opacity: logoOpacity,
-          alignItems: 'center',
-        }}
-      >
-        <View style={styles.logoBox}>
-          <Image
-            source={require('../../assets/images/no-image.jpg')}
-            style={styles.logo}
-            resizeMode="contain"
+    <View style={[styles.container, { backgroundColor: colors.primary }]}>
+      {/* Background Pattern */}
+      <View style={styles.backgroundPattern}>
+        <View style={[styles.circle, styles.circle1]} />
+        <View style={[styles.circle, styles.circle2]} />
+        <View style={[styles.circle, styles.circle3]} />
+      </View>
+
+      {/* Main Content */}
+      <View style={styles.content}>
+        <Animated.View
+          style={[
+            styles.logoContainer,
+            {
+              transform: [{ scale: logoScale }],
+              opacity: logoOpacity,
+            }
+          ]}
+        >
+          <View style={styles.logoBox}>
+            <Text style={styles.logoIcon}>🛒</Text>
+          </View>
+        </Animated.View>
+
+        <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
+          <Text style={styles.brandTitle}>QuickMart</Text>
+          <Text style={styles.brandSubtitle}>Fresh groceries delivered to your door</Text>
+        </Animated.View>
+      </View>
+
+      {/* Progress Bar */}
+      <View style={styles.progressContainer}>
+        <View style={styles.progressBar}>
+          <Animated.View 
+            style={[
+              styles.progressFill, 
+              { 
+                width: progressWidth,
+                backgroundColor: colors.onPrimary 
+              }
+            ]} 
           />
         </View>
-        <Text style={styles.brandTitle}>QuickMart</Text>
-        <Text style={styles.brandSubtitle}>Your favorite groceries, delivered fast</Text>
-      </Animated.View>
-      <View style={{ height: 40 }} />
-      <AdinkraLoader size={60} symbol="gye_nyame" />
-      <Text style={[styles.loadingText, { color: colors.onPrimary + 'cc' }]}>{loadingTexts[loadingIdx]}</Text>
-      
-      {/* Add cultural accents */}
-      <KenteAccent style={{ position: 'absolute', top: 50, left: 20 }} animated />
-      <KenteAccent style={{ position: 'absolute', bottom: 100, right: 30, width: 40, height: 40 }} />
+        <Text style={styles.loadingText}>Loading your experience...</Text>
+      </View>
     </View>
   );
 }
@@ -99,39 +114,99 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoBox: {
-    width: 140,
-    height: 140,
-    borderRadius: 32,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 18,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+  backgroundPattern: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
-  logo: { width: 100, height: 100 },
-  brandTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginTop: 8, letterSpacing: 1.2 },
-  brandSubtitle: { fontSize: 15, color: '#fff', opacity: 0.9, textAlign: 'center', marginTop: 2, letterSpacing: 0.5 },
-  spinnerCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.2)',
+  circle: {
+    position: 'absolute',
+    borderRadius: 1000,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  circle1: {
+    width: 200,
+    height: 200,
+    top: -50,
+    right: -50,
+  },
+  circle2: {
+    width: 150,
+    height: 150,
+    bottom: 100,
+    left: -30,
+  },
+  circle3: {
+    width: 100,
+    height: 100,
+    top: height * 0.3,
+    right: 50,
+  },
+  content: {
     alignItems: 'center',
     justifyContent: 'center',
+    flex: 1,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoBox: {
+    width: 120,
+    height: 120,
+    borderRadius: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  logoIcon: {
+    fontSize: 60,
+  },
+  textContainer: {
+    alignItems: 'center',
+  },
+  brandTitle: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+    letterSpacing: 1.5,
     marginBottom: 8,
   },
-  loadingText: {
-    color: '#fff',
-    fontSize: 15,
-    marginTop: 12,
-    opacity: 0.8,
+  brandSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-    letterSpacing: 0.2,
+    letterSpacing: 0.5,
+    lineHeight: 22,
+  },
+  progressContainer: {
+    position: 'absolute',
+    bottom: 100,
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 40,
+  },
+  progressBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    marginBottom: 16,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  loadingText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
 });
 

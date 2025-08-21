@@ -2,10 +2,10 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTheme } from '../theme/theme';
-import Dashboard from '@/screens/storeOwner/Dashboard';
-import Orders from '@/screens/storeOwner/Orders';
-import Products from '@/screens/storeOwner/Products';
-import Settings from '@/screens/storeOwner/Settings';
+import Dashboard from '../screens/storeOwner/Dashboard';
+import Orders from '../screens/storeOwner/Orders';
+import Products from '../screens/storeOwner/Products';
+import Settings from '../screens/storeOwner/Settings';
 
 const Tab = createBottomTabNavigator();
 const ORANGE = '#FF7A00';
