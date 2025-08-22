@@ -33,21 +33,17 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
     ]).start();
   }, []);
 
-  const handleSignUp = () => {
-    navigation.navigate('UserRoleSelection');
-  };
-
-  const handleSignIn = () => {
+  const handleStartShopping = () => {
     navigation.navigate('UserRoleSelection');
   };
 
   return (
     <View style={styles.container}>
-      {/* Background Gradient */}
-      <LinearGradient
-        colors={['#FFF8F0', '#FFF5E6', '#FFF0D9']}
-        style={styles.background}
-      />
+              {/* Background Gradient */}
+        <LinearGradient
+          colors={['#E8F5E8', '#F0F8F0', '#F8FCF8']}
+          style={styles.background}
+        />
 
       {/* Language Selector */}
       <View style={styles.languageContainer}>
@@ -119,7 +115,7 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
           </Text>
         </View>
 
-        {/* Action Buttons */}
+        {/* Action Button */}
         <Animated.View 
           style={[
             styles.buttonContainer,
@@ -132,15 +128,9 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
             }
           ]}
         >
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-            <Text style={styles.signUpText}>
-              {selectedLang === 'fr' ? 'S\'inscrire' : 'Sign up'}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.signInButton} onPress={handleSignIn}>
-            <Text style={styles.signInText}>
-              {selectedLang === 'fr' ? 'Se connecter' : 'Sign in'}
+          <TouchableOpacity style={styles.startShoppingButton} onPress={handleStartShopping}>
+            <Text style={styles.startShoppingText}>
+              {selectedLang === 'fr' ? 'Commencer à acheter' : 'Start Shopping'}
             </Text>
           </TouchableOpacity>
         </Animated.View>
@@ -152,7 +142,7 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: '#E8F5E8',
   },
   background: {
     position: 'absolute',
@@ -175,13 +165,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 140, 0, 0.3)',
   },
   langBtnActive: {
-    backgroundColor: '#FF8C00',
-    borderColor: '#FF8C00',
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
   },
   langText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FF8C00',
+    color: '#4CAF50',
   },
   langTextActive: {
     color: '#FFFFFF',
@@ -350,14 +340,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#8B4513',
+    color: '#2E7D32',
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 38,
   },
   description: {
     fontSize: 16,
-    color: '#8B4513',
+    color: '#2E7D32',
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
@@ -366,38 +356,20 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 16,
   },
-  signUpButton: {
-    backgroundColor: '#FF8C00',
-    paddingVertical: 16,
-    borderRadius: 12,
+  startShoppingButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 18,
+    borderRadius: 25,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 6,
   },
-  signUpText: {
+  startShoppingText: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-  signInButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FF8C00',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  signInText: {
-    color: '#FF8C00',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
