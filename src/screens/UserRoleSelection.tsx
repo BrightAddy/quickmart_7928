@@ -13,7 +13,7 @@ type RoleDef = {
   title: { en: string; tw: string };
   description: { en: string; tw: string };
   icon: string;
-  benefits: string[];
+  benefits: { en: string; tw: string }[];
   accent: string;
   route: 'CustomerLogin' | 'ShopperLogin' | 'StoreOwnerLogin';
 };
@@ -24,7 +24,12 @@ const roles: RoleDef[] = [
     title: { en: 'Customer', tw: 'Odɔfoɔ' },
     description: { en: 'Shop groceries conveniently', tw: 'Tɔ wo nneɛma wɔ saa saa' },
     icon: '🛒',
-    benefits: ['Browse local stores', 'Fast delivery', 'Secure payments', 'Track orders'],
+    benefits: [
+      { en: 'Browse local stores', tw: 'Hwɛ wo dɔɔni a ɛwɔ wo ha' },
+      { en: 'Fast delivery', tw: 'Fa wo nneɛma akɔ wo fie wɔ saa saa' },
+      { en: 'Secure payments', tw: 'Sika a wo tumi de wo werɛ so' },
+      { en: 'Track orders', tw: 'Hwɛ wo nneɛma ba' }
+    ],
     accent: '#2E7D32',
     route: 'CustomerLogin',
   },
@@ -33,7 +38,12 @@ const roles: RoleDef[] = [
     title: { en: 'Shopper', tw: 'Akwantufoɔ' },
     description: { en: 'Earn money delivering orders', tw: 'Yɛ sika wɔ wo akwantu so' },
     icon: '🚚',
-    benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
+    benefits: [
+      { en: 'Flexible hours', tw: 'Saa saa a wo tumi yɛ' },
+      { en: 'Earn money', tw: 'Yɛ sika' },
+      { en: 'Weekly payouts', tw: 'Fa wo sika wɔ dapaa so' },
+      { en: 'GPS navigation', tw: 'GPS a ɛkyerɛ wo kwan' }
+    ],
     accent: '#FF9800',
     route: 'ShopperLogin',
   },
@@ -42,13 +52,18 @@ const roles: RoleDef[] = [
     title: { en: 'Store Owner', tw: 'Dɔɔni' },
     description: { en: 'Manage your business digitally', tw: 'Hwɛ wo adwuma wɔ computer so' },
     icon: '🏬',
-    benefits: ['Inventory management', 'Reach more customers', 'Analytics dashboard', 'Automated orders'],
+    benefits: [
+      { en: 'Inventory management', tw: 'Hwɛ wo nneɛma' },
+      { en: 'Reach more customers', tw: 'Fa wo odɔfoɔ pii' },
+      { en: 'Analytics dashboard', tw: 'Hwɛ wo adwuma yɛ' },
+      { en: 'Automated orders', tw: 'Nneɛma a ɛyɛ wo so' }
+    ],
     accent: '#388E3C',
     route: 'StoreOwnerLogin',
   },
 ];
 
-function LanguageSelector({ selected, onChange }: { selected: string; onChange: (lang: string) => void }) {
+function LanguageSelector({ selected, onChange }: { selected: 'en' | 'tw'; onChange: (lang: 'en' | 'tw') => void }) {
   return (
     <View style={styles.langRow}>
       <TouchableOpacity style={[styles.langBtn, selected === 'en' && styles.langBtnActive]} onPress={() => onChange('en')}>
@@ -61,7 +76,7 @@ function LanguageSelector({ selected, onChange }: { selected: string; onChange: 
   );
 }
 
-function RoleCard({ role, lang, onPress }: any) {
+function RoleCard({ role, lang, onPress }: { role: RoleDef; lang: 'en' | 'tw'; onPress: () => void }) {
   const cardAnim = useRef(new Animated.Value(0)).current;
   const floatingAnim = useRef(new Animated.Value(0)).current;
 
@@ -119,8 +134,8 @@ function RoleCard({ role, lang, onPress }: any) {
         <Text style={[styles.roleTitle, { color: role.accent }]}>{role.title[lang]}</Text>
         <Text style={styles.roleDesc}>{role.description[lang]}</Text>
         <View style={styles.benefitsList}>
-          {role.benefits.map((b: string, i: number) => (
-            <Text key={i} style={styles.benefitItem}>• {b}</Text>
+          {role.benefits.map((b: { en: string; tw: string }, i: number) => (
+            <Text key={i} style={styles.benefitItem}>• {b[lang]}</Text>
           ))}
         </View>
       </TouchableOpacity>
@@ -130,7 +145,7 @@ function RoleCard({ role, lang, onPress }: any) {
 
 export default function UserRoleSelection({ navigation }: NativeStackScreenProps<RootStackParamList, 'UserRoleSelection'>) {
   const { colors } = useTheme();
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState<'en' | 'tw'>('en');
   const slideAnim = useRef(new Animated.Value(60)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -174,7 +189,7 @@ export default function UserRoleSelection({ navigation }: NativeStackScreenProps
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }] 
       }}>
-        <Title style={styles.mainTitle}>Choose your role</Title>
+        <Title style={styles.mainTitle}>{lang === 'tw' ? 'Paw wo dwuma' : 'Choose your role'}</Title>
         <LanguageSelector selected={lang} onChange={setLang} />
         
         <ScrollView 
