@@ -10,8 +10,8 @@ const { width, height } = Dimensions.get('window');
 
 type RoleDef = {
   key: 'customer' | 'shopper' | 'store';
-  title: { en: string; fr: string };
-  description: { en: string; fr: string };
+  title: { en: string; tw: string };
+  description: { en: string; tw: string };
   icon: string;
   benefits: string[];
   accent: string;
@@ -21,8 +21,8 @@ type RoleDef = {
 const roles: RoleDef[] = [
   {
     key: 'customer',
-    title: { en: 'Customer', fr: 'Client' },
-    description: { en: 'Shop groceries conveniently', fr: 'Achetez des produits facilement' },
+    title: { en: 'Customer', tw: 'Odɔfoɔ' },
+    description: { en: 'Shop groceries conveniently', tw: 'Tɔ wo nneɛma wɔ saa saa' },
     icon: '🛒',
     benefits: ['Browse local stores', 'Fast delivery', 'Secure payments', 'Track orders'],
     accent: '#2E7D32',
@@ -30,8 +30,8 @@ const roles: RoleDef[] = [
   },
   {
     key: 'shopper',
-    title: { en: 'Shopper', fr: 'Livreur' },
-    description: { en: 'Earn money delivering orders', fr: 'Gagnez de l\'argent en livrant' },
+    title: { en: 'Shopper', tw: 'Akwantufoɔ' },
+    description: { en: 'Earn money delivering orders', tw: 'Yɛ sika wɔ wo akwantu so' },
     icon: '🚚',
     benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
     accent: '#FF9800',
@@ -39,8 +39,8 @@ const roles: RoleDef[] = [
   },
   {
     key: 'store',
-    title: { en: 'Store Owner', fr: 'Commerçant' },
-    description: { en: 'Manage your business digitally', fr: 'Gérez votre commerce en ligne' },
+    title: { en: 'Store Owner', tw: 'Dɔɔni' },
+    description: { en: 'Manage your business digitally', tw: 'Hwɛ wo adwuma wɔ computer so' },
     icon: '🏬',
     benefits: ['Inventory management', 'Reach more customers', 'Analytics dashboard', 'Automated orders'],
     accent: '#388E3C',
@@ -54,8 +54,8 @@ function LanguageSelector({ selected, onChange }: { selected: string; onChange: 
       <TouchableOpacity style={[styles.langBtn, selected === 'en' && styles.langBtnActive]} onPress={() => onChange('en')}>
         <Text style={[styles.langBtnText, selected === 'en' && styles.langBtnTextActive]}>EN</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.langBtn, selected === 'fr' && styles.langBtnActive]} onPress={() => onChange('fr')}>
-        <Text style={[styles.langBtnText, selected === 'fr' && styles.langBtnTextActive]}>FR</Text>
+      <TouchableOpacity style={[styles.langBtn, selected === 'tw' && styles.langBtnActive]} onPress={() => onChange('tw')}>
+        <Text style={[styles.langBtnText, selected === 'tw' && styles.langBtnTextActive]}>TW</Text>
       </TouchableOpacity>
     </View>
   );
