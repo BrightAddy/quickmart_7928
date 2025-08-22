@@ -112,12 +112,12 @@ function HeaderSection() {
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
+      <TextInput
+        style={styles.searchInput}
             placeholder="Search for fruits, vegetables, groceries..."
-            placeholderTextColor="#888"
-          />
-        </View>
+        placeholderTextColor="#888"
+      />
+    </View>
       </View>
       
       {/* Location Section */}
@@ -144,22 +144,22 @@ function PromotionalBanner() {
           setCurrentSlide(slideIndex);
         }}
       >
-        {promotions.map((promo) => (
+      {promotions.map((promo) => (
           <View key={promo.id} style={styles.bannerCard}>
             <View style={[styles.bannerLeft, { backgroundColor: promo.backgroundColor }]}>
               <Text style={styles.bannerDiscountLabel}>Discount</Text>
               <Text style={styles.bannerDiscountPercent}>{promo.discount}</Text>
-              <Text style={styles.bannerTitle}>{promo.title}</Text>
+            <Text style={styles.bannerTitle}>{promo.title}</Text>
               <TouchableOpacity style={styles.bannerButton}>
                 <Text style={styles.bannerButtonText}>{promo.buttonText}</Text>
               </TouchableOpacity>
-            </View>
-            <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
-              <Image source={{ uri: promo.image }} style={styles.bannerImage} />
-            </View>
           </View>
-        ))}
-      </ScrollView>
+            <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
+          <Image source={{ uri: promo.image }} style={styles.bannerImage} />
+            </View>
+        </View>
+      ))}
+    </ScrollView>
       
       {/* Pagination Dots */}
       <View style={styles.paginationDots}>
@@ -171,8 +171,8 @@ function PromotionalBanner() {
               index === currentSlide && styles.paginationDotActive
             ]} 
           />
-        ))}
-      </View>
+              ))}
+            </View>
     </View>
   );
 }
@@ -190,7 +190,7 @@ function CategoriesSection() {
           <TouchableOpacity key={cat.id} style={styles.categoryItem}>
             <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
               <MaterialCommunityIcons name={cat.icon} size={24} color={cat.iconColor} />
-            </View>
+              </View>
             <Text style={styles.categoryName}>{cat.name}</Text>
           </TouchableOpacity>
         ))}
@@ -221,7 +221,7 @@ function SpecialDealsSection() {
             <View style={styles.dealPriceContainer}>
               <Text style={styles.dealPrice}>{deal.price}</Text>
               <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
-            </View>
+          </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -248,15 +248,15 @@ function BottomNavigation() {
         <View style={styles.navIconContainer}>
           <Ionicons name="cart" size={24} color="#999" />
           <View style={styles.cartBadge} />
-        </View>
+      </View>
         <Text style={styles.navLabel}>Cart</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
       <TouchableOpacity style={styles.navItem}>
         <View style={styles.navIconContainer}>
           <Ionicons name="person" size={24} color="#999" />
         </View>
         <Text style={styles.navLabel}>Profile</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
     </View>
   );
 }
@@ -273,17 +273,17 @@ export default function CustomerHome({ navigation }: any) {
       >
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
           <HeaderSection />
-          <PromotionalBanner />
+        <PromotionalBanner />
           <CategoriesSection />
           <SpecialDealsSection />
           <View style={{ height: 100 }} />
-        </ScrollView>
+      </ScrollView>
         
         <BottomNavigation />
         
         {/* Floating Chatbot */}
-        <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
-        <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
+      <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
+      <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
       </LinearGradient>
     </SafeAreaView>
   );
@@ -303,9 +303,9 @@ const styles = StyleSheet.create({
   
   // Header Section
   headerGradient: {
-    paddingTop: 20,
+    paddingTop: 40,
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingBottom: 24,
   },
   appHeader: {
     flexDirection: 'row',
@@ -392,6 +392,7 @@ const styles = StyleSheet.create({
   
   // Banner Section
   bannerContainer: {
+    marginTop: 16,
     marginBottom: 24,
     paddingHorizontal: 16,
   },
