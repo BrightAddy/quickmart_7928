@@ -135,12 +135,12 @@ export default function OnboardingScreen({ navigation }: Props) {
     if (currentSlide < onboardingData.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      navigation.replace('UserRoleSelection');
+      navigation.replace('Welcome');
     }
   };
 
   const skipOnboarding = () => {
-    navigation.replace('UserRoleSelection');
+    navigation.replace('Welcome');
   };
 
   const currentData = onboardingData[currentSlide];

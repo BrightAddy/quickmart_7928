@@ -9,6 +9,7 @@ import { ThemeProvider } from './src/theme/theme';
 import { RootStackParamList } from './src/navigation/types';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
 import UserRoleSelection from './src/screens/UserRoleSelection';
 import CustomerLogin from './src/screens/CustomerLogin';
 import CustomerSignup from './src/screens/CustomerSignup';
@@ -55,6 +56,7 @@ export default function App() {
                   <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="Splash" component={SplashScreen} />
                     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                    <Stack.Screen name="Welcome" component={WelcomeScreen} />
                     <Stack.Screen name="UserRoleSelection" component={UserRoleSelection} />
                     <Stack.Screen name="CustomerLogin" component={CustomerLogin} />
                     <Stack.Screen name="CustomerSignup" component={CustomerSignup} />

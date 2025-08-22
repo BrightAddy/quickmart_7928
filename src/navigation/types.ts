@@ -1,6 +1,7 @@
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
+  Welcome: undefined;
   UserRoleSelection: undefined;
   CustomerLogin: undefined;
   CustomerSignup: undefined;
