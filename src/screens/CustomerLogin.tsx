@@ -10,8 +10,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CustomerLogin'>;
 
 function LanguageSelector({ selected, onChange }: { selected: string; onChange: (lang: string) => void }) {
   return (
-    <TouchableOpacity style={styles.langSelector} onPress={() => onChange(selected === 'en' ? 'fr' : 'en')}>
-      <Text style={styles.langText}>{selected === 'en' ? 'EN' : 'FR'}</Text>
+    <TouchableOpacity style={styles.langSelector} onPress={() => onChange(selected === 'en' ? 'tw' : 'en')}>
+      <Text style={styles.langText}>{selected === 'en' ? 'EN' : 'TW'}</Text>
     </TouchableOpacity>
   );
 }
@@ -98,7 +98,7 @@ export default function CustomerLogin({ navigation }: Props) {
             </View>
             <Text style={styles.brandTitle}>QuickMart</Text>
             <Text style={styles.brandSubtitle}>
-              {selectedLang === 'fr' ? 'Vos courses préférées, livrées rapidement' : 'Your favorite groceries, delivered fast'}
+              {selectedLang === 'tw' ? 'Wo nneɛma a wo pɛ, fa wo ho yie' : 'Your favorite groceries, delivered fast'}
             </Text>
           </View>
         </Animated.View>
@@ -106,19 +106,19 @@ export default function CustomerLogin({ navigation }: Props) {
         {/* Login Form */}
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>
-            {selectedLang === 'fr' ? 'Bon retour !' : 'Welcome Back!'}
+            {selectedLang === 'tw' ? 'Akwaaba bio!' : 'Welcome Back!'}
           </Text>
           
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder={selectedLang === 'fr' ? 'Téléphone ou Email' : 'Phone or Email'}
+              placeholder={selectedLang === 'tw' ? 'Telefon anaa Email' : 'Phone or Email'}
               value={identifier}
               onChangeText={setIdentifier}
               style={styles.input}
               autoCapitalize="none"
             />
             <TextInput
-              placeholder={selectedLang === 'fr' ? 'Mot de passe' : 'Password'}
+              placeholder={selectedLang === 'tw' ? 'Password' : 'Password'}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -127,13 +127,13 @@ export default function CustomerLogin({ navigation }: Props) {
             
             <TouchableOpacity onPress={() => setShowForgot(true)} style={styles.forgotLink}>
               <Text style={styles.forgotText}>
-                {selectedLang === 'fr' ? 'Mot de passe oublié ?' : 'Forgot password?'}
+                {selectedLang === 'tw' ? 'Wo werɛ password?' : 'Forgot password?'}
               </Text>
             </TouchableOpacity>
             
             <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
               <Text style={styles.loginButtonText}>
-                {selectedLang === 'fr' ? 'Se connecter' : 'Login'}
+                {selectedLang === 'tw' ? 'Bra mu' : 'Login'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -145,12 +145,12 @@ export default function CustomerLogin({ navigation }: Props) {
 
           <View style={styles.signupSection}>
             <Text style={styles.signupText}>
-              {selectedLang === 'fr' ? 'Nouvel utilisateur ? ' : 'New user? '}
+              {selectedLang === 'tw' ? 'Odɔfoɔ foforɔ? ' : 'New user? '}
               <Text 
                 style={styles.signupLink} 
                 onPress={() => navigation.navigate('CustomerSignup')}
               >
-                {selectedLang === 'fr' ? 'S\'inscrire' : 'Sign Up'}
+                {selectedLang === 'tw' ? 'Bɛ wo ho' : 'Sign Up'}
               </Text>
             </Text>
           </View>
@@ -162,11 +162,11 @@ export default function CustomerLogin({ navigation }: Props) {
         <Pressable style={styles.modalBg} onPress={() => setShowForgot(false)}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
-              {selectedLang === 'fr' ? 'Réinitialiser le mot de passe' : 'Reset Password'}
+              {selectedLang === 'tw' ? 'San password bio' : 'Reset Password'}
             </Text>
             <Text style={styles.modalDescription}>
-              {selectedLang === 'fr' 
-                ? 'Nous vous enverrons un code de vérification pour réinitialiser votre mot de passe.'
+              {selectedLang === 'tw' 
+                ? 'Yɛɛ wo code a ɛyɛ verification de wo san wo password.'
                 : 'We\'ll send you a verification code to reset your password.'
               }
             </Text>
@@ -178,7 +178,7 @@ export default function CustomerLogin({ navigation }: Props) {
               }}
             >
               <Text style={styles.modalButtonText}>
-                {selectedLang === 'fr' ? 'Envoyer le code' : 'Send Reset Code'}
+                {selectedLang === 'tw' ? 'Fa code no' : 'Send Reset Code'}
               </Text>
             </TouchableOpacity>
           </View>

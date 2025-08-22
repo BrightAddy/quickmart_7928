@@ -25,34 +25,53 @@ const { width, height } = Dimensions.get('window');
 
 interface OnboardingSlide {
   id: string;
-  title: string;
-  description: string;
+  title: { en: string; tw: string };
+  description: { en: string; tw: string };
   image: any;
 }
 
 const onboardingData: OnboardingSlide[] = [
   {
     id: '1',
-    title: 'Fast Delivery to Your Door',
-    description: 'Get your groceries delivered by our reliable delivery partners in minutes.',
+    title: { 
+      en: 'Fast Delivery to Your Door',
+      tw: 'Fa wo nneɛma akɔ wo fie wɔ saa saa'
+    },
+    description: { 
+      en: 'Get your groceries delivered by our reliable delivery partners in minutes.',
+      tw: 'Fa wo nneɛma akɔ wo fie wɔ saa saa wɔ wo akwantufoɔ a wo tumi de wo werɛ so.'
+    },
     image: slide1Image,
   },
   {
     id: '2',
-    title: 'Shop Smart, Save More',
-    description: 'Browse thousands of products and get the best deals with our smart recommendations.',
+    title: { 
+      en: 'Shop Smart, Save More',
+      tw: 'Tɔ wo ho yie, fa wo ho yie'
+    },
+    description: { 
+      en: 'Browse thousands of products and get the best deals with our smart recommendations.',
+      tw: 'Hwɛ nneɛma pii na fa wo ho yie wɔ wo nkyerɛkyerɛ a ɛyɛ.'
+    },
     image: slide2Image,
   },
   {
     id: '3',
-    title: 'Earn While You Deliver',
-    description: 'Join our delivery network and earn money by delivering groceries to customers.',
+    title: { 
+      en: 'Earn While You Deliver',
+      tw: 'Yɛ sika wɔ wo akwantu so'
+    },
+    description: { 
+      en: 'Join our delivery network and earn money by delivering groceries to customers.',
+      tw: 'Ka wo akwantu network ho na yɛ sika wɔ wo akwantu so.'
+    },
     image: slide3Image,
   }
 ];
 
 export default function OnboardingScreen({ navigation }: Props) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedLang, setSelectedLang] = useState<'en' | 'tw'>('en');
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const produceAnim = useRef(new Animated.Value(0)).current;
@@ -161,6 +180,17 @@ export default function OnboardingScreen({ navigation }: Props) {
 
       {/* Header */}
       <View style={styles.header}>
+        {/* Language Toggle Switch */}
+        <TouchableOpacity 
+          style={styles.languageToggle} 
+          onPress={() => setSelectedLang(selectedLang === 'en' ? 'tw' : 'en')}
+        >
+          <Text style={styles.languageToggleText}>
+            {selectedLang === 'en' ? 'EN' : 'TW'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Centered Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logo}>
             <Text style={styles.logoIcon}>🚚</Text>
@@ -169,8 +199,9 @@ export default function OnboardingScreen({ navigation }: Props) {
           <Text style={styles.appName}>QuickMart</Text>
         </View>
 
+        {/* Skip Button */}
         <TouchableOpacity style={styles.skipButton} onPress={skipOnboarding}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{selectedLang === 'tw' ? 'Fa wo ho' : 'Skip'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -203,8 +234,8 @@ export default function OnboardingScreen({ navigation }: Props) {
 
         {/* Text Content */}
         <View style={styles.textContainer}>
-          <Text style={styles.title}>{currentData.title}</Text>
-          <Text style={styles.description}>{currentData.description}</Text>
+          <Text style={styles.title}>{currentData.title[selectedLang]}</Text>
+          <Text style={styles.description}>{currentData.description[selectedLang]}</Text>
         </View>
       </Animated.View>
 
@@ -238,7 +269,10 @@ export default function OnboardingScreen({ navigation }: Props) {
           onPress={nextSlide}
         >
           <Text style={styles.nextButtonText}>
-            {currentSlide === onboardingData.length - 1 ? 'Get Started' : 'Next'}
+            {currentSlide === onboardingData.length - 1 
+              ? (selectedLang === 'tw' ? 'Fɛɛ aseɛ' : 'Get Started')
+              : (selectedLang === 'tw' ? 'Bio' : 'Next')
+            }
           </Text>
         </TouchableOpacity>
       </View>
@@ -259,12 +293,61 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative',
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: -50 }],
+  },
+  languageContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  languageToggle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  languageToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4CAF50',
+  },
+  langBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.3)',
+  },
+  langBtnActive: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+  langText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4CAF50',
+  },
+  langTextActive: {
+    color: '#FFFFFF',
   },
   logo: {
     position: 'relative',
@@ -285,9 +368,6 @@ const styles = StyleSheet.create({
     color: '#FF8C00',
   },
   skipButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
