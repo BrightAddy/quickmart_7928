@@ -185,23 +185,6 @@ export default function UserRoleSelection({ navigation }: NativeStackScreenProps
             <RoleCard key={role.key} role={role} lang={lang} onPress={() => navigation.navigate(role.route)} />
           ))}
         </ScrollView>
-        
-        <View style={styles.loginSection}>
-          <Text style={styles.loginText}>
-            {lang === 'fr' ? 'Déjà inscrit ? ' : 'Already have account? '}
-            <Text style={styles.loginLink} onPress={() => navigation.navigate('CustomerLogin')}>
-              {lang === 'fr' ? 'Connexion Client' : 'Customer Login'}
-            </Text>
-            {' | '}
-            <Text style={styles.loginLink} onPress={() => navigation.navigate('ShopperLogin')}>
-              {lang === 'fr' ? 'Livreur' : 'Shopper'}
-            </Text>
-            {' | '}
-            <Text style={styles.loginLink} onPress={() => navigation.navigate('StoreOwnerLogin')}>
-              {lang === 'fr' ? 'Commerçant' : 'Store Owner'}
-            </Text>
-          </Text>
-        </View>
       </Animated.View>
     </View>
   );
@@ -333,24 +316,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 20,
   },
-  loginSection: { 
-    marginTop: 20, 
-    marginBottom: 30,
-    alignSelf: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 20,
-  },
-  loginText: { 
-    color: '#666', 
-    textAlign: 'center', 
-    fontSize: 16,
-  },
-  loginLink: { 
-    color: '#2E7D32', 
-    fontWeight: 'bold',
-  },
+
 });
 
 
