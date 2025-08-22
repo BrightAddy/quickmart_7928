@@ -15,7 +15,7 @@ type RoleDef = {
   icon: string;
   benefits: string[];
   accent: string;
-  route: keyof RootStackParamList;
+  route: 'CustomerLogin' | 'ShopperLogin' | 'StoreOwnerLogin';
 };
 
 const roles: RoleDef[] = [
@@ -26,7 +26,7 @@ const roles: RoleDef[] = [
     icon: '🛒',
     benefits: ['Browse local stores', 'Fast delivery', 'Secure payments', 'Track orders'],
     accent: '#2E7D32',
-    route: 'CustomerTabs',
+    route: 'CustomerLogin',
   },
   {
     key: 'shopper',
@@ -35,7 +35,7 @@ const roles: RoleDef[] = [
     icon: '🚚',
     benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
     accent: '#FF9800',
-    route: 'ShopperTabs',
+    route: 'ShopperLogin',
   },
   {
     key: 'store',
@@ -44,7 +44,7 @@ const roles: RoleDef[] = [
     icon: '🏬',
     benefits: ['Inventory management', 'Reach more customers', 'Analytics dashboard', 'Automated orders'],
     accent: '#388E3C',
-    route: 'StoreOwnerHome',
+    route: 'StoreOwnerLogin',
   },
 ];
 
@@ -182,7 +182,7 @@ export default function UserRoleSelection({ navigation }: NativeStackScreenProps
           showsVerticalScrollIndicator={false}
         >
           {roles.map((role) => (
-            <RoleCard key={role.key} role={role} lang={lang} onPress={() => navigation.replace(role.route)} />
+            <RoleCard key={role.key} role={role} lang={lang} onPress={() => navigation.navigate(role.route)} />
           ))}
         </ScrollView>
         

@@ -10,7 +10,12 @@ import { RootStackParamList } from './src/navigation/types';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import UserRoleSelection from './src/screens/UserRoleSelection';
-import LoginScreen from './src/screens/LoginScreen';
+import CustomerLogin from './src/screens/CustomerLogin';
+import CustomerSignup from './src/screens/CustomerSignup';
+import ShopperLogin from './src/screens/ShopperLogin';
+import ShopperSignup from './src/screens/ShopperSignup';
+import StoreOwnerLogin from './src/screens/StoreOwnerLogin';
+import StoreOwnerSignup from './src/screens/StoreOwnerSignup';
 import CustomerHome from './src/screens/CustomerHome';
 import StoreBrowse from './src/screens/StoreBrowse';
 import CartCheckout from './src/screens/CartCheckout';
@@ -51,7 +56,12 @@ export default function App() {
                     <Stack.Screen name="Splash" component={SplashScreen} />
                     <Stack.Screen name="Onboarding" component={OnboardingScreen} />
                     <Stack.Screen name="UserRoleSelection" component={UserRoleSelection} />
-                    <Stack.Screen name="Login" component={LoginScreen} />
+                    <Stack.Screen name="CustomerLogin" component={CustomerLogin} />
+                    <Stack.Screen name="CustomerSignup" component={CustomerSignup} />
+                    <Stack.Screen name="ShopperLogin" component={ShopperLogin} />
+                    <Stack.Screen name="ShopperSignup" component={ShopperSignup} />
+                    <Stack.Screen name="StoreOwnerLogin" component={StoreOwnerLogin} />
+                    <Stack.Screen name="StoreOwnerSignup" component={StoreOwnerSignup} />
                     <Stack.Screen name="CustomerHome" component={CustomerHome} />
                     <Stack.Screen name="StoreBrowse" component={StoreBrowse} />
                     <Stack.Screen name="CartCheckout" component={CartCheckout} />

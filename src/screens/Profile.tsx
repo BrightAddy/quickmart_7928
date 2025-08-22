@@ -82,7 +82,7 @@ export default function Profile({ navigation }: any) {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Logout', style: 'destructive', onPress: () => {
           // In a real app, this would clear user session
-          navigation.replace('Login');
+          navigation.replace('UserRoleSelection');
         }}
       ]
     );

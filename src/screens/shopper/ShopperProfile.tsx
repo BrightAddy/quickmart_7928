@@ -92,7 +92,7 @@ export default function ShopperProfile({ navigation }: any) {
         <ListItem title="Preferences" subtitle={`${preferences.language} · ${preferences.navigationApp}`} icon="⚙️" onPress={() => setModal('preferences')} colors={colors} />
         <ListItem title="Legal" subtitle="Terms, privacy" icon="📜" onPress={() => {}} colors={colors} />
 
-        <TouchableOpacity style={[styles.signOut, { backgroundColor: '#ef4444' }]} onPress={() => navigation.replace('Login')}>
+        <TouchableOpacity style={[styles.signOut, { backgroundColor: '#ef4444' }]} onPress={() => navigation.replace('UserRoleSelection')}>
           <Text style={[styles.signOutText, { color: '#fff' }]}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
