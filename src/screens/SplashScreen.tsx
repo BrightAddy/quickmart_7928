@@ -62,7 +62,7 @@ export default function SplashScreen({ navigation }: Props) {
 
     // Navigate after animations
     const timer = setTimeout(() => {
-      navigation.replace('Onboarding');
+      navigation.replace('Welcome');
     }, 3500);
 
     return () => clearTimeout(timer);

@@ -34,7 +34,7 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
   }, []);
 
   const handleStartShopping = () => {
-    navigation.navigate('UserRoleSelection');
+    navigation.navigate('Onboarding');
   };
 
   return (
