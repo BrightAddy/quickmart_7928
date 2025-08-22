@@ -3,6 +3,12 @@ export type RootStackParamList = {
   Onboarding: undefined;
   UserRoleSelection: undefined;
   Login: undefined;
+  CustomerLogin: undefined;
+  CustomerSignup: undefined;
+  ShopperLogin: undefined;
+  ShopperSignup: undefined;
+  StoreOwnerLogin: undefined;
+  StoreOwnerSignup: undefined;
   CustomerHome: undefined;
   StoreBrowse: { store: any } | undefined;
   CartCheckout: undefined;

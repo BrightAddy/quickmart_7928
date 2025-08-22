@@ -186,11 +186,22 @@ export default function UserRoleSelection({ navigation }: NativeStackScreenProps
           ))}
         </ScrollView>
         
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginLink}>
-          <Body style={styles.loginText}>
-            {lang === 'fr' ? 'Déjà inscrit ? Connexion' : 'Already have account? Login'}
-          </Body>
-        </TouchableOpacity>
+        <View style={styles.loginSection}>
+          <Text style={styles.loginText}>
+            {lang === 'fr' ? 'Déjà inscrit ? ' : 'Already have account? '}
+            <Text style={styles.loginLink} onPress={() => navigation.navigate('CustomerLogin')}>
+              {lang === 'fr' ? 'Connexion Client' : 'Customer Login'}
+            </Text>
+            {' | '}
+            <Text style={styles.loginLink} onPress={() => navigation.navigate('ShopperLogin')}>
+              {lang === 'fr' ? 'Livreur' : 'Shopper'}
+            </Text>
+            {' | '}
+            <Text style={styles.loginLink} onPress={() => navigation.navigate('StoreOwnerLogin')}>
+              {lang === 'fr' ? 'Commerçant' : 'Store Owner'}
+            </Text>
+          </Text>
+        </View>
       </Animated.View>
     </View>
   );
@@ -322,7 +333,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     lineHeight: 20,
   },
-  loginLink: { 
+  loginSection: { 
     marginTop: 20, 
     marginBottom: 30,
     alignSelf: 'center',
@@ -332,10 +343,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   loginText: { 
-    color: '#2E7D32', 
+    color: '#666', 
     textAlign: 'center', 
-    fontWeight: '600',
     fontSize: 16,
+  },
+  loginLink: { 
+    color: '#2E7D32', 
+    fontWeight: 'bold',
   },
 });
 
