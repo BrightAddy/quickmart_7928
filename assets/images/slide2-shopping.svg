@@ -1,0 +1,24 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="300" height="200" fill="#F0F8F0"/>
+  
+  <!-- Shopping cart -->
+  <rect x="80" y="100" width="120" height="60" rx="8" fill="#4ECDC4" stroke="#333" stroke-width="3"/>
+  <circle cx="100" cy="170" r="15" fill="#333"/>
+  <circle cx="180" cy="170" r="15" fill="#333"/>
+  <rect x="70" y="80" width="140" height="25" rx="5" fill="#4ECDC4" stroke="#333" stroke-width="3"/>
+  
+  <!-- Shopping items -->
+  <rect x="100" y="115" width="20" height="15" fill="#FFF"/>
+  <rect x="130" y="115" width="20" height="15" fill="#FFF"/>
+  <rect x="160" y="115" width="20" height="15" fill="#FFF"/>
+  
+  <!-- Smartphone -->
+  <rect x="200" y="60" width="40" height="70" rx="8" fill="#45B7D1" stroke="#333" stroke-width="2"/>
+  <rect x="205" y="70" width="30" height="40" fill="#333"/>
+  <circle cx="220" cy="120" r="3" fill="#FFF"/>
+  
+  <!-- Heart -->
+  <path d="M60 80 C50 70 35 75 35 90 C35 105 60 120 60 120 C60 120 85 105 85 90 C85 75 70 70 60 80 Z" fill="#DDA0DD"/>
+  <path d="M60 80 C50 70 35 75 35 90 C35 105 60 120 60 120 C60 120 85 105 85 90 C85 75 70 70 60 80 Z" fill="none" stroke="#333" stroke-width="2"/>
+</svg>

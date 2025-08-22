@@ -8,10 +8,16 @@ import {
   TouchableOpacity,
   Easing,
   PanResponder,
+  Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
+
+// Import the 3 main slide images
+const slide1Image = require('../../assets/images/slide1-delivery.svg');
+const slide2Image = require('../../assets/images/slide2-shopping.svg');
+const slide3Image = require('../../assets/images/slide3-earnings.svg');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
@@ -21,27 +27,27 @@ interface OnboardingSlide {
   id: string;
   title: string;
   description: string;
-  produce: string[];
+  image: any;
 }
 
 const onboardingData: OnboardingSlide[] = [
   {
     id: '1',
-    title: 'Wholesome Organics Without the Cost',
-    description: 'Get affordable organic groceries made for everyone, every single day.',
-    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
+    title: 'Fast Delivery to Your Door',
+    description: 'Get your groceries delivered by our reliable delivery partners in minutes.',
+    image: slide1Image,
   },
   {
     id: '2',
-    title: 'Fresh From Local Farms',
-    description: 'Connect directly with local farmers for the freshest produce delivered to your door.',
-    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
+    title: 'Shop Smart, Save More',
+    description: 'Browse thousands of products and get the best deals with our smart recommendations.',
+    image: slide2Image,
   },
   {
     id: '3',
-    title: 'Smart Shopping Made Simple',
-    description: 'AI-powered recommendations help you find the best deals and freshest ingredients.',
-    produce: ['🥬', '🌽', '🫑', '🎃', '🧅', '🥬', '🍎', '🍌', '🍒', '🥕', '🧄', '🥑', '🍋', '🥗']
+    title: 'Earn While You Deliver',
+    description: 'Join our delivery network and earn money by delivering groceries to customers.',
+    image: slide3Image,
   }
 ];
 
@@ -143,6 +149,8 @@ export default function OnboardingScreen({ navigation }: Props) {
     outputRange: [0, -15],
   });
 
+
+
   return (
     <View style={styles.container}>
       {/* Background Gradient */}
@@ -151,20 +159,20 @@ export default function OnboardingScreen({ navigation }: Props) {
         style={styles.background}
       />
 
-             {/* Header */}
-       <View style={styles.header}>
-         <View style={styles.logoContainer}>
-           <View style={styles.logo}>
-             <Text style={styles.logoIcon}>🚚</Text>
-             <Text style={styles.logoLeaf}>🌿</Text>
-           </View>
-           <Text style={styles.appName}>QuickMart</Text>
-         </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.logoContainer}>
+          <View style={styles.logo}>
+            <Text style={styles.logoIcon}>🚚</Text>
+            <Text style={styles.logoLeaf}>🌿</Text>
+          </View>
+          <Text style={styles.appName}>QuickMart</Text>
+        </View>
 
-         <TouchableOpacity style={styles.skipButton} onPress={skipOnboarding}>
-           <Text style={styles.skipText}>Skip</Text>
-         </TouchableOpacity>
-       </View>
+        <TouchableOpacity style={styles.skipButton} onPress={skipOnboarding}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Main Content */}
       <Animated.View 
@@ -176,44 +184,22 @@ export default function OnboardingScreen({ navigation }: Props) {
         ]}
         {...panResponder.panHandlers}
       >
-        {/* Produce Pile */}
-        <Animated.View 
-          style={[
-            styles.produceContainer,
-            {
-              transform: [{ translateY: floatingTransform }],
-              opacity: produceAnim
-            }
-          ]}
-        >
-          <View style={styles.producePile}>
-            {currentData.produce.map((item, index) => (
-              <Animated.Text
-                key={index}
-                style={[
-                  styles.produceItem,
-                  {
-                    transform: [{
-                      translateY: produceAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [50, 0],
-                      })
-                    }],
-                    opacity: produceAnim.interpolate({
-                      inputRange: [0, 0.5, 1],
-                      outputRange: [0, 0.5, 1],
-                    })
-                  }
-                ]}
-              >
-                {item}
-              </Animated.Text>
-            ))}
-          </View>
-          
-          {/* Misty base effect */}
-          <View style={styles.mistyBase} />
-        </Animated.View>
+                 {/* Main Illustration */}
+         <Animated.View 
+           style={[
+             styles.illustrationContainer,
+             {
+               transform: [{ translateY: floatingTransform }],
+               opacity: produceAnim
+             }
+           ]}
+         >
+           <Image 
+             source={currentData.image} 
+             style={styles.mainIllustration} 
+             resizeMode="contain"
+           />
+         </Animated.View>
 
         {/* Text Content */}
         <View style={styles.textContainer}>
@@ -316,24 +302,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 30,
   },
-  produceContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-    position: 'relative',
+     illustrationContainer: {
+     alignItems: 'center',
+     marginBottom: 40,
+     position: 'relative',
+   },
+   mainIllustration: {
+     width: 300,
+     height: 200,
+   },
+  produceItem: {
+    position: 'absolute',
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  producePile: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  produceImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePlaceholder: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#F0F8F0',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 300,
-    height: 200,
-    position: 'relative',
-  },
-  produceItem: {
-    fontSize: 32,
-    margin: 4,
-    position: 'absolute',
+    borderRadius: 20,
   },
   mistyBase: {
     position: 'absolute',
@@ -396,9 +395,34 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  nextButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFF',
-  },
-});
+     nextButtonText: {
+     fontSize: 18,
+     fontWeight: '600',
+     color: '#FFF',
+   },
+   fallbackShape: {
+     position: 'absolute',
+     width: '100%',
+     height: '100%',
+     justifyContent: 'center',
+     alignItems: 'center',
+     borderRadius: 20,
+   },
+       fallbackText: {
+      fontSize: 20,
+      color: '#FFF',
+    },
+    illustration: {
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    illustrationIcon: {
+      fontSize: 24,
+    },
+  });
