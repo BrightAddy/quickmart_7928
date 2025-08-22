@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Animated, ScrollView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Animated, ScrollView, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal } from '../components/UI';
+import { Screen, Title, Body } from '../components/UI';
 import { useTheme } from '../theme/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width, height } = Dimensions.get('window');
 
 type RoleDef = {
   key: 'customer' | 'shopper' | 'store';
@@ -28,7 +31,7 @@ const roles: RoleDef[] = [
   {
     key: 'shopper',
     title: { en: 'Shopper', fr: 'Livreur' },
-    description: { en: 'Earn money delivering orders', fr: 'Gagnez de l’argent en livrant' },
+    description: { en: 'Earn money delivering orders', fr: 'Gagnez de l\'argent en livrant' },
     icon: '🚚',
     benefits: ['Flexible hours', 'Earn money', 'Weekly payouts', 'GPS navigation'],
     accent: '#FF9800',
@@ -48,84 +51,292 @@ const roles: RoleDef[] = [
 function LanguageSelector({ selected, onChange }: { selected: string; onChange: (lang: string) => void }) {
   return (
     <View style={styles.langRow}>
-      <TouchableOpacity style={[styles.langBtn, selected === 'en' && styles.langBtnActive]} onPress={() => onChange('en')}><Text style={styles.langBtnText}>EN</Text></TouchableOpacity>
-      <TouchableOpacity style={[styles.langBtn, selected === 'fr' && styles.langBtnActive]} onPress={() => onChange('fr')}><Text style={styles.langBtnText}>FR</Text></TouchableOpacity>
+      <TouchableOpacity style={[styles.langBtn, selected === 'en' && styles.langBtnActive]} onPress={() => onChange('en')}>
+        <Text style={[styles.langBtnText, selected === 'en' && styles.langBtnTextActive]}>EN</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.langBtn, selected === 'fr' && styles.langBtnActive]} onPress={() => onChange('fr')}>
+        <Text style={[styles.langBtnText, selected === 'fr' && styles.langBtnTextActive]}>FR</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 function RoleCard({ role, lang, onPress }: any) {
+  const cardAnim = useRef(new Animated.Value(0)).current;
+  const floatingAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Staggered entrance animation
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(cardAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(floatingAnim, {
+              toValue: 1,
+              duration: 2000,
+              useNativeDriver: true,
+            }),
+            Animated.timing(floatingAnim, {
+              toValue: 0,
+              duration: 2000,
+              useNativeDriver: true,
+            }),
+          ])
+        )
+      ]).start();
+    }, role.key === 'customer' ? 0 : role.key === 'shopper' ? 200 : 400);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const floatingTransform = floatingAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -8],
+  });
+
   return (
-    <TouchableOpacity style={[styles.roleCard, { borderColor: role.accent }]} onPress={onPress}>
-      <Text style={styles.roleIcon}>{role.icon}</Text>
-      <Text style={[styles.roleTitle, { color: role.accent }]}>{role.title[lang]}</Text>
-      <Text style={styles.roleDesc}>{role.description[lang]}</Text>
-      <View style={styles.benefitsList}>
-        {role.benefits.map((b: string, i: number) => (
-          <Text key={i} style={styles.benefitItem}>• {b}</Text>
-        ))}
-      </View>
-    </TouchableOpacity>
+    <Animated.View
+      style={[
+        styles.roleCardContainer,
+        {
+          opacity: cardAnim,
+          transform: [
+            { translateY: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [50, 0] }) },
+            { scale: cardAnim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }
+          ]
+        }
+      ]}
+    >
+      <TouchableOpacity style={[styles.roleCard, { borderColor: role.accent }]} onPress={onPress}>
+        <Animated.View style={{ transform: [{ translateY: floatingTransform }] }}>
+          <Text style={styles.roleIcon}>{role.icon}</Text>
+        </Animated.View>
+        <Text style={[styles.roleTitle, { color: role.accent }]}>{role.title[lang]}</Text>
+        <Text style={styles.roleDesc}>{role.description[lang]}</Text>
+        <View style={styles.benefitsList}>
+          {role.benefits.map((b: string, i: number) => (
+            <Text key={i} style={styles.benefitItem}>• {b}</Text>
+          ))}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
 export default function UserRoleSelection({ navigation }: NativeStackScreenProps<RootStackParamList, 'UserRoleSelection'>) {
   const { colors } = useTheme();
   const [lang, setLang] = useState('en');
-  const [chatbotVisible, setChatbotVisible] = React.useState(false);
   const slideAnim = useRef(new Animated.Value(60)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
-    Animated.timing(slideAnim, {
-      toValue: 0,
-      duration: 700,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 700,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        delay: 300,
+        useNativeDriver: true,
+      })
+    ]).start();
   }, []);
+
   return (
-    <Screen>
-      <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
-        <Title style={{ textAlign: 'center', marginTop: 8 }}>Choose your role</Title>
+    <View style={styles.container}>
+      {/* Background Gradient */}
+      <LinearGradient
+        colors={['#E8F5E8', '#F0F8F0', '#F8FCF8']}
+        style={styles.background}
+      />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.logoContainer}>
+          <View style={styles.logo}>
+            <Text style={styles.logoIcon}>🚚</Text>
+            <Text style={styles.logoLeaf}>🌿</Text>
+          </View>
+          <Text style={styles.appName}>QuickMart</Text>
+        </View>
+      </View>
+
+      <Animated.View style={{ 
+        flex: 1,
+        opacity: fadeAnim,
+        transform: [{ translateY: slideAnim }] 
+      }}>
+        <Title style={styles.mainTitle}>Choose your role</Title>
         <LanguageSelector selected={lang} onChange={setLang} />
-        <ScrollView contentContainerStyle={{ gap: 18, marginTop: 18, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent} 
+          showsVerticalScrollIndicator={false}
+        >
           {roles.map((role) => (
             <RoleCard key={role.key} role={role} lang={lang} onPress={() => navigation.replace(role.route)} />
           ))}
         </ScrollView>
+        
         <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.loginLink}>
-          <Body style={{ color: colors.primary, textAlign: 'center', fontWeight: 'bold' }}>{lang === 'fr' ? 'Déjà inscrit ? Connexion' : 'Already have account? Login'}</Body>
+          <Body style={styles.loginText}>
+            {lang === 'fr' ? 'Déjà inscrit ? Connexion' : 'Already have account? Login'}
+          </Body>
         </TouchableOpacity>
       </Animated.View>
-      <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
-      <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
-    </Screen>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  langRow: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 12 },
-  langBtn: { backgroundColor: '#eee', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 6, marginHorizontal: 2 },
-  langBtnActive: { backgroundColor: '#2E7D32' },
-  langBtnText: { color: '#222', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+  },
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    position: 'relative',
+    marginRight: 8,
+  },
+  logoIcon: {
+    fontSize: 24,
+  },
+  logoLeaf: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    fontSize: 12,
+  },
+  appName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FF8C00',
+  },
+  mainTitle: {
+    textAlign: 'center',
+    marginTop: 8,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 20,
+  },
+  langRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    gap: 8, 
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  langBtn: { 
+    backgroundColor: '#fff', 
+    borderRadius: 20, 
+    paddingHorizontal: 20, 
+    paddingVertical: 10, 
+    marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  langBtnActive: { 
+    backgroundColor: '#2E7D32',
+    transform: [{ scale: 1.05 }],
+  },
+  langBtnText: { 
+    color: '#666', 
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  langBtnTextActive: {
+    color: '#fff',
+  },
+  scrollContent: { 
+    gap: 20, 
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  roleCardContainer: {
+    marginBottom: 8,
+  },
   roleCard: { 
     backgroundColor: 'white', 
-    borderRadius: 20, 
+    borderRadius: 24, 
     borderWidth: 2, 
-    padding: 20, 
-    marginHorizontal: 8, 
+    padding: 24, 
     alignItems: 'center', 
-    elevation: 6, 
+    elevation: 8, 
     shadowColor: '#000', 
-    shadowOpacity: 0.08, 
-    shadowRadius: 12, 
-    shadowOffset: { width: 0, height: 6 },
-    transform: [{ scale: 1 }] // Prepared for press animations
+    shadowOpacity: 0.12, 
+    shadowRadius: 16, 
+    shadowOffset: { width: 0, height: 8 },
+    transform: [{ scale: 1 }],
   },
-  roleIcon: { fontSize: 40, marginBottom: 8 },
-  roleTitle: { fontWeight: 'bold', fontSize: 20, marginBottom: 2 },
-  roleDesc: { color: '#888', fontSize: 14, marginBottom: 8, textAlign: 'center' },
-  benefitsList: { alignItems: 'flex-start', width: '100%', marginTop: 4 },
-  benefitItem: { color: '#2E7D32', fontSize: 13, marginBottom: 2 },
-  loginLink: { marginTop: 18, alignSelf: 'center' },
+  roleIcon: { 
+    fontSize: 48, 
+    marginBottom: 12,
+  },
+  roleTitle: { 
+    fontWeight: 'bold', 
+    fontSize: 22, 
+    marginBottom: 4, 
+    textAlign: 'center',
+  },
+  roleDesc: { 
+    color: '#666', 
+    fontSize: 15, 
+    marginBottom: 16, 
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  benefitsList: { 
+    alignItems: 'flex-start', 
+    width: '100%', 
+    marginTop: 8,
+  },
+  benefitItem: { 
+    color: '#2E7D32', 
+    fontSize: 14, 
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  loginLink: { 
+    marginTop: 20, 
+    marginBottom: 30,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+  },
+  loginText: { 
+    color: '#2E7D32', 
+    textAlign: 'center', 
+    fontWeight: '600',
+    fontSize: 16,
+  },
 });
 
 
