@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FloatingChatbotButton, ChatbotModal } from '../components/UI';
@@ -75,6 +75,61 @@ const specialDeals = [
     price: 'GHS 8.00',
     originalPrice: 'GHS 12.00',
   },
+];
+
+const popularStores = [
+  {
+    id: 1,
+    name: 'Melcom',
+    image: 'https://images.pexels.com/photos/1005638/pexels-photo-1005638.jpeg?auto=compress&cs=tinysrgb&w=400',
+    rating: 4.8,
+    deliveryTime: '15-25 min',
+    distance: '0.8 km',
+    type: 'Supermarket',
+    isFavorite: false,
+    categories: ['Electronics', 'Groceries', 'Household'],
+  },
+  {
+    id: 2,
+    name: 'Palace',
+    image: 'https://images.pexels.com/photos/2292837/pexels-photo-2292837.jpeg?auto=compress&cs=tinysrgb&w=400',
+    rating: 4.6,
+    deliveryTime: '20-30 min',
+    distance: '1.2 km',
+    type: 'Supermarket',
+    isFavorite: true,
+    categories: ['Fresh Produce', 'Local Items'],
+  },
+  {
+    id: 3,
+    name: 'Shoprite',
+    image: 'https://images.pexels.com/photos/4110256/pexels-photo-4110256.jpeg?auto=compress&cs=tinysrgb&w=400',
+    rating: 4.7,
+    deliveryTime: '25-35 min',
+    distance: '1.5 km',
+    type: 'Supermarket',
+    isFavorite: false,
+    categories: ['International', 'Fresh Food'],
+  },
+  {
+    id: 4,
+    name: 'MaxMart',
+    image: 'https://images.pexels.com/photos/5966630/pexels-photo-5966630.jpeg?auto=compress&cs=tinysrgb&w=400',
+    rating: 4.5,
+    deliveryTime: '18-28 min',
+    distance: '1.0 km',
+    type: 'Mart',
+    isFavorite: false,
+    categories: ['Local Groceries', 'Household'],
+  },
+];
+
+const storeTypes = [
+  { id: 1, name: 'Popular', icon: 'star', active: true },
+  { id: 2, name: 'Supermarkets', icon: 'store', active: false },
+  { id: 3, name: 'Marts', icon: 'shopping', active: false },
+  { id: 4, name: 'Local Shops', icon: 'home-city', active: false },
+  { id: 5, name: 'Farmers Market', icon: 'leaf', active: false },
 ];
 
 // Mock customer data - replace with actual user data
@@ -156,10 +211,10 @@ function PromotionalBanner() {
           </View>
             <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
           <Image source={{ uri: promo.image }} style={styles.bannerImage} />
-            </View>
         </View>
-      ))}
-    </ScrollView>
+          </View>
+        ))}
+      </ScrollView>
       
       {/* Pagination Dots */}
       <View style={styles.paginationDots}>
@@ -171,8 +226,8 @@ function PromotionalBanner() {
               index === currentSlide && styles.paginationDotActive
             ]} 
           />
-              ))}
-            </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -190,8 +245,68 @@ function CategoriesSection() {
           <TouchableOpacity key={cat.id} style={styles.categoryItem}>
             <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
               <MaterialCommunityIcons name={cat.icon} size={24} color={cat.iconColor} />
-              </View>
+            </View>
             <Text style={styles.categoryName}>{cat.name}</Text>
+          </TouchableOpacity>
+      ))}
+    </ScrollView>
+    </View>
+  );
+}
+
+function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  const toggleFavorite = (storeId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(storeId)) {
+        newFavorites.delete(storeId);
+      } else {
+        newFavorites.add(storeId);
+      }
+      return newFavorites;
+    });
+  };
+
+  return (
+    <View style={styles.popularStoresSection}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Popular Stores</Text>
+        <TouchableOpacity onPress={onSeeMore}>
+          <Text style={styles.seeMoreText}>See more {'>'}</Text>
+        </TouchableOpacity>
+      </View>
+      
+      <ScrollView 
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.storesContainer}
+      >
+        {popularStores.map((store) => (
+          <TouchableOpacity key={store.id} style={styles.storeItem}>
+            <View style={styles.storeImageContainer}>
+              <Image source={{ uri: store.image }} style={styles.storeImage} />
+              <TouchableOpacity 
+                style={styles.favoriteButton}
+                onPress={() => toggleFavorite(store.id.toString())}
+              >
+                <Ionicons 
+                  name={favorites.has(store.id.toString()) ? "heart" : "heart-outline"} 
+                  size={20} 
+                  color={favorites.has(store.id.toString()) ? "#E91E63" : "#fff"} 
+                />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.storeName}>{store.name}</Text>
+            <View style={styles.storeMeta}>
+              <View style={styles.storeRating}>
+                <Ionicons name="star" size={14} color="#FFD700" />
+                <Text style={styles.ratingText}>{store.rating}</Text>
+            </View>
+              <Text style={styles.storeType}>{store.type}</Text>
+              </View>
+            <Text style={styles.storeDelivery}>{store.deliveryTime} • {store.distance}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -210,7 +325,7 @@ function SpecialDealsSection() {
       </View>
       
       <ScrollView 
-        horizontal 
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.dealsContainer}
       >
@@ -221,11 +336,100 @@ function SpecialDealsSection() {
             <View style={styles.dealPriceContainer}>
               <Text style={styles.dealPrice}>{deal.price}</Text>
               <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
-          </View>
+              </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
+  );
+}
+
+function StoresModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const [selectedType, setSelectedType] = useState('Popular');
+  const [filteredStores, setFilteredStores] = useState(popularStores);
+
+  const filterStores = (type: string) => {
+    setSelectedType(type);
+    if (type === 'Popular') {
+      setFilteredStores(popularStores);
+    } else if (type === 'Supermarkets') {
+      setFilteredStores(popularStores.filter(store => store.type === 'Supermarket'));
+    } else if (type === 'Marts') {
+      setFilteredStores(popularStores.filter(store => store.type === 'Mart'));
+    } else {
+      setFilteredStores(popularStores);
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>All Stores</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#666" />
+          </TouchableOpacity>
+        </View>
+        
+        {/* Filter Tabs */}
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <TouchableOpacity 
+              style={[styles.filterButton, selectedType === 'Popular' && styles.active]}
+              onPress={() => filterStores('Popular')}
+            >
+              <Text style={styles.filterText}>Popular</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.filterButton, selectedType === 'Supermarkets' && styles.active]}
+              onPress={() => filterStores('Supermarkets')}
+            >
+              <Text style={styles.filterText}>Supermarkets</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.filterButton, selectedType === 'Marts' && styles.active]}
+              onPress={() => filterStores('Marts')}
+            >
+              <Text style={styles.filterText}>Marts</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+        
+        {/* Stores List */}
+        <FlatList
+          data={filteredStores}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.modalStoreItem}>
+              <Image source={{ uri: item.image }} style={styles.modalStoreImage} />
+              <View style={styles.modalStoreInfo}>
+                <Text style={styles.modalStoreName}>{item.name}</Text>
+                <View style={styles.modalStoreMeta}>
+                  <View style={styles.modalStoreRating}>
+                    <Ionicons name="star" size={14} color="#FFD700" />
+                    <Text style={styles.modalRatingText}>{item.rating}</Text>
+                  </View>
+                  <Text style={styles.modalStoreType}>{item.type}</Text>
+                </View>
+                <Text style={styles.modalStoreDelivery}>{item.deliveryTime} • {item.distance}</Text>
+                <View style={styles.modalStoreCategories}>
+                  {item.categories.slice(0, 2).map((cat, idx) => (
+                    <Text key={idx} style={styles.modalStoreCategory}>{cat}</Text>
+                  ))}
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          style={styles.modalStoresList}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
+    </Modal>
   );
 }
 
@@ -263,6 +467,11 @@ function BottomNavigation() {
 
 export default function CustomerHome({ navigation }: any) {
   const [chatbotVisible, setChatbotVisible] = useState(false);
+  const [storesModalVisible, setStoresModalVisible] = useState(false);
+
+  const handleSeeMoreStores = () => {
+    setStoresModalVisible(true);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -275,6 +484,7 @@ export default function CustomerHome({ navigation }: any) {
           <HeaderSection />
         <PromotionalBanner />
           <CategoriesSection />
+          <PopularStoresSection onSeeMore={handleSeeMoreStores} />
           <SpecialDealsSection />
           <View style={{ height: 100 }} />
       </ScrollView>
@@ -284,6 +494,9 @@ export default function CustomerHome({ navigation }: any) {
         {/* Floating Chatbot */}
       <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
       <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
+        
+        {/* Stores Modal */}
+        <StoresModal visible={storesModalVisible} onClose={() => setStoresModalVisible(false)} />
       </LinearGradient>
     </SafeAreaView>
   );
@@ -567,6 +780,80 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   
+  // Popular Stores Section
+  popularStoresSection: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  storesContainer: {
+    paddingRight: 16,
+  },
+  storeItem: {
+    marginRight: 16,
+    width: 180,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  storeImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  storeImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  storeName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  storeMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  storeRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: 12,
+    color: '#FFD700',
+    fontWeight: 'bold',
+  },
+  storeType: {
+    fontSize: 12,
+    color: '#666',
+  },
+  storeDelivery: {
+    fontSize: 12,
+    color: '#999',
+  },
+  
   // Bottom Navigation
   bottomNav: {
     flexDirection: 'row',
@@ -615,6 +902,130 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#F44336',
+  },
+  
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterContainer: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  filterButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: "#f2f2f2",
+    marginRight: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  active: {
+    backgroundColor: "#2ecc71",
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  modalStoresList: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  modalStoreItem: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  modalStoreImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  modalStoreInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  modalStoreName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  modalStoreMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  modalStoreRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalRatingText: {
+    fontSize: 14,
+    color: '#FFD700',
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  modalStoreType: {
+    fontSize: 13,
+    color: '#6c757d',
+  },
+  modalStoreDelivery: {
+    fontSize: 13,
+    color: '#6c757d',
+    marginBottom: 6,
+  },
+  modalStoreCategories: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  modalStoreCategory: {
+    fontSize: 11,
+    color: '#6c757d',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
 });
 
