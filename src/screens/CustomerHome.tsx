@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FloatingChatbotButton, ChatbotModal } from '../components/UI';
 
 // --- Placeholder Data ---
 const promotions = [
@@ -76,6 +77,12 @@ const specialDeals = [
   },
 ];
 
+// Mock customer data - replace with actual user data
+const customerData = {
+  firstName: 'Kwame',
+  location: 'Accra, Ghana'
+};
+
 // --- Components ---
 function HeaderSection() {
   return (
@@ -83,23 +90,11 @@ function HeaderSection() {
       colors={['#4CAF50', '#45A049']}
       style={styles.headerGradient}
     >
-      {/* Status Bar */}
-      <View style={styles.statusBar}>
-        <Text style={styles.timeText}>9:41</Text>
-        <View style={styles.statusIcons}>
-          <Ionicons name="cellular" size={16} color="#333" />
-          <Ionicons name="wifi" size={16} color="#333" />
-          <Ionicons name="battery-full" size={16} color="#333" />
-        </View>
-      </View>
-      
       {/* App Header */}
       <View style={styles.appHeader}>
         <View style={styles.appTitleContainer}>
-          <Text style={styles.appName}>Kangsayur</Text>
-          <View style={styles.carrotIconContainer}>
-            <MaterialCommunityIcons name="carrot" size={24} color="#333" />
-          </View>
+          <Text style={styles.welcomeText}>Welcome back,</Text>
+          <Text style={styles.customerName}>{customerData.firstName}</Text>
         </View>
         
         <View style={styles.headerActions}>
@@ -117,18 +112,18 @@ function HeaderSection() {
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-      <TextInput
-        style={styles.searchInput}
+          <TextInput
+            style={styles.searchInput}
             placeholder="Search for fruits, vegetables, groceries..."
-        placeholderTextColor="#888"
-      />
-    </View>
+            placeholderTextColor="#888"
+          />
+        </View>
       </View>
       
       {/* Location Section */}
       <View style={styles.locationSection}>
         <Ionicons name="location" size={16} color="#666" />
-        <Text style={styles.locationText}>Sent to Pamulang Barat Residence No.5, RT 05/...</Text>
+        <Text style={styles.locationText}>Delivering to {customerData.location}</Text>
         <Ionicons name="chevron-down" size={16} color="#666" />
       </View>
     </LinearGradient>
@@ -149,22 +144,22 @@ function PromotionalBanner() {
           setCurrentSlide(slideIndex);
         }}
       >
-      {promotions.map((promo) => (
+        {promotions.map((promo) => (
           <View key={promo.id} style={styles.bannerCard}>
             <View style={[styles.bannerLeft, { backgroundColor: promo.backgroundColor }]}>
               <Text style={styles.bannerDiscountLabel}>Discount</Text>
               <Text style={styles.bannerDiscountPercent}>{promo.discount}</Text>
-            <Text style={styles.bannerTitle}>{promo.title}</Text>
+              <Text style={styles.bannerTitle}>{promo.title}</Text>
               <TouchableOpacity style={styles.bannerButton}>
                 <Text style={styles.bannerButtonText}>{promo.buttonText}</Text>
               </TouchableOpacity>
-          </View>
-            <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
-          <Image source={{ uri: promo.image }} style={styles.bannerImage} />
             </View>
-        </View>
-      ))}
-    </ScrollView>
+            <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
+              <Image source={{ uri: promo.image }} style={styles.bannerImage} />
+            </View>
+          </View>
+        ))}
+      </ScrollView>
       
       {/* Pagination Dots */}
       <View style={styles.paginationDots}>
@@ -176,8 +171,8 @@ function PromotionalBanner() {
               index === currentSlide && styles.paginationDotActive
             ]} 
           />
-              ))}
-            </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -195,7 +190,7 @@ function CategoriesSection() {
           <TouchableOpacity key={cat.id} style={styles.categoryItem}>
             <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
               <MaterialCommunityIcons name={cat.icon} size={24} color={cat.iconColor} />
-              </View>
+            </View>
             <Text style={styles.categoryName}>{cat.name}</Text>
           </TouchableOpacity>
         ))}
@@ -226,7 +221,7 @@ function SpecialDealsSection() {
             <View style={styles.dealPriceContainer}>
               <Text style={styles.dealPrice}>{deal.price}</Text>
               <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
-          </View>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -253,20 +248,22 @@ function BottomNavigation() {
         <View style={styles.navIconContainer}>
           <Ionicons name="cart" size={24} color="#999" />
           <View style={styles.cartBadge} />
-      </View>
+        </View>
         <Text style={styles.navLabel}>Cart</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.navItem}>
         <View style={styles.navIconContainer}>
           <Ionicons name="person" size={24} color="#999" />
         </View>
         <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
     </View>
   );
 }
 
 export default function CustomerHome({ navigation }: any) {
+  const [chatbotVisible, setChatbotVisible] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#4CAF50" />
@@ -276,13 +273,17 @@ export default function CustomerHome({ navigation }: any) {
       >
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
           <HeaderSection />
-        <PromotionalBanner />
+          <PromotionalBanner />
           <CategoriesSection />
           <SpecialDealsSection />
           <View style={{ height: 100 }} />
-      </ScrollView>
+        </ScrollView>
         
         <BottomNavigation />
+        
+        {/* Floating Chatbot */}
+        <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
+        <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
       </LinearGradient>
     </SafeAreaView>
   );
@@ -302,25 +303,9 @@ const styles = StyleSheet.create({
   
   // Header Section
   headerGradient: {
-    paddingTop: 0,
+    paddingTop: 20,
     paddingHorizontal: 16,
     paddingBottom: 16,
-  },
-  statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 16,
-  },
-  timeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  statusIcons: {
-    flexDirection: 'row',
-    gap: 8,
   },
   appHeader: {
     flexDirection: 'row',
@@ -329,20 +314,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   appTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
-  appName: {
+  welcomeText: {
+    fontSize: 14,
+    color: '#333',
+    opacity: 0.8,
+    marginBottom: 2,
+  },
+  customerName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginRight: 8,
-  },
-  carrotIconContainer: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerActions: {
     flexDirection: 'row',
@@ -545,11 +529,19 @@ const styles = StyleSheet.create({
   dealItem: {
     marginRight: 16,
     width: 120,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   dealImage: {
-    width: 120,
+    width: '100%',
     height: 80,
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 8,
   },
   dealName: {
