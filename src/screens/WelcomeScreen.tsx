@@ -54,10 +54,10 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
           <Text style={[styles.langText, selectedLang === 'en' && styles.langTextActive]}>EN</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          style={[styles.langBtn, selectedLang === 'fr' && styles.langBtnActive]} 
-          onPress={() => setSelectedLang('fr')}
+          style={[styles.langBtn, selectedLang === 'tw' && styles.langBtnActive]} 
+          onPress={() => setSelectedLang('tw')}
         >
-          <Text style={[styles.langText, selectedLang === 'fr' && styles.langTextActive]}>FR</Text>
+          <Text style={[styles.langText, selectedLang === 'tw' && styles.langTextActive]}>TW</Text>
         </TouchableOpacity>
       </View>
 
@@ -105,11 +105,11 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
         {/* Text Section */}
         <View style={styles.textSection}>
           <Text style={styles.title}>
-            {selectedLang === 'fr' ? 'Détendez-vous et achetez' : 'Realax and shop'}
+            {selectedLang === 'tw' ? 'Yɛɛ wo ho yie na tɔ' : 'Realax and shop'}
           </Text>
           <Text style={styles.description}>
-            {selectedLang === 'fr' 
-              ? 'Achetez en ligne et faites-vous livrer vos courses depuis les magasins jusqu\'à chez vous en 1 heure maximum.'
+            {selectedLang === 'tw' 
+              ? 'Tɔ wo nneɛma wɔ internet so na fa wo nneɛma akɔ wo fie wɔ saa ɔduruu saa saa.'
               : 'Shop online and get grocories delivered from stores to your home in as fast as 1 hour .'
             }
           </Text>
@@ -130,7 +130,7 @@ export default function WelcomeScreen({ navigation }: NativeStackScreenProps<Roo
         >
           <TouchableOpacity style={styles.startShoppingButton} onPress={handleStartShopping}>
             <Text style={styles.startShoppingText}>
-              {selectedLang === 'fr' ? 'Commencer à acheter' : 'Start Shopping'}
+              {selectedLang === 'tw' ? 'Fɛɛ aseɛ tɔ' : 'Start Shopping'}
             </Text>
           </TouchableOpacity>
         </Animated.View>
