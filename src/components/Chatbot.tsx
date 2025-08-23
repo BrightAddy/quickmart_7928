@@ -11,8 +11,11 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
 import { useChatbot, Product, CartItem } from '../context/ChatbotContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -35,6 +38,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
 
   const [inputText, setInputText] = useState('');
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -81,6 +86,154 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
   const handleLanguageSwitch = (languageCode: string) => {
     switchLanguage(languageCode as any);
     setShowLanguageSelector(false);
+  };
+
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant microphone permission to use voice feature.');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Failed to start recording', err);
+      Alert.alert('Error', 'Failed to start recording. Please try again.');
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    try {
+      setIsRecording(false);
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(null);
+
+      // Simulate voice-to-text conversion
+      // In a real app, you would use a service like Google Speech-to-Text
+      const simulatedText = getVoiceToTextSimulation();
+      if (simulatedText) {
+        setInputText(simulatedText);
+      }
+
+      Alert.alert('Voice Recorded', 'Voice message processed! You can edit the text before sending.');
+    } catch (error) {
+      console.error('Failed to stop recording', error);
+      Alert.alert('Error', 'Failed to process voice recording.');
+    }
+  };
+
+  const getVoiceToTextSimulation = () => {
+    // Simulate voice-to-text based on current language
+    const voiceSimulations = {
+      english: "I want to buy some fresh vegetables",
+      twi: "Me pɛ me tɔ vegetables foforo",
+      ewe: "Nye wo pɛe nye wo tɔ vegetables yeyewo",
+      ga: "Mi hiɛ mi tɔ vegetables foforo",
+      hausa: "Ina son in siyo vegetables masu kyau"
+    };
+    return voiceSimulations[currentLanguage as keyof typeof voiceSimulations] || "I want to shop for groceries";
+  };
+
+  const handleImageUpload = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant camera/gallery permission to use image feature.');
+        return;
+      }
+
+      Alert.alert(
+        'Select Image',
+        'Choose how you want to add an image',
+        [
+          { text: 'Camera', onPress: () => openCamera() },
+          { text: 'Gallery', onPress: () => openGallery() },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+    } catch (error) {
+      console.error('Failed to request permissions', error);
+    }
+  };
+
+  const openCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        processImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Failed to open camera', error);
+    }
+  };
+
+  const openGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        processImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Failed to open gallery', error);
+    }
+  };
+
+  const processImage = (imageUri: string) => {
+    // Simulate image recognition
+    // In a real app, you would use services like Google Vision API or AWS Rekognition
+    const recognizedProducts = [
+      'Fresh Organic Carrots',
+      'Ripe Red Tomatoes',
+      'Fresh Green Spinach'
+    ];
+    
+    const randomProduct = recognizedProducts[Math.floor(Math.random() * recognizedProducts.length)];
+    const message = getImageRecognitionMessage(randomProduct);
+    
+    sendMessage(message);
+    Alert.alert('Image Processed', `Found: ${randomProduct}. Check the chat for product suggestions!`);
+  };
+
+  const getImageRecognitionMessage = (productName: string) => {
+    const messages = {
+      english: `I found ${productName} in your image. Please show me similar products.`,
+      twi: `Me hu ${productName} wɔ wo mfonini mu. Kyerɛ me products a ɛte sɛ wei.`,
+      ewe: `Nye wo kpɔ ${productName} le wo image me. Fia nye wo products si sɔ kple esi.`,
+      ga: `Mi yɛ ${productName} wɔ wo image mli. Kyerɛ mi products a ɛte sɛ wei.`,
+      hausa: `Na gani ${productName} a hoton ka. Nuna ni products masu kama da wannan.`
+    };
+    return messages[currentLanguage as keyof typeof messages] || `Found ${productName} in your image. Show me similar products.`;
   };
 
   const renderMessage = (message: any) => {
@@ -271,6 +424,18 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
           style={styles.inputContainer}
         >
           <View style={styles.inputWrapper}>
+            <TouchableOpacity
+              style={styles.imageButton}
+              onPress={handleImageUpload}
+            >
+              <Ionicons name="camera" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.voiceButton, isRecording && styles.voiceButtonRecording]}
+              onPress={isRecording ? stopRecording : startRecording}
+            >
+              <Ionicons name={isRecording ? "stop" : "mic"} size={20} color="#fff" />
+            </TouchableOpacity>
             <TextInput
               style={styles.textInput}
               placeholder="Type your message..."
@@ -583,13 +748,15 @@ const styles = StyleSheet.create({
   inputContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+    paddingBottom: 30,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
+    backgroundColor: '#fff',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 12,
+    gap: 8,
   },
   textInput: {
     flex: 1,
@@ -611,5 +778,25 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: '#e0e0e0',
+  },
+  voiceButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ff6b6b',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  voiceButtonRecording: {
+    backgroundColor: '#ff4757',
+    transform: [{ scale: 1.1 }],
+  },
+  imageButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#3742fa',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
