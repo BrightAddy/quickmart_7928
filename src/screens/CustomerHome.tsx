@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Modal, FlatList } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FloatingChatbotButton, ChatbotModal } from '../components/UI';
@@ -124,14 +124,6 @@ const popularStores = [
   },
 ];
 
-const storeTypes = [
-  { id: 1, name: 'Popular', icon: 'star', active: true },
-  { id: 2, name: 'Supermarkets', icon: 'store', active: false },
-  { id: 3, name: 'Marts', icon: 'shopping', active: false },
-  { id: 4, name: 'Local Shops', icon: 'home-city', active: false },
-  { id: 5, name: 'Farmers Market', icon: 'leaf', active: false },
-];
-
 // Mock customer data - replace with actual user data
 const customerData = {
   firstName: 'Kwame',
@@ -167,12 +159,12 @@ function HeaderSection() {
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-      <TextInput
-        style={styles.searchInput}
+          <TextInput
+            style={styles.searchInput}
             placeholder="Search for fruits, vegetables, groceries..."
-        placeholderTextColor="#888"
-      />
-    </View>
+            placeholderTextColor="#888"
+          />
+        </View>
       </View>
       
       {/* Location Section */}
@@ -199,19 +191,19 @@ function PromotionalBanner() {
           setCurrentSlide(slideIndex);
         }}
       >
-      {promotions.map((promo) => (
+        {promotions.map((promo) => (
           <View key={promo.id} style={styles.bannerCard}>
             <View style={[styles.bannerLeft, { backgroundColor: promo.backgroundColor }]}>
               <Text style={styles.bannerDiscountLabel}>Discount</Text>
               <Text style={styles.bannerDiscountPercent}>{promo.discount}</Text>
-            <Text style={styles.bannerTitle}>{promo.title}</Text>
+              <Text style={styles.bannerTitle}>{promo.title}</Text>
               <TouchableOpacity style={styles.bannerButton}>
                 <Text style={styles.bannerButtonText}>{promo.buttonText}</Text>
               </TouchableOpacity>
-          </View>
+            </View>
             <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
-          <Image source={{ uri: promo.image }} style={styles.bannerImage} />
-        </View>
+              <Image source={{ uri: promo.image }} style={styles.bannerImage} />
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -248,8 +240,8 @@ function CategoriesSection() {
             </View>
             <Text style={styles.categoryName}>{cat.name}</Text>
           </TouchableOpacity>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -279,7 +271,7 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
       </View>
       
       <ScrollView 
-        horizontal
+        horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.storesContainer}
       >
@@ -303,9 +295,9 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
               <View style={styles.storeRating}>
                 <Ionicons name="star" size={14} color="#FFD700" />
                 <Text style={styles.ratingText}>{store.rating}</Text>
-            </View>
-              <Text style={styles.storeType}>{store.type}</Text>
               </View>
+              <Text style={styles.storeType}>{store.type}</Text>
+            </View>
             <Text style={styles.storeDelivery}>{store.deliveryTime} • {store.distance}</Text>
           </TouchableOpacity>
         ))}
@@ -314,18 +306,18 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
   );
 }
 
-function SpecialDealsSection() {
+function SpecialDealsSection({ onSeeMore }: { onSeeMore: () => void }) {
   return (
     <View style={styles.specialDealsSection}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Special Deal</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onSeeMore}>
           <Text style={styles.seeMoreText}>See more {'>'}</Text>
         </TouchableOpacity>
       </View>
       
       <ScrollView 
-        horizontal
+        horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.dealsContainer}
       >
@@ -336,100 +328,11 @@ function SpecialDealsSection() {
             <View style={styles.dealPriceContainer}>
               <Text style={styles.dealPrice}>{deal.price}</Text>
               <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
-              </View>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
-  );
-}
-
-function StoresModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const [selectedType, setSelectedType] = useState('Popular');
-  const [filteredStores, setFilteredStores] = useState(popularStores);
-
-  const filterStores = (type: string) => {
-    setSelectedType(type);
-    if (type === 'Popular') {
-      setFilteredStores(popularStores);
-    } else if (type === 'Supermarkets') {
-      setFilteredStores(popularStores.filter(store => store.type === 'Supermarket'));
-    } else if (type === 'Marts') {
-      setFilteredStores(popularStores.filter(store => store.type === 'Mart'));
-    } else {
-      setFilteredStores(popularStores);
-    }
-  };
-
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>All Stores</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
-        
-        {/* Filter Tabs */}
-        <View style={styles.filterContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedType === 'Popular' && styles.active]}
-              onPress={() => filterStores('Popular')}
-            >
-              <Text style={styles.filterText}>Popular</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedType === 'Supermarkets' && styles.active]}
-              onPress={() => filterStores('Supermarkets')}
-            >
-              <Text style={styles.filterText}>Supermarkets</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filterButton, selectedType === 'Marts' && styles.active]}
-              onPress={() => filterStores('Marts')}
-            >
-              <Text style={styles.filterText}>Marts</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-        
-        {/* Stores List */}
-        <FlatList
-          data={filteredStores}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={styles.modalStoreItem}>
-              <Image source={{ uri: item.image }} style={styles.modalStoreImage} />
-              <View style={styles.modalStoreInfo}>
-                <Text style={styles.modalStoreName}>{item.name}</Text>
-                <View style={styles.modalStoreMeta}>
-                  <View style={styles.modalStoreRating}>
-                    <Ionicons name="star" size={14} color="#FFD700" />
-                    <Text style={styles.modalRatingText}>{item.rating}</Text>
-                  </View>
-                  <Text style={styles.modalStoreType}>{item.type}</Text>
-                </View>
-                <Text style={styles.modalStoreDelivery}>{item.deliveryTime} • {item.distance}</Text>
-                <View style={styles.modalStoreCategories}>
-                  {item.categories.slice(0, 2).map((cat, idx) => (
-                    <Text key={idx} style={styles.modalStoreCategory}>{cat}</Text>
-                  ))}
-                </View>
-              </View>
-            </TouchableOpacity>
-          )}
-          style={styles.modalStoresList}
-          showsVerticalScrollIndicator={false}
-        />
-      </SafeAreaView>
-    </Modal>
   );
 }
 
@@ -452,25 +355,24 @@ function BottomNavigation() {
         <View style={styles.navIconContainer}>
           <Ionicons name="cart" size={24} color="#999" />
           <View style={styles.cartBadge} />
-      </View>
+        </View>
         <Text style={styles.navLabel}>Cart</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.navItem}>
         <View style={styles.navIconContainer}>
           <Ionicons name="person" size={24} color="#999" />
         </View>
         <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
     </View>
   );
 }
 
 export default function CustomerHome({ navigation }: any) {
   const [chatbotVisible, setChatbotVisible] = useState(false);
-  const [storesModalVisible, setStoresModalVisible] = useState(false);
 
   const handleSeeMoreStores = () => {
-    setStoresModalVisible(true);
+    navigation.navigate('AllStores');
   };
 
   return (
@@ -482,21 +384,18 @@ export default function CustomerHome({ navigation }: any) {
       >
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
           <HeaderSection />
-        <PromotionalBanner />
+          <PromotionalBanner />
           <CategoriesSection />
           <PopularStoresSection onSeeMore={handleSeeMoreStores} />
-          <SpecialDealsSection />
+          <SpecialDealsSection onSeeMore={() => navigation.navigate('Deals')} />
           <View style={{ height: 100 }} />
-      </ScrollView>
+        </ScrollView>
         
         <BottomNavigation />
         
         {/* Floating Chatbot */}
-      <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
-      <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
-        
-        {/* Stores Modal */}
-        <StoresModal visible={storesModalVisible} onClose={() => setStoresModalVisible(false)} />
+        <FloatingChatbotButton onPress={() => setChatbotVisible(true)} />
+        <ChatbotModal visible={chatbotVisible} onClose={() => setChatbotVisible(false)} />
       </LinearGradient>
     </SafeAreaView>
   );

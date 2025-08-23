@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Splash: undefined;
-  Onboarding: undefined;
   Welcome: undefined;
+  Onboarding: undefined;
   UserRoleSelection: undefined;
   CustomerLogin: undefined;
   CustomerSignup: undefined;
@@ -9,30 +9,28 @@ export type RootStackParamList = {
   ShopperSignup: undefined;
   StoreOwnerLogin: undefined;
   StoreOwnerSignup: undefined;
-  CustomerHome: undefined;
-  StoreBrowse: { store: any } | undefined;
-  CartCheckout: undefined;
-  UserPreferences: undefined;
-  CustomerTabs: { screen?: string } | undefined;
-  HelpCenter: undefined;
-  Referral: undefined;
-  ShopperHome: undefined;
+  CustomerTabs: undefined;
   ShopperTabs: undefined;
   StoreOwnerHome: undefined;
-  OrderTracking: { id: string } | undefined;
-  PaymentMethods: undefined;
+  AllStores: undefined;
+  StoreBrowse: { store: any };
+  UserPreferences: undefined;
   Notifications: undefined;
-  ProductDetails: { product: any } | undefined;
-  Checkout: { subtotal?: number; delivery?: number; discount?: number; total?: number } | undefined;
-  EditProfile: { profile: any } | undefined;
-  ManageAddresses: { addresses: any[] } | undefined;
-  FavoriteStores: undefined;
-  ShoppingLists: undefined;
-  RecentlyViewed: undefined;
-  SecuritySettings: undefined;
-  ChangePassword: undefined;
-  TwoFactorAuth: undefined;
+  HelpCenter: undefined;
+  Wishlist: undefined;
+  Search: undefined;
+  Deals: undefined;
   LoyaltyPoints: undefined;
+  Referral: undefined;
+  ManageAddresses: undefined;
+  PaymentMethods: undefined;
+  ProductDetails: { product: any };
+  CartCheckout: undefined;
+  Checkout: undefined;
+  Orders: undefined;
+  OrderTracking: { order: any };
+  EditProfile: undefined;
+  Profile: undefined;
 };
 
 
