@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Image, SafeAreaView, StatusBar, FlatList } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TouchableOpacity, Image, SafeAreaView, StatusBar, FlatList, Dimensions } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 // --- Comprehensive Store Data ---
 const allStores = [
@@ -271,31 +274,41 @@ const storeTypes = [
 // --- Components ---
 function HeaderSection({ onBack }: { onBack: () => void }) {
   return (
-    <View style={styles.headerSection}>
-      <TouchableOpacity style={styles.backButton} onPress={onBack}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>All Stores</Text>
-      <TouchableOpacity style={styles.searchButton}>
-        <Ionicons name="search" size={24} color="#333" />
-      </TouchableOpacity>
-    </View>
+    <LinearGradient
+      colors={['#4CAF50', '#45A049', '#388E3C']}
+      style={styles.headerGradient}
+    >
+      <View style={styles.headerSection}>
+        <TouchableOpacity style={styles.backButton} onPress={onBack} activeOpacity={0.8}>
+          <View style={styles.backButtonInner}>
+            <Ionicons name="arrow-back" size={20} color="#fff" />
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>All Stores</Text>
+        <TouchableOpacity style={styles.searchButton} activeOpacity={0.8}>
+          <View style={styles.searchButtonInner}>
+            <Ionicons name="search" size={20} color="#fff" />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
   );
 }
 
 function FilterSection({ selectedType, onFilterChange }: { selectedType: string; onFilterChange: (type: string) => void }) {
   return (
     <View style={styles.filterSection}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScrollContent}>
         {storeTypes.map((type) => (
           <TouchableOpacity
             key={type.id}
             style={[styles.filterButton, selectedType === type.name && styles.activeFilter]}
             onPress={() => onFilterChange(type.name)}
+            activeOpacity={0.8}
           >
             <MaterialCommunityIcons 
               name={type.icon as any} 
-              size={16} 
+              size={18} 
               color={selectedType === type.name ? '#fff' : '#666'} 
             />
             <Text style={[styles.filterText, selectedType === type.name && styles.activeFilterText]}>
@@ -310,12 +323,17 @@ function FilterSection({ selectedType, onFilterChange }: { selectedType: string;
 
 function StoreCard({ store, onToggleFavorite }: { store: any; onToggleFavorite: (id: string) => void }) {
   return (
-    <TouchableOpacity style={styles.storeCard}>
+    <TouchableOpacity style={styles.storeCard} activeOpacity={0.9}>
       <View style={styles.storeImageContainer}>
         <Image source={{ uri: store.image }} style={styles.storeImage} />
+        <LinearGradient
+          colors={['rgba(0,0,0,0.1)', 'transparent']}
+          style={styles.imageOverlay}
+        />
         <TouchableOpacity 
           style={styles.favoriteButton}
           onPress={() => onToggleFavorite(store.id.toString())}
+          activeOpacity={0.8}
         >
           <Ionicons 
             name={store.isFavorite ? "heart" : "heart-outline"} 
@@ -331,7 +349,7 @@ function StoreCard({ store, onToggleFavorite }: { store: any; onToggleFavorite: 
         
         <View style={styles.storeMeta}>
           <View style={styles.storeRating}>
-            <Ionicons name="star" size={14} color="#FFD700" />
+            <Ionicons name="star" size={16} color="#FFD700" />
             <Text style={styles.ratingText}>{store.rating}</Text>
           </View>
           <Text style={styles.storeType}>{store.type}</Text>
@@ -385,7 +403,7 @@ export default function AllStores({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="light-content" backgroundColor="#4CAF50" />
       
       <HeaderSection onBack={() => navigation.goBack()} />
       <FilterSection selectedType={selectedType} onFilterChange={handleFilterChange} />
@@ -410,174 +428,237 @@ export default function AllStores({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F8FCF8',
   },
   
-  // Header Section
+  // Header Section with Gradient
+  headerGradient: {
+    paddingTop: 20,
+    paddingBottom: 16,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
   headerSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    paddingTop: 10,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+  },
+  backButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   searchButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+  },
+  searchButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   
-  // Filter Section
+  // Filter Section with 3D styling
   filterSection: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  activeFilter: {
-    backgroundColor: '#2ecc71',
-    borderColor: '#2ecc71',
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-    marginLeft: 6,
-  },
-  activeFilterText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  
-  // Stores List
-  storesList: {
-    flex: 1,
-  },
-  storesListContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  
-  // Store Card
-  storeCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 2,
+    paddingVertical: 20,
+    marginTop: 8,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+  filterScrollContent: {
+    paddingHorizontal: 20,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginRight: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  activeFilter: {
+    backgroundColor: '#4CAF50',
+    elevation: 6,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  filterText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeFilterText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  
+  // Store List
+  storesList: {
+    flex: 1,
+  },
+  storesListContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  
+  // Store Card with 3D styling
+  storeCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginBottom: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
+  },
   storeImageContainer: {
     position: 'relative',
-    width: '100%',
-    height: 160,
+    height: 180,
   },
   storeImage: {
     width: '100%',
     height: '100%',
   },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+  },
   favoriteButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    top: 16,
+    right: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
   storeInfo: {
-    padding: 16,
+    padding: 20,
   },
   storeName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: 8,
+    lineHeight: 26,
   },
   storeDescription: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 12,
     lineHeight: 20,
+    marginBottom: 16,
   },
   storeMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   storeRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    backgroundColor: '#FFF9C4',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
   },
   ratingText: {
+    marginLeft: 6,
     fontSize: 14,
-    color: '#FFD700',
-    fontWeight: 'bold',
-    marginLeft: 4,
+    fontWeight: '700',
+    color: '#F57C00',
   },
   storeType: {
     fontSize: 12,
-    color: '#666',
-    backgroundColor: '#f8f9fa',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    fontWeight: '600',
+    color: '#4CAF50',
+    backgroundColor: '#E8F5E8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
   },
   storeDelivery: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 12,
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 16,
+    fontWeight: '500',
   },
   storeCategories: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
   },
   storeCategory: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#666',
-    backgroundColor: '#f8f9fa',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    fontWeight: '500',
   },
 });
