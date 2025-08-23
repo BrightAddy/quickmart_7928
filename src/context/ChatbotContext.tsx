@@ -123,26 +123,26 @@ const translations = {
     confirmOrder: "Yie! Nye wo aka items sia ka wo cart me. Ready a checkout?",
   },
   ga: {
-    welcome: "Akwaba! Me yɛ wo shopping assistant. Deɛn na me bɛtumi akyerɛ wo?",
-    addToCart: "Aka cart mu",
-    cartUpdated: "Cart no ayɛ updated",
-    languageChanged: "Kasa no ayɛ Ga",
-    shopForMe: "Me bɛkyerɛ wo shop groceries. Deɛn na wo pɛ me ma me fa ka wo cart mu?",
-    bestDeals: "Hena na ɛyɛ deals pa wɔ wo shopping history mu:",
-    noProducts: "Kafra, me nhu products no. Wo pɛ me ma me suggest alternatives?",
-    cartEmpty: "Wo cart no empty. Ma me kyerɛ wo products pa!",
+    welcome: "Miaawɔ! Mi yɛ mli shopping assistant. Deɛn na mi bɛtumi akyerɛ wo?",
+    addToCart: "Mi aka cart mli",
+    cartUpdated: "Cart fee mi updated kɛ",
+    languageChanged: "Kasa fee mi Ga kɛ",
+    shopForMe: "Mi bɛkyerɛ wo shop groceries. Deɛn na wo hiɛ mi ka wo cart mli?",
+    bestDeals: "Wole ni ɛyɛ deals pa wɔ wo shopping history mli:",
+    noProducts: "Kafra, mi mɔ products fee. Wo hiɛ mi suggest alternatives?",
+    cartEmpty: "Wo cart fee empty. Mi kyerɛ wo products pa!",
     total: "Total",
     quantity: "Quantity",
     remove: "Remove",
     checkout: "Checkout",
     continueShopping: "Continue Shopping",
-    searchProducts: "Me rehwehwɛ products...",
-    foundProducts: "Me hu products yi ma wo:",
-    addMore: "Wo pɛ me ma me fa biribi bio ka wo cart mu?",
-    storeSelection: "Store bɛn na wo pɛ me ma me shop firi?",
-    categorySelection: "Category bɛn na wo pɛ products?",
+    searchProducts: "Mi lɛ products...",
+    foundProducts: "Mi yɛ products lɛ ma wo:",
+    addMore: "Wo hiɛ mi ka biribi bio wo cart mli?",
+    storeSelection: "Store bɛn na wo hiɛ mi shop firi?",
+    categorySelection: "Category bɛn na wo hiɛ products?",
     priceRange: "Wo budget yɛ he?",
-    confirmOrder: "Yie! Me aka items yi ka wo cart mu. Ready a checkout?",
+    confirmOrder: "Yie! Mi aka items lɛ ka wo cart mli. Ready a checkout?",
   },
   hausa: {
     welcome: "Sannu! Ni ne shopping assistant. Me za a i taimaka?",
@@ -275,7 +275,6 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const processUserMessage = useCallback((text: string) => {
     const lowerText = text.toLowerCase();
-    const lang = currentLanguage;
 
     // Language switching
     if (lowerText.includes('language') || lowerText.includes('kasa') || lowerText.includes('gbe') || lowerText.includes('harshe')) {
@@ -325,7 +324,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Shopping requests
     if (lowerText.includes('shop') || lowerText.includes('buy') || lowerText.includes('add') || lowerText.includes('cart')) {
       addMessage({
-        text: translations[lang].shopForMe,
+        text: translations[currentLanguage].shopForMe,
         isUser: false,
         type: 'text',
       });
@@ -334,7 +333,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setTimeout(() => {
         const suggestions = sampleProducts.slice(0, 3);
         addMessage({
-          text: translations[lang].foundProducts,
+          text: translations[currentLanguage].foundProducts,
           isUser: false,
           type: 'product_suggestion',
           data: suggestions,
@@ -347,7 +346,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (lowerText.includes('deal') || lowerText.includes('offer') || lowerText.includes('discount')) {
       const deals = getPersonalizedDeals();
       addMessage({
-        text: translations[lang].bestDeals,
+        text: translations[currentLanguage].bestDeals,
         isUser: false,
         type: 'product_suggestion',
         data: deals,
@@ -357,11 +356,11 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // Generic response
     addMessage({
-      text: translations[lang].shopForMe,
+      text: translations[currentLanguage].shopForMe,
       isUser: false,
       type: 'text',
     });
-  }, [currentLanguage, addMessage]);
+  }, [currentLanguage, addMessage, switchLanguage]);
 
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);

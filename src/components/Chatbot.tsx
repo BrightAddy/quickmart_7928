@@ -203,7 +203,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
             </View>
             <View>
               <Text style={styles.botName}>Shopping Assistant</Text>
-              <Text style={styles.botStatus}>Online • {currentLanguage}</Text>
+              <Text style={styles.botStatus}>Online • {languages.find(lang => lang.code === currentLanguage)?.name}</Text>
             </View>
           </View>
           <View style={styles.headerRight}>
@@ -212,7 +212,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
               onPress={() => setShowLanguageSelector(!showLanguageSelector)}
             >
               <Text style={styles.languageButtonText}>
-                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage}
+                {languages.find(lang => lang.code === currentLanguage)?.flag} {languages.find(lang => lang.code === currentLanguage)?.name}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -224,26 +224,28 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
         {/* Language Selector */}
         {showLanguageSelector && (
           <View style={styles.languageSelector}>
-            {languages.map((language) => (
-              <TouchableOpacity
-                key={language.code}
-                style={[
-                  styles.languageOption,
-                  currentLanguage === language.code && styles.languageOptionActive,
-                ]}
-                onPress={() => handleLanguageSwitch(language.code)}
-              >
-                <Text style={styles.languageFlag}>{language.flag}</Text>
-                <Text
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {languages.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
                   style={[
-                    styles.languageName,
-                    currentLanguage === language.code && styles.languageNameActive,
+                    styles.languageOption,
+                    currentLanguage === language.code && styles.languageOptionActive,
                   ]}
+                  onPress={() => handleLanguageSwitch(language.code)}
                 >
-                  {language.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={styles.languageFlag}>{language.flag}</Text>
+                  <Text
+                    style={[
+                      styles.languageName,
+                      currentLanguage === language.code && styles.languageNameActive,
+                    ]}
+                  >
+                    {language.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -374,7 +376,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   languageSelector: {
-    flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: '#f8f8f8',
