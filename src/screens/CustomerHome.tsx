@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Chatbot } from '../components/Chatbot';
+import { useChatbot } from '../context/ChatbotContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -62,6 +64,7 @@ export default function CustomerHome({ navigation }: any) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState(new Set());
+  const { toggleChat, isOpen } = useChatbot();
 
   const toggleFavorite = (id: number) => {
     setFavorites(prev => {
@@ -246,9 +249,12 @@ export default function CustomerHome({ navigation }: any) {
       </ScrollView>
 
       {/* Floating Chatbot */}
-      <TouchableOpacity style={styles.floatingChatbot} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.floatingChatbot} activeOpacity={0.8} onPress={toggleChat}>
         <Ionicons name="chatbubble-ellipses" size={24} color="#fff" />
       </TouchableOpacity>
+
+      {/* Chatbot Component */}
+      <Chatbot isVisible={isOpen} onClose={toggleChat} />
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
