@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { FloatingChatbotButton, ChatbotModal } from '../components/UI';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 // --- Placeholder Data ---
 const promotions = [
@@ -134,7 +136,7 @@ const customerData = {
 function HeaderSection() {
   return (
     <LinearGradient
-      colors={['#4CAF50', '#45A049']}
+      colors={['#4CAF50', '#45A049', '#388E3C']}
       style={styles.headerGradient}
     >
       {/* App Header */}
@@ -145,12 +147,16 @@ function HeaderSection() {
         </View>
         
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="mail" size={24} color="#333" />
+          <TouchableOpacity style={styles.headerButton} activeOpacity={0.8}>
+            <View style={styles.headerButtonInner}>
+              <Ionicons name="mail" size={22} color="#fff" />
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="notifications" size={24} color="#333" />
-            <View style={styles.notificationBadge} />
+          <TouchableOpacity style={styles.headerButton} activeOpacity={0.8}>
+            <View style={styles.headerButtonInner}>
+              <Ionicons name="notifications" size={22} color="#fff" />
+              <View style={styles.notificationBadge} />
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -158,20 +164,20 @@ function HeaderSection() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+          <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search for fruits, vegetables, groceries..."
-            placeholderTextColor="#888"
+            placeholderTextColor="#999"
           />
         </View>
       </View>
       
       {/* Location Section */}
       <View style={styles.locationSection}>
-        <Ionicons name="location" size={16} color="#666" />
+        <Ionicons name="location" size={16} color="#fff" />
         <Text style={styles.locationText}>Delivering to {customerData.location}</Text>
-        <Ionicons name="chevron-down" size={16} color="#666" />
+        <Ionicons name="chevron-down" size={16} color="#fff" />
       </View>
     </LinearGradient>
   );
@@ -192,19 +198,24 @@ function PromotionalBanner() {
         }}
       >
         {promotions.map((promo) => (
-          <View key={promo.id} style={styles.bannerCard}>
+          <TouchableOpacity key={promo.id} style={styles.bannerCard} activeOpacity={0.9}>
             <View style={[styles.bannerLeft, { backgroundColor: promo.backgroundColor }]}>
               <Text style={styles.bannerDiscountLabel}>Discount</Text>
               <Text style={styles.bannerDiscountPercent}>{promo.discount}</Text>
               <Text style={styles.bannerTitle}>{promo.title}</Text>
-              <TouchableOpacity style={styles.bannerButton}>
-                <Text style={styles.bannerButtonText}>{promo.buttonText}</Text>
+              <TouchableOpacity style={styles.bannerButton} activeOpacity={0.8}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.7)']}
+                  style={styles.bannerButtonGradient}
+                >
+                  <Text style={styles.bannerButtonText}>{promo.buttonText}</Text>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
             <View style={[styles.bannerRight, { backgroundColor: promo.rightBackground }]}>
               <Image source={{ uri: promo.image }} style={styles.bannerImage} />
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
       
@@ -234,9 +245,9 @@ function CategoriesSection() {
         contentContainerStyle={styles.categoriesContainer}
       >
         {categories.map((cat) => (
-          <TouchableOpacity key={cat.id} style={styles.categoryItem}>
+          <TouchableOpacity key={cat.id} style={styles.categoryItem} activeOpacity={0.8}>
             <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
-              <MaterialCommunityIcons name={cat.icon} size={24} color={cat.iconColor} />
+              <MaterialCommunityIcons name={cat.icon} size={26} color={cat.iconColor} />
             </View>
             <Text style={styles.categoryName}>{cat.name}</Text>
           </TouchableOpacity>
@@ -265,8 +276,10 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
     <View style={styles.popularStoresSection}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Popular Stores</Text>
-        <TouchableOpacity onPress={onSeeMore}>
-          <Text style={styles.seeMoreText}>See more {'>'}</Text>
+        <TouchableOpacity onPress={onSeeMore} activeOpacity={0.8}>
+          <View style={styles.seeMoreButton}>
+            <Text style={styles.seeMoreText}>See more {'>'}</Text>
+          </View>
         </TouchableOpacity>
       </View>
       
@@ -276,12 +289,21 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
         contentContainerStyle={styles.storesContainer}
       >
         {popularStores.map((store) => (
-          <TouchableOpacity key={store.id} style={styles.storeItem}>
+          <TouchableOpacity
+            key={store.id}
+            style={styles.storeItem}
+            activeOpacity={0.9}
+          >
             <View style={styles.storeImageContainer}>
               <Image source={{ uri: store.image }} style={styles.storeImage} />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.1)', 'transparent']}
+                style={styles.storeImageOverlay}
+              />
               <TouchableOpacity 
                 style={styles.favoriteButton}
                 onPress={() => toggleFavorite(store.id.toString())}
+                activeOpacity={0.8}
               >
                 <Ionicons 
                   name={favorites.has(store.id.toString()) ? "heart" : "heart-outline"} 
@@ -290,15 +312,17 @@ function PopularStoresSection({ onSeeMore }: { onSeeMore: () => void }) {
                 />
               </TouchableOpacity>
             </View>
-            <Text style={styles.storeName}>{store.name}</Text>
-            <View style={styles.storeMeta}>
-              <View style={styles.storeRating}>
-                <Ionicons name="star" size={14} color="#FFD700" />
-                <Text style={styles.ratingText}>{store.rating}</Text>
+            <View style={styles.storeInfo}>
+              <Text style={styles.storeName}>{store.name}</Text>
+              <View style={styles.storeMeta}>
+                <View style={styles.storeRating}>
+                  <Ionicons name="star" size={14} color="#FFD700" />
+                  <Text style={styles.ratingText}>{store.rating}</Text>
+                </View>
+                <Text style={styles.storeType}>{store.type}</Text>
               </View>
-              <Text style={styles.storeType}>{store.type}</Text>
+              <Text style={styles.storeDelivery}>{store.deliveryTime} • {store.distance}</Text>
             </View>
-            <Text style={styles.storeDelivery}>{store.deliveryTime} • {store.distance}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -311,8 +335,10 @@ function SpecialDealsSection({ onSeeMore }: { onSeeMore: () => void }) {
     <View style={styles.specialDealsSection}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Special Deal</Text>
-        <TouchableOpacity onPress={onSeeMore}>
-          <Text style={styles.seeMoreText}>See more {'>'}</Text>
+        <TouchableOpacity onPress={onSeeMore} activeOpacity={0.8}>
+          <View style={styles.seeMoreButton}>
+            <Text style={styles.seeMoreText}>See more {'>'}</Text>
+          </View>
         </TouchableOpacity>
       </View>
       
@@ -322,12 +348,20 @@ function SpecialDealsSection({ onSeeMore }: { onSeeMore: () => void }) {
         contentContainerStyle={styles.dealsContainer}
       >
         {specialDeals.map((deal) => (
-          <TouchableOpacity key={deal.id} style={styles.dealItem}>
-            <Image source={{ uri: deal.image }} style={styles.dealImage} />
-            <Text style={styles.dealName}>{deal.name}</Text>
-            <View style={styles.dealPriceContainer}>
-              <Text style={styles.dealPrice}>{deal.price}</Text>
-              <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
+          <TouchableOpacity key={deal.id} style={styles.dealItem} activeOpacity={0.9}>
+            <View style={styles.dealImageContainer}>
+              <Image source={{ uri: deal.image }} style={styles.dealImage} />
+              <LinearGradient
+                colors={['rgba(0,0,0,0.1)', 'transparent']}
+                style={styles.dealImageOverlay}
+              />
+            </View>
+            <View style={styles.dealInfo}>
+              <Text style={styles.dealName}>{deal.name}</Text>
+              <View style={styles.dealPriceContainer}>
+                <Text style={styles.dealPrice}>{deal.price}</Text>
+                <Text style={styles.dealOriginalPrice}>{deal.originalPrice}</Text>
+              </View>
             </View>
           </TouchableOpacity>
         ))}
@@ -338,32 +372,25 @@ function SpecialDealsSection({ onSeeMore }: { onSeeMore: () => void }) {
 
 function BottomNavigation() {
   return (
-    <View style={styles.bottomNav}>
-      <TouchableOpacity style={styles.navItem}>
-        <View style={[styles.navIconContainer, styles.navIconActive]}>
-          <Ionicons name="home" size={24} color="#4CAF50" />
-        </View>
-        <Text style={[styles.navLabel, styles.navLabelActive]}>Home</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <View style={styles.navIconContainer}>
-          <Ionicons name="heart" size={24} color="#999" />
-        </View>
-        <Text style={styles.navLabel}>Favorites</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <View style={styles.navIconContainer}>
-          <Ionicons name="cart" size={24} color="#999" />
-          <View style={styles.cartBadge} />
-        </View>
-        <Text style={styles.navLabel}>Cart</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.navItem}>
-        <View style={styles.navIconContainer}>
-          <Ionicons name="person" size={24} color="#999" />
-        </View>
-        <Text style={styles.navLabel}>Profile</Text>
-      </TouchableOpacity>
+    <View style={styles.bottomNavigation}>
+      <View style={styles.navItems}>
+        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} activeOpacity={0.8}>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
+          <Text style={styles.navIcon}>❤️</Text>
+          <Text style={styles.navText}>Favorites</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navText}>Cart</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
+          <Text style={styles.navIcon}>👤</Text>
+          <Text style={styles.navText}>Profile</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -404,7 +431,7 @@ export default function CustomerHome({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F8FCF8',
   },
   backgroundGradient: {
     flex: 1,
@@ -413,113 +440,145 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Header Section
+  // Header Section with Enhanced 3D Styling
   headerGradient: {
-    paddingTop: 40,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   appHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   appTitleContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
   },
   welcomeText: {
-    fontSize: 14,
-    color: '#333',
-    opacity: 0.8,
-    marginBottom: 2,
+    fontSize: 15,
+    color: '#fff',
+    opacity: 0.9,
+    marginBottom: 4,
+    fontWeight: '500',
   },
   customerName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   headerActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
   },
   headerButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  headerButtonInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   notificationBadge: {
     position: 'absolute',
     top: 8,
     right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#F44336',
-  },
-  searchContainer: {
-    marginBottom: 12,
-  },
-  searchBar: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 2,
   },
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchBar: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 16,
   },
   searchInput: {
     fontSize: 16,
-    color: '#222',
+    color: '#333',
     flex: 1,
+    fontWeight: '500',
   },
   locationSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   locationText: {
     flex: 1,
     fontSize: 14,
-    color: '#333',
+    color: '#fff',
+    fontWeight: '600',
     marginLeft: 8,
     marginRight: 8,
   },
   
-  // Banner Section
+  // Banner Section with Enhanced 3D Styling
   bannerContainer: {
-    marginTop: 16,
-    marginBottom: 24,
-    paddingHorizontal: 16,
+    marginHorizontal: 20,
+    marginVertical: 24,
   },
   bannerCard: {
+    width: screenWidth - 40,
+    height: 160,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     flexDirection: 'row',
-    width: 350,
-    height: 180,
-    marginHorizontal: 8,
-    borderRadius: 16,
-    overflow: 'hidden',
-    elevation: 4,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   },
   bannerLeft: {
     flex: 1,
@@ -527,32 +586,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bannerDiscountLabel: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.9,
     marginBottom: 4,
+    fontWeight: '600',
   },
   bannerDiscountPercent: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#fff',
     marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   bannerTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
     marginBottom: 16,
+    lineHeight: 22,
   },
   bannerButton: {
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
     alignSelf: 'flex-start',
+  },
+  bannerButtonGradient: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   bannerButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#333',
   },
   bannerRight: {
@@ -563,7 +634,7 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: 100,
     height: 100,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   paginationDots: {
     flexDirection: 'row',
@@ -579,89 +650,227 @@ const styles = StyleSheet.create({
   },
   paginationDotActive: {
     backgroundColor: '#4CAF50',
+    width: 24,
   },
   
-  // Categories Section
+  // Categories Section with Enhanced 3D Styling
   categoriesSection: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
+    marginBottom: 28,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#333',
-    marginBottom: 16,
+    marginBottom: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
   },
   categoriesContainer: {
-    paddingRight: 16,
+    paddingRight: 20,
   },
   categoryItem: {
     alignItems: 'center',
-    marginRight: 20,
-    width: 80,
+    marginRight: 28,
+    width: 70,
   },
   categoryIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 65,
+    height: 65,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
-    elevation: 2,
+    marginBottom: 12,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   categoryName: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
     textAlign: 'center',
+    lineHeight: 16,
   },
   
-  // Special Deals Section
-  specialDealsSection: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
+  // Popular Stores Section with Enhanced 3D Styling
+  popularStoresSection: {
+    marginBottom: 28,
+    paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  seeMoreButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#E8F5E8',
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   seeMoreText: {
     fontSize: 14,
     color: '#4CAF50',
+    fontWeight: '700',
+  },
+  storesContainer: {
+    paddingRight: 20,
+  },
+  storeItem: {
+    width: 200,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginRight: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
+  },
+  storeImageContainer: {
+    position: 'relative',
+    height: 120,
+  },
+  storeImage: {
+    width: '100%',
+    height: '100%',
+  },
+  storeImageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 20,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 18,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  storeInfo: {
+    padding: 16,
+  },
+  storeName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  storeMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  storeRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF9C4',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  ratingText: {
+    marginLeft: 4,
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#F57C00',
+  },
+  storeType: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#4CAF50',
+    backgroundColor: '#E8F5E8',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  storeDelivery: {
+    fontSize: 12,
+    color: '#888',
     fontWeight: '500',
   },
+  
+  // Special Deals Section with Enhanced 3D Styling
+  specialDealsSection: {
+    marginBottom: 28,
+    paddingHorizontal: 20,
+  },
   dealsContainer: {
-    paddingRight: 16,
+    paddingRight: 20,
   },
   dealItem: {
-    marginRight: 16,
-    width: 120,
+    width: 140,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 12,
-    elevation: 2,
+    marginRight: 16,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  dealImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 80,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
   },
   dealImage: {
     width: '100%',
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 8,
+    height: '100%',
+    borderRadius: 12,
+  },
+  dealImageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+  },
+  dealInfo: {
+    flex: 1,
   },
   dealName: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: 8,
+    lineHeight: 18,
   },
   dealPriceContainer: {
     flexDirection: 'row',
@@ -670,261 +879,60 @@ const styles = StyleSheet.create({
   },
   dealPrice: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#4CAF50',
   },
   dealOriginalPrice: {
     fontSize: 12,
     color: '#999',
     textDecorationLine: 'line-through',
-  },
-  
-  // Popular Stores Section
-  popularStoresSection: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
-  },
-  storesContainer: {
-    paddingRight: 16,
-  },
-  storeItem: {
-    marginRight: 16,
-    width: 180,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  storeImageContainer: {
-    position: 'relative',
-    width: '100%',
-    height: 100,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  storeImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 8,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  storeName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  storeMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  storeRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 12,
-    color: '#FFD700',
-    fontWeight: 'bold',
-  },
-  storeType: {
-    fontSize: 12,
-    color: '#666',
-  },
-  storeDelivery: {
-    fontSize: 12,
-    color: '#999',
-  },
-  
-  // Bottom Navigation
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 30,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  navIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  navIconActive: {
-    backgroundColor: '#E8F5E8',
-  },
-  navLabel: {
-    fontSize: 12,
-    color: '#999',
     fontWeight: '500',
   },
-  navLabelActive: {
-    color: '#4CAF50',
-    fontWeight: '600',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#F44336',
-  },
   
-  // Modal Styles
-  modalContainer: {
-    flex: 1,
+  // Bottom Navigation with Enhanced 3D Styling
+  bottomNavigation: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterContainer: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    backgroundColor: "#f2f2f2",
-    marginRight: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  active: {
-    backgroundColor: "#2ecc71",
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  modalStoresList: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  modalStoreItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
-  modalStoreImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
+  navItems: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
-  modalStoreInfo: {
-    flex: 1,
-    justifyContent: 'space-between',
+  navItem: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    minWidth: 80,
   },
-  modalStoreName: {
-    fontSize: 16,
+  navItemActive: {
+    backgroundColor: '#E8F5E8',
+  },
+  navIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  navText: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: '#666',
   },
-  modalStoreMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  modalStoreRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  modalRatingText: {
-    fontSize: 14,
-    color: '#FFD700',
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  modalStoreType: {
-    fontSize: 13,
-    color: '#6c757d',
-  },
-  modalStoreDelivery: {
-    fontSize: 13,
-    color: '#6c757d',
-    marginBottom: 6,
-  },
-  modalStoreCategories: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  modalStoreCategory: {
-    fontSize: 11,
-    color: '#6c757d',
-    backgroundColor: '#f8f9fa',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
+  navTextActive: {
+    color: '#4CAF50',
+    fontWeight: '700',
   },
 });
 

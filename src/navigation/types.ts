@@ -9,6 +9,8 @@ export type RootStackParamList = {
   ShopperSignup: undefined;
   StoreOwnerLogin: undefined;
   StoreOwnerSignup: undefined;
+  CustomerHome: undefined;
+  ShopperHome: undefined;
   CustomerTabs: undefined;
   ShopperTabs: undefined;
   StoreOwnerHome: undefined;
@@ -22,7 +24,7 @@ export type RootStackParamList = {
   Deals: undefined;
   LoyaltyPoints: undefined;
   Referral: undefined;
-  ManageAddresses: undefined;
+  ManageAddresses: { addresses: any[] };
   PaymentMethods: undefined;
   ProductDetails: { product: any };
   CartCheckout: undefined;

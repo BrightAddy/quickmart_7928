@@ -4,17 +4,7 @@ import { Screen } from '../components/UI';
 import { useTheme } from '../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCart } from '../context/CartContext';
-
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  imageUrl?: string;
-  rating?: number;
-  inStock?: boolean;
-  weightLabel?: string; // e.g., "1000 gm"
-  description?: string;
-};
+import { Product } from '../context/ProductsContext';
 
 export default function ProductDetails({ route, navigation }: any) {
   const { colors } = useTheme();
@@ -116,8 +106,8 @@ export default function ProductDetails({ route, navigation }: any) {
               id: product?.id ?? Math.random().toString(36).slice(2),
               name: product?.name || 'Product',
               price: product?.price || 0,
-              imageUrl: product?.imageUrl,
-              category: undefined,
+              imageUrl: product?.imageUrl || '',
+              category: product?.category || 'General',
               unitLabel: weight,
             }, qty);
             navigation.navigate('CartCheckout');
