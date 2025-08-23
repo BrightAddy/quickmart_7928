@@ -245,8 +245,8 @@ export default function Deals({ navigation }: any) {
               <Ionicons name="cart" size={20} color="#fff" />
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeText}>2</Text>
+                </View>
               </View>
-            </View>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -288,7 +288,7 @@ export default function Deals({ navigation }: any) {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+            </View>
 
       {/* Products Grid */}
       <FlatList
@@ -298,8 +298,8 @@ export default function Deals({ navigation }: any) {
         numColumns={2}
         columnWrapperStyle={styles.productRow}
         contentContainerStyle={styles.productsContainer}
-        showsVerticalScrollIndicator={false}
-      />
+          showsVerticalScrollIndicator={false}
+        />
     </SafeAreaView>
   );
 }
