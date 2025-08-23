@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   floatingChatbot: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 140,
     right: 20,
     width: 56,
     height: 56,
