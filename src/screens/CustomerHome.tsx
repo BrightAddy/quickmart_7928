@@ -192,6 +192,7 @@ function PromotionalBanner() {
         horizontal 
         pagingEnabled 
         showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.bannerScrollContent}
         onMomentumScrollEnd={(event) => {
           const slideIndex = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
           setCurrentSlide(slideIndex);
@@ -375,19 +376,27 @@ function BottomNavigation() {
     <View style={styles.bottomNavigation}>
       <View style={styles.navItems}>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]} activeOpacity={0.8}>
-          <Text style={styles.navIcon}>🏠</Text>
+          <View style={styles.navIconContainer}>
+            <Ionicons name="home" size={24} color="#4CAF50" />
+          </View>
           <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Text style={styles.navIcon}>❤️</Text>
+          <View style={styles.navIconContainer}>
+            <Ionicons name="heart" size={24} color="#999" />
+          </View>
           <Text style={styles.navText}>Favorites</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Text style={styles.navIcon}>🛒</Text>
+          <View style={styles.navIconContainer}>
+            <Ionicons name="cart" size={24} color="#999" />
+          </View>
           <Text style={styles.navText}>Cart</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Text style={styles.navIcon}>👤</Text>
+          <View style={styles.navIconContainer}>
+            <Ionicons name="person" size={24} color="#999" />
+          </View>
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
@@ -565,6 +574,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginVertical: 24,
   },
+  bannerScrollContent: {
+    paddingRight: 20,
+  },
   bannerCard: {
     width: screenWidth - 40,
     height: 160,
@@ -579,6 +591,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     overflow: 'hidden',
+    marginHorizontal: 8,
   },
   bannerLeft: {
     flex: 1,
@@ -920,6 +933,20 @@ const styles = StyleSheet.create({
   },
   navItemActive: {
     backgroundColor: '#E8F5E8',
+  },
+  navIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   navIcon: {
     fontSize: 24,

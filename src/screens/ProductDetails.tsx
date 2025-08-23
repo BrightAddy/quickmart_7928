@@ -16,8 +16,8 @@ export default function ProductDetails({ route, navigation }: any) {
   const canDecrease = qty > 1;
   const total = useMemo(() => (product?.price || 0) * qty, [product?.price, qty]);
 
-  const displayImage = product?.imageUrl || 'https://via.placeholder.com/600x400.png?text=Product';
-  const weight = product?.weightLabel || '1000 gm';
+  const displayImage = product?.image || 'https://via.placeholder.com/600x400.png?text=Product';
+  const weight = product?.unitLabel || '1000 gm';
   const rating = product?.rating ?? 4.5;
   const description = product?.description ||
     '100% satisfaction guarantee. If you experience any of the following issues, missing, poor item, late arrival, unprofessional service, please let us know and we will make it right.';
@@ -103,10 +103,10 @@ export default function ProductDetails({ route, navigation }: any) {
         <TouchableOpacity
           onPress={() => {
             addItem({
-              id: product?.id ?? Math.random().toString(36).slice(2),
+              id: Number(product?.id) ?? Math.random(),
               name: product?.name || 'Product',
               price: product?.price || 0,
-              imageUrl: product?.imageUrl || '',
+              imageUrl: product?.image || '',
               category: product?.category || 'General',
               unitLabel: weight,
             }, qty);
