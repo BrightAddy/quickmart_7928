@@ -27,7 +27,7 @@ The QuickMart Shopping Chatbot is an intelligent shopping assistant that helps u
 ## How to Use
 
 ### 1. Opening the Chatbot
-- Tap the floating chatbot button (💬) on the CustomerHome screen
+- Tap the floating chatbot button (💬) on the CustomerHome screen (`src/screens/customer/CustomerHome.tsx`)
 - The chatbot slides up from the bottom with a smooth animation
 
 ### 2. Basic Commands
@@ -57,9 +57,9 @@ The QuickMart Shopping Chatbot is an intelligent shopping assistant that helps u
 ## Technical Implementation
 
 ### Components
-- **ChatbotContext**: Manages chat state, language, and cart
-- **Chatbot Component**: Main chat interface with animations
-- **Integration**: Seamlessly integrated into CustomerHome screen
+- **ChatbotContext**: Manages chat state, language, and cart (`src/context/ChatbotContext.tsx`)
+- **Chatbot Component**: Main chat interface with animations (`src/components/Chatbot.tsx`)
+- **Integration**: Seamlessly integrated into CustomerHome screen (`src/screens/customer/CustomerHome.tsx`)
 
 ### State Management
 - Chat messages with different types (text, product_suggestion, cart_update)
@@ -104,7 +104,7 @@ Bot: "Me hu products yi ma wo:" [shows vegetable products]
 - Shopping list management
 
 ## Getting Started
-1. The chatbot is automatically available on the CustomerHome screen
+1. The chatbot is automatically available on the CustomerHome screen (`src/screens/customer/CustomerHome.tsx`)
 2. Tap the floating chat button to start
 3. Try different languages and shopping commands
 4. Explore product suggestions and add items to cart

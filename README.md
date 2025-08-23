@@ -74,30 +74,77 @@ npm start
 quickmart_7928/
 ├── src/
 │   ├── components/          # Reusable UI components
+│   │   ├── Chatbot.tsx     # AI shopping assistant
 │   │   └── UI.tsx          # Main UI component library
 │   ├── context/            # React Context providers
 │   │   ├── CartContext.tsx # Shopping cart state management
+│   │   ├── ChatbotContext.tsx # Chatbot state and functionality
 │   │   ├── OrderContext.tsx # Order state management
 │   │   └── ProductsContext.tsx # Product data management
 │   ├── navigation/         # Navigation configuration
 │   │   ├── CustomerTabs.tsx # Customer tab navigation
+│   │   ├── ShopperStack.tsx # Shopper stack navigation
 │   │   ├── ShopperTabs.tsx # Shopper tab navigation
 │   │   ├── StoreOwnerTabs.tsx # Store owner tab navigation
 │   │   └── types.ts        # Navigation type definitions
-│   ├── screens/           # Application screens
-│   │   ├── SplashScreen.tsx # App launch screen
-│   │   ├── OnboardingScreen.tsx # User onboarding
-│   │   ├── CustomerHome.tsx # Customer main screen
-│   │   ├── shopper/       # Shopper-specific screens
-│   │   ├── storeOwner/    # Store owner screens
-│   │   └── ...           # Other screens
+│   ├── screens/           # Application screens (role-based organization)
+│   │   ├── general/       # Shared screens for all user roles
+│   │   │   ├── EditProfile.tsx      # User profile editing
+│   │   │   ├── HelpCenter.tsx       # Help and support center
+│   │   │   ├── Notifications.tsx    # Push notifications settings
+│   │   │   ├── OnboardingScreen.tsx # User onboarding flow
+│   │   │   ├── SplashScreen.tsx     # App launch screen
+│   │   │   ├── UserPreferencesScreen.tsx # App preferences
+│   │   │   ├── UserRoleSelection.tsx # Role selection screen
+│   │   │   └── WelcomeScreen.tsx    # Welcome screen
+│   │   ├── customer/       # Customer shopping screens
+│   │   │   ├── AllStores.tsx        # Browse all available stores
+│   │   │   ├── CartCheckout.tsx     # Shopping cart and checkout
+│   │   │   ├── Checkout.tsx         # Payment and order confirmation
+│   │   │   ├── CustomerHome.tsx     # Customer main dashboard
+│   │   │   ├── CustomerLogin.tsx    # Customer login screen
+│   │   │   ├── CustomerSignup.tsx   # Customer registration
+│   │   │   ├── Deals.tsx           # Special offers and deals
+│   │   │   ├── LoyaltyPoints.tsx   # Customer rewards program
+│   │   │   ├── ManageAddresses.tsx # Address management
+│   │   │   ├── Orders.tsx          # Order history and tracking
+│   │   │   ├── OrderTracking.tsx   # Real-time order tracking
+│   │   │   ├── PaymentMethods.tsx  # Payment options management
+│   │   │   ├── ProductDetails.tsx  # Individual product view
+│   │   │   ├── Profile.tsx         # Customer profile view
+│   │   │   ├── Referral.tsx        # Referral program
+│   │   │   ├── Search.tsx          # Product search functionality
+│   │   │   ├── StoreBrowse.tsx     # Browse specific store products
+│   │   │   └── Wishlist.tsx        # Customer wishlist
+│   │   ├── shopper/        # Delivery driver screens
+│   │   │   ├── ShopperActiveOrder.tsx  # Current delivery assignment
+│   │   │   ├── ShopperChat.tsx         # Customer communication
+│   │   │   ├── ShopperDashboard.tsx    # Driver dashboard
+│   │   │   ├── ShopperEarnings.tsx     # Earnings and analytics
+│   │   │   ├── ShopperLogin.tsx        # Driver login screen
+│   │   │   ├── ShopperOrders.tsx       # Delivery order history
+│   │   │   ├── ShopperPerformance.tsx  # Performance metrics
+│   │   │   ├── ShopperProfile.tsx      # Driver profile
+│   │   │   ├── ShopperRoute.tsx        # Delivery route optimization
+│   │   │   ├── ShopperSchedule.tsx     # Work schedule management
+│   │   │   └── ShopperSignup.tsx       # Driver registration
+│   │   └── storeOwner/     # Store management screens
+│   │       ├── Dashboard.tsx          # Store analytics dashboard
+│   │       ├── Orders.tsx             # Order management
+│   │       ├── Products.tsx           # Product and inventory management
+│   │       ├── Settings.tsx           # Store settings
+│   │       ├── StoreOwnerLogin.tsx    # Store owner login
+│   │       ├── StoreOwnerPlaceholder.tsx # Store setup placeholder
+│   │       └── StoreOwnerSignup.tsx   # Store owner registration
 │   └── theme/            # Theme configuration
 │       └── theme.tsx     # Color schemes and styling
 ├── assets/               # Static assets (images, fonts)
 ├── App.tsx              # Main application component
 ├── app.json             # Expo configuration
 ├── package.json         # Dependencies and scripts
-└── tsconfig.json        # TypeScript configuration
+├── tsconfig.json        # TypeScript configuration
+├── CHATBOT_README.md    # Chatbot documentation
+└── STORE_INTEGRATION_README.md # Store integration guide
 ```
 
 ## 🎨 Theming
@@ -137,9 +184,20 @@ function MyComponent() {
 
 ### Adding New Screens
 
-1. Create a new screen component in `src/screens/`
-2. Add the screen to the navigation stack in `App.tsx`
-3. Update navigation types in `src/navigation/types.ts`
+1. **Determine the screen category**:
+   - **General screens** (shared across roles): Add to `src/screens/general/`
+   - **Customer screens**: Add to `src/screens/customer/`
+   - **Shopper screens**: Add to `src/screens/shopper/`
+   - **Store Owner screens**: Add to `src/screens/storeOwner/`
+
+2. **Create the screen component** with appropriate naming convention:
+   - Customer screens: `Customer[Feature].tsx`
+   - Shopper screens: `Shopper[Feature].tsx`
+   - Store Owner screens: `[Feature].tsx` (or `StoreOwner[Feature].tsx`)
+
+3. **Add the screen to the navigation stack** in `App.tsx`
+4. **Update navigation types** in `src/navigation/types.ts`
+5. **Update import statements** in relevant navigation files
 
 ### State Management
 

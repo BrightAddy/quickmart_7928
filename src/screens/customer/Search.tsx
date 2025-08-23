@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Screen, Title, Body } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen, Title, Body } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 
 const trendingQueries = ['Rice', 'Plantain', 'Palm Oil', 'Tomatoes', 'Yam'];
 const recentQueriesInitial = ['Fan Milk', 'Titus Sardine'];

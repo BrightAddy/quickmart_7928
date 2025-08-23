@@ -11,13 +11,13 @@ import {
   Image,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // Import the 3 main slide images
-const slide1Image = require('../../assets/images/slide1-delivery.svg');
-const slide2Image = require('../../assets/images/slide2-shopping.svg');
-const slide3Image = require('../../assets/images/slide3-earnings.svg');
+const slide1Image = require('../../../assets/images/slide1-delivery.svg');
+const slide2Image = require('../../../assets/images/slide2-shopping.svg');
+const slide3Image = require('../../../assets/images/slide3-earnings.svg');
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 

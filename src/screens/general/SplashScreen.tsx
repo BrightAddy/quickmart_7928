@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated, Easing, Text, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { useTheme } from '../theme/theme';
+import { RootStackParamList } from '../../navigation/types';
+import { useTheme } from '../../theme/theme';
 
 const { width, height } = Dimensions.get('window');
 

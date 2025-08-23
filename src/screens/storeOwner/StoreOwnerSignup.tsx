@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text, ScrollView, Animated, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CustomerSignup'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'StoreOwnerSignup'>;
 
 function LanguageSelector({ selected, onChange }: { selected: string; onChange: (lang: string) => void }) {
   return (
@@ -29,11 +29,14 @@ function SocialSignup({ onGoogle, onApple }: { onGoogle: () => void; onApple: ()
   );
 }
 
-export default function CustomerSignup({ navigation }: Props) {
+export default function StoreOwnerSignup({ navigation }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [storeType, setStoreType] = useState('');
+  const [businessLicense, setBusinessLicense] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedLang, setSelectedLang] = useState('en');
@@ -72,7 +75,7 @@ export default function CustomerSignup({ navigation }: Props) {
   }, []);
 
   const nextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
       handleSignup();
@@ -86,8 +89,8 @@ export default function CustomerSignup({ navigation }: Props) {
   };
 
   const handleSignup = () => {
-    // Mock success: navigate to customer home
-    navigation.replace('CustomerHome');
+    // Mock success: navigate to store owner home
+    navigation.replace('StoreOwnerHome');
   };
 
   const renderStep1 = () => (
@@ -154,6 +157,41 @@ export default function CustomerSignup({ navigation }: Props) {
   const renderStep3 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
+        {selectedLang === 'fr' ? 'Informations du commerce' : 'Business Information'}
+      </Text>
+      <Text style={styles.stepDescription}>
+        {selectedLang === 'fr' 
+          ? 'Détails sur votre commerce'
+          : 'Details about your business'
+        }
+      </Text>
+      
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Nom du commerce' : 'Store Name'}
+          value={storeName}
+          onChangeText={setStoreName}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Type de commerce' : 'Store Type (Grocery, Pharmacy, etc.)'}
+          value={storeType}
+          onChangeText={setStoreType}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Numéro de licence commerciale' : 'Business License Number'}
+          value={businessLicense}
+          onChangeText={setBusinessLicense}
+          style={styles.input}
+        />
+      </View>
+    </View>
+  );
+
+  const renderStep4 = () => (
+    <View style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>
         {selectedLang === 'fr' ? 'Sécurité' : 'Security'}
       </Text>
       <Text style={styles.stepDescription}>
@@ -187,6 +225,7 @@ export default function CustomerSignup({ navigation }: Props) {
       case 1: return renderStep1();
       case 2: return renderStep2();
       case 3: return renderStep3();
+      case 4: return renderStep4();
       default: return renderStep1();
     }
   };
@@ -195,7 +234,7 @@ export default function CustomerSignup({ navigation }: Props) {
     <View style={styles.container}>
       {/* Background Gradient */}
       <LinearGradient
-        colors={['#E8F5E8', '#F0F8F0', '#F8FCF8']}
+        colors={['#E8F5E8', '#C8E6C9', '#A5D6A7']}
         style={styles.background}
       />
 
@@ -219,25 +258,25 @@ export default function CustomerSignup({ navigation }: Props) {
         <Animated.View style={[styles.logoSection, { opacity: logoAnim }]}>
           <View style={styles.logoContainer}>
             <View style={styles.logo}>
-              <Text style={styles.logoIcon}>🛒</Text>
-              <Text style={styles.logoLeaf}>🌿</Text>
+              <Text style={styles.logoIcon}>🏬</Text>
+              <Text style={styles.logoLeaf}>💼</Text>
             </View>
             <Text style={styles.brandTitle}>QuickMart</Text>
             <Text style={styles.brandSubtitle}>
-              {selectedLang === 'fr' ? 'Rejoignez notre communauté' : 'Join our community'}
+              {selectedLang === 'fr' ? 'Rejoignez notre réseau de commerces' : 'Join our store network'}
             </Text>
           </View>
         </Animated.View>
 
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
-          {[1, 2, 3].map((step) => (
+          {[1, 2, 3, 4].map((step) => (
             <View
               key={step}
               style={[
                 styles.progressDot,
                 {
-                  backgroundColor: step <= currentStep ? '#2E7D32' : '#E0E0E0',
+                  backgroundColor: step <= currentStep ? '#388E3C' : '#E0E0E0',
                   transform: [{ scale: step === currentStep ? 1.2 : 1 }]
                 }
               ]}
@@ -268,7 +307,7 @@ export default function CustomerSignup({ navigation }: Props) {
           
           <TouchableOpacity onPress={nextStep} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>
-              {currentStep === 3 
+              {currentStep === 4 
                 ? (selectedLang === 'fr' ? 'Créer le compte' : 'Create Account')
                 : (selectedLang === 'fr' ? 'Suivant' : 'Next')
               }
@@ -293,7 +332,7 @@ export default function CustomerSignup({ navigation }: Props) {
             {selectedLang === 'fr' ? 'Déjà un compte ? ' : 'Already have an account? '}
             <Text 
               style={styles.loginLink} 
-              onPress={() => navigation.navigate('CustomerLogin')}
+              onPress={() => navigation.navigate('StoreOwnerLogin')}
             >
               {selectedLang === 'fr' ? 'Se connecter' : 'Login'}
             </Text>
@@ -328,7 +367,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 20,
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: 'bold',
   },
   langSelector: {
@@ -342,7 +381,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   langText: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -370,7 +409,7 @@ const styles = StyleSheet.create({
   brandTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#2E7D32',
+    color: '#388E3C',
     marginBottom: 8,
   },
   brandSubtitle: {
@@ -422,7 +461,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 2,
-    borderColor: 'rgba(46, 125, 50, 0.2)',
+    borderColor: 'rgba(56, 142, 60, 0.2)',
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
@@ -442,13 +481,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   primaryButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#388E3C',
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 16,
     flex: 1,
     alignItems: 'center',
-    shadowColor: '#2E7D32',
+    shadowColor: '#388E3C',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -466,10 +505,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#2E7D32',
+    borderColor: '#388E3C',
   },
   secondaryButtonText: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: '600',
     fontSize: 16,
   },
@@ -513,7 +552,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   loginLink: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: 'bold',
   },
 });

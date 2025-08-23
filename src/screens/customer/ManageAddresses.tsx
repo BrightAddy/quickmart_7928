@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Screen } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 
  type Address = {
   id: string;

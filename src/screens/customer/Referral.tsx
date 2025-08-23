@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Screen } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 
 export default function Referral() {
   const { colors } = useTheme();

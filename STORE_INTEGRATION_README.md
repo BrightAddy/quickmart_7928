@@ -10,13 +10,13 @@ This implementation creates a **real-time connection** between the Store Owner's
 - **Real-time Updates**: Changes propagate instantly across all interfaces
 - **Data Consistency**: No more duplicate or conflicting data
 
-### 2. **Store Owner Interface (`Products.tsx`)**
+### 2. **Store Owner Interface (`src/screens/storeOwner/Products.tsx`)**
 - **Product Management**: Add, edit, duplicate, delete products
 - **Status Control**: Toggle products between Active/Inactive
 - **Stock Management**: Monitor inventory levels
 - **Real-time Stats**: Live product statistics and revenue tracking
 
-### 3. **Customer Interface (`StoreBrowse.tsx` & `CustomerHome.tsx`)**
+### 3. **Customer Interface (`src/screens/customer/StoreBrowse.tsx` & `src/screens/customer/CustomerHome.tsx`)**
 - **Live Product Display**: Shows only Active products with stock > 0
 - **Instant Updates**: Product changes appear immediately
 - **Smart Filtering**: Search and category filtering using live data
@@ -90,7 +90,7 @@ getProductsByCategory(category, storeId?) // Filter by category
 ## 🧪 Testing the Integration
 
 ### **Step 1: Add a New Product**
-1. Go to Store Owner → Products
+1. Go to Store Owner → Products (`src/screens/storeOwner/Products.tsx`)
 2. Click "Add Product" button
 3. A sample product will be added automatically
 4. **Result**: Product appears instantly in customer interface
@@ -106,7 +106,7 @@ getProductsByCategory(category, storeId?) // Filter by category
 3. **Result**: Product disappears from customer interface immediately
 
 ### **Step 4: View Customer Interface**
-1. Navigate to Customer → Store Browse
+1. Navigate to Customer → Store Browse (`src/screens/customer/StoreBrowse.tsx`)
 2. **Result**: All changes from store owner are visible in real-time
 
 ## 🎨 UI/UX Features
@@ -155,14 +155,14 @@ getProductsByCategory(category, storeId?) // Filter by category
 ## 📱 How to Use
 
 ### **For Store Owners**
-1. Navigate to Store Owner → Products
+1. Navigate to Store Owner → Products (`src/screens/storeOwner/Products.tsx`)
 2. Use "Add Product" to create new products
 3. Edit existing products with the Edit button
 4. Toggle product status to control customer visibility
 5. Monitor stock levels and sales performance
 
 ### **For Customers**
-1. Navigate to Customer → Store Browse
+1. Navigate to Customer → Store Browse (`src/screens/customer/StoreBrowse.tsx`)
 2. Browse available stores and their products
 3. Use search and category filters to find products
 4. Add products to cart for purchase

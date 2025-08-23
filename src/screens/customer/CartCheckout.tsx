@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet, Text, Image, Modal, TextInput, Pressable } from 'react-native';
-import { Screen, Title } from '../components/UI';
-import { useTheme } from '../theme/theme';
-import { FloatingChatbotButton, ChatbotModal, ImageScanModal } from '../components/UI';
+import { Screen, Title } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
+import { FloatingChatbotButton, ChatbotModal, ImageScanModal } from '../../components/UI';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 
 const initialItems = [
   {

@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert, Animated } from 'react-native';
-import { Screen } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCart } from '../context/CartContext';
-import { useOrders } from '../context/OrderContext';
+import { useCart } from '../../context/CartContext';
+import { useOrders } from '../../context/OrderContext';
 
 interface Address {
   id: string;

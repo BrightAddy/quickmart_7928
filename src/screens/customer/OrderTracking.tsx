@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Animated, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { Screen } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useOrders } from '../context/OrderContext';
+import { useOrders } from '../../context/OrderContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

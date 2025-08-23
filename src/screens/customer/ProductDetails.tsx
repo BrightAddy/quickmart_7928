@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Screen } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCart } from '../context/CartContext';
-import { Product } from '../context/ProductsContext';
+import { useCart } from '../../context/CartContext';
+import { Product } from '../../context/ProductsContext';
 
 export default function ProductDetails({ route, navigation }: any) {
   const { colors } = useTheme();

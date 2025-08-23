@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Chatbot } from '../components/Chatbot';
-import { useChatbot } from '../context/ChatbotContext';
+import { Chatbot } from '../../components/Chatbot';
+import { useChatbot } from '../../context/ChatbotContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

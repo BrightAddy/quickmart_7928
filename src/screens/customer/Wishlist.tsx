@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { Screen, Title, Body } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen, Title, Body } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 
 type WishItem = { id: string; name: string; price: string; inStock: boolean };
 

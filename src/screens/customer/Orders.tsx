@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Animated, Image, TextInput, ScrollView } from 'react-native';
-import { Screen, FloatingChatbotButton, ChatbotModal, GhanaianLoader } from '../components/UI';
-import { useTheme } from '../theme/theme';
-import { useOrders } from '../context/OrderContext';
+import { Screen, FloatingChatbotButton, ChatbotModal, GhanaianLoader } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
+import { useOrders } from '../../context/OrderContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const getStatusColor = (status: string) => {
@@ -164,7 +164,7 @@ export default function Orders({ navigation }: any) {
               <Image 
                 source={{ uri: orderItem.imageUrl }} 
                 style={styles.itemImage}
-                defaultSource={require('../../assets/images/no-image.jpg')}
+                defaultSource={require('../../../assets/images/no-image.jpg')}
               />
               <View style={styles.itemDetails}>
                 <Text style={[styles.itemName, { color: colors.onBackground }]} numberOfLines={1}>

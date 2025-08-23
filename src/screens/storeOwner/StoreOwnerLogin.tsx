@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text, Modal, Pressable, Animated, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { RootStackParamList } from '../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CustomerLogin'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'StoreOwnerLogin'>;
 
 function LanguageSelector({ selected, onChange }: { selected: string; onChange: (lang: string) => void }) {
   return (
-    <TouchableOpacity style={styles.langSelector} onPress={() => onChange(selected === 'en' ? 'tw' : 'en')}>
-      <Text style={styles.langText}>{selected === 'en' ? 'EN' : 'TW'}</Text>
+    <TouchableOpacity style={styles.langSelector} onPress={() => onChange(selected === 'en' ? 'fr' : 'en')}>
+      <Text style={styles.langText}>{selected === 'en' ? 'EN' : 'FR'}</Text>
     </TouchableOpacity>
   );
 }
@@ -29,7 +29,7 @@ function SocialLogin({ onGoogle, onApple }: { onGoogle: () => void; onApple: () 
   );
 }
 
-export default function CustomerLogin({ navigation }: Props) {
+export default function StoreOwnerLogin({ navigation }: Props) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showForgot, setShowForgot] = useState(false);
@@ -38,6 +38,7 @@ export default function CustomerLogin({ navigation }: Props) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(60)).current;
   const logoAnim = useRef(new Animated.Value(0)).current;
+  const floatingAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -58,18 +59,39 @@ export default function CustomerLogin({ navigation }: Props) {
         useNativeDriver: true,
       })
     ]).start();
+
+    // Floating animation for store icon
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatingAnim, {
+          toValue: 1,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatingAnim, {
+          toValue: 0,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
   }, []);
 
   const handleLogin = () => {
-    // Mock success: navigate to customer home
-    navigation.replace('CustomerHome');
+    // Mock success: navigate to store owner home
+    navigation.replace('StoreOwnerHome');
   };
+
+  const floatingTransform = floatingAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -12],
+  });
 
   return (
     <View style={styles.container}>
       {/* Background Gradient */}
       <LinearGradient
-        colors={['#E8F5E8', '#F0F8F0', '#F8FCF8']}
+        colors={['#E8F5E8', '#C8E6C9', '#A5D6A7']}
         style={styles.background}
       />
 
@@ -92,13 +114,18 @@ export default function CustomerLogin({ navigation }: Props) {
         {/* Logo Section */}
         <Animated.View style={[styles.logoSection, { opacity: logoAnim }]}>
           <View style={styles.logoContainer}>
-            <View style={styles.logo}>
-              <Text style={styles.logoIcon}>🛒</Text>
-              <Text style={styles.logoLeaf}>🌿</Text>
-            </View>
+            <Animated.View style={{ transform: [{ translateY: floatingTransform }] }}>
+              <View style={styles.logo}>
+                <Text style={styles.logoIcon}>🏬</Text>
+                <Text style={styles.logoLeaf}>💼</Text>
+              </View>
+            </Animated.View>
             <Text style={styles.brandTitle}>QuickMart</Text>
             <Text style={styles.brandSubtitle}>
-              {selectedLang === 'tw' ? 'Wo nneɛma a wo pɛ, fa wo ho yie' : 'Your favorite groceries, delivered fast'}
+              {selectedLang === 'fr' 
+                ? 'Gérez votre commerce en ligne' 
+                : 'Manage your business online'
+              }
             </Text>
           </View>
         </Animated.View>
@@ -106,19 +133,19 @@ export default function CustomerLogin({ navigation }: Props) {
         {/* Login Form */}
         <View style={styles.formContainer}>
           <Text style={styles.welcomeText}>
-            {selectedLang === 'tw' ? 'Akwaaba bio!' : 'Welcome Back!'}
+            {selectedLang === 'fr' ? 'Bon retour, Commerçant !' : 'Welcome Back, Store Owner!'}
           </Text>
           
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder={selectedLang === 'tw' ? 'Telefon anaa Email' : 'Phone or Email'}
+              placeholder={selectedLang === 'fr' ? 'Téléphone ou Email' : 'Phone or Email'}
               value={identifier}
               onChangeText={setIdentifier}
               style={styles.input}
               autoCapitalize="none"
             />
             <TextInput
-              placeholder={selectedLang === 'tw' ? 'Password' : 'Password'}
+              placeholder={selectedLang === 'fr' ? 'Mot de passe' : 'Password'}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -127,13 +154,13 @@ export default function CustomerLogin({ navigation }: Props) {
             
             <TouchableOpacity onPress={() => setShowForgot(true)} style={styles.forgotLink}>
               <Text style={styles.forgotText}>
-                {selectedLang === 'tw' ? 'Wo werɛ password?' : 'Forgot password?'}
+                {selectedLang === 'fr' ? 'Mot de passe oublié ?' : 'Forgot password?'}
               </Text>
             </TouchableOpacity>
             
             <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
               <Text style={styles.loginButtonText}>
-                {selectedLang === 'tw' ? 'Bra mu' : 'Login'}
+                {selectedLang === 'fr' ? 'Se connecter' : 'Login'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -145,12 +172,12 @@ export default function CustomerLogin({ navigation }: Props) {
 
           <View style={styles.signupSection}>
             <Text style={styles.signupText}>
-              {selectedLang === 'tw' ? 'Odɔfoɔ foforɔ? ' : 'New user? '}
+              {selectedLang === 'fr' ? 'Nouveau commerçant ? ' : 'New store owner? '}
               <Text 
                 style={styles.signupLink} 
-                onPress={() => navigation.navigate('CustomerSignup')}
+                onPress={() => navigation.navigate('StoreOwnerSignup')}
               >
-                {selectedLang === 'tw' ? 'Bɛ wo ho' : 'Sign Up'}
+                {selectedLang === 'fr' ? 'S\'inscrire' : 'Sign Up'}
               </Text>
             </Text>
           </View>
@@ -162,11 +189,11 @@ export default function CustomerLogin({ navigation }: Props) {
         <Pressable style={styles.modalBg} onPress={() => setShowForgot(false)}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>
-              {selectedLang === 'tw' ? 'San password bio' : 'Reset Password'}
+              {selectedLang === 'fr' ? 'Réinitialiser le mot de passe' : 'Reset Password'}
             </Text>
             <Text style={styles.modalDescription}>
-              {selectedLang === 'tw' 
-                ? 'Yɛɛ wo code a ɛyɛ verification de wo san wo password.'
+              {selectedLang === 'fr' 
+                ? 'Nous vous enverrons un code de vérification pour réinitialiser votre mot de passe.'
                 : 'We\'ll send you a verification code to reset your password.'
               }
             </Text>
@@ -178,7 +205,7 @@ export default function CustomerLogin({ navigation }: Props) {
               }}
             >
               <Text style={styles.modalButtonText}>
-                {selectedLang === 'tw' ? 'Fa code no' : 'Send Reset Code'}
+                {selectedLang === 'fr' ? 'Envoyer le code' : 'Send Reset Code'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -212,7 +239,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 20,
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: 'bold',
   },
   langSelector: {
@@ -226,7 +253,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   langText: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -254,7 +281,7 @@ const styles = StyleSheet.create({
   brandTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#2E7D32',
+    color: '#388E3C',
     marginBottom: 8,
   },
   brandSubtitle: {
@@ -280,7 +307,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 2,
-    borderColor: 'rgba(46, 125, 50, 0.2)',
+    borderColor: 'rgba(56, 142, 60, 0.2)',
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
@@ -297,17 +324,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   forgotText: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: '600',
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#388E3C',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#2E7D32',
+    shadowColor: '#388E3C',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -349,7 +376,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   signupLink: {
-    color: '#2E7D32',
+    color: '#388E3C',
     fontWeight: 'bold',
   },
   modalBg: {
@@ -383,7 +410,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   modalButton: {
-    backgroundColor: '#2E7D32',
+    backgroundColor: '#388E3C',
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 16,

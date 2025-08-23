@@ -10,9 +10,9 @@ import {
   Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { useTheme } from '../theme/theme';
-import { Screen, Title, Body, KenteAccent, AdinkraLoader } from '../components/UI';
+import { RootStackParamList } from '../../navigation/types';
+import { useTheme } from '../../theme/theme';
+import { Screen, Title, Body, KenteAccent, AdinkraLoader } from '../../components/UI';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'UserPreferences'>;
 

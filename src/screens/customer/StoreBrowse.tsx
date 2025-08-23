@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet, Image, TextInput, Text, ScrollView, ActivityIndicator } from 'react-native';
-import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal, ImageUploadButton, ImageScanModal, ImageRecognitionResult, GhanaianLoader, KenteAccent } from '../components/UI';
-import { useTheme } from '../theme/theme';
-import { useCart } from '../context/CartContext';
-import { useProducts } from '../context/ProductsContext';
+import { Screen, Title, Body, FloatingChatbotButton, ChatbotModal, ImageUploadButton, ImageScanModal, ImageRecognitionResult, GhanaianLoader, KenteAccent } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
+import { useCart } from '../../context/CartContext';
+import { useProducts } from '../../context/ProductsContext';
 
 const defaultStoreData = {
   name: 'Fresh Market Accra',

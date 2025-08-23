@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Animated, ScrollView, Dimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { Screen, Title, Body } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { RootStackParamList } from '../../navigation/types';
+import { Screen, Title, Body } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');

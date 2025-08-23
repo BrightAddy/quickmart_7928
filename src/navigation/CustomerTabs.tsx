@@ -1,9 +1,9 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import CustomerHome from '../screens/CustomerHome';
-import CartCheckout from '../screens/CartCheckout';
-import Orders from '../screens/Orders';
-import Profile from '../screens/Profile';
+import CustomerHome from '../screens/customer/CustomerHome';
+import CartCheckout from '../screens/customer/CartCheckout';
+import Orders from '../screens/customer/Orders';
+import Profile from '../screens/customer/Profile';
 import { useTheme } from '../theme/theme';
 import { Text } from 'react-native';
 

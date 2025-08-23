@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
-import { Screen, FloatingChatbotButton, ChatbotModal, KenteAccent } from '../components/UI';
-import { useTheme } from '../theme/theme';
+import { Screen, FloatingChatbotButton, ChatbotModal, KenteAccent } from '../../components/UI';
+import { useTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface UserProfile {
