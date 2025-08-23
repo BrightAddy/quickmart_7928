@@ -11,24 +11,24 @@ const specialDeals = [
     id: 1,
     name: 'Fresh Organic Carrots',
     image: 'https://images.pexels.com/photos/143133/pexels-photo-143133.jpeg?auto=compress&cs=tinysrgb&w=400',
-    price: 'Rp 18,000',
-    originalPrice: 'Rp 21,000',
+    price: '₵ 18.00',
+    originalPrice: '₵ 21.00',
     discount: '15%',
   },
   {
     id: 2,
     name: 'Ripe Red Tomatoes',
     image: 'https://images.pexels.com/photos/1327838/pexels-photo-1327838.jpeg?auto=compress&cs=tinysrgb&w=400',
-    price: 'Rp 15,000',
-    originalPrice: 'Rp 20,000',
+    price: '₵ 15.00',
+    originalPrice: '₵ 20.00',
     discount: '25%',
   },
   {
     id: 3,
     name: 'Fresh Green Spinach',
     image: 'https://images.pexels.com/photos/1199562/pexels-photo-1199562.jpeg?auto=compress&cs=tinysrgb&w=400',
-    price: 'Rp 12,000',
-    originalPrice: 'Rp 18,000',
+    price: '₵ 12.00',
+    originalPrice: '₵ 18.00',
     discount: '33%',
   },
 ];
@@ -84,20 +84,22 @@ export default function CustomerHome({ navigation }: any) {
         colors={['#51bc7d', '#4cad73']}
         style={styles.headerBackground}
       >
-        {/* App Logo */}
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Kangsayur</Text>
-        </View>
+        {/* Header Top Row - Welcome and Icons */}
+        <View style={styles.headerTopRow}>
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeText}>Welcome back,</Text>
+            <Text style={styles.userName}>Kwame</Text>
+          </View>
 
-        {/* Header Icons */}
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.headerIconButton}>
-            <Ionicons name="notifications" size={24} color="#fff" />
-            <View style={styles.notificationBadge} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIconButton}>
-            <Ionicons name="mail" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.headerIconButton}>
+              <Ionicons name="notifications" size={24} color="#fff" />
+              <View style={styles.notificationBadge} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerIconButton}>
+              <Ionicons name="mail" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -118,10 +120,10 @@ export default function CustomerHome({ navigation }: any) {
         <View style={styles.locationContainer}>
           <View style={styles.locationLeft}>
             <Ionicons name="location" size={16} color="#fff" />
-            <Text style={styles.sentToText}>Sent to</Text>
+            <Text style={styles.sentToText}>Delivering to</Text>
           </View>
           <View style={styles.locationRight}>
-            <Text style={styles.addressText}>Pamulang Barat Residence No.5, RT 05/ ...</Text>
+            <Text style={styles.addressText}>East Legon, Accra, Ghana</Text>
             <Ionicons name="chevron-down" size={20} color="#fff" />
           </View>
         </View>
@@ -188,7 +190,11 @@ export default function CustomerHome({ navigation }: any) {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Special Deal</Text>
-            <TouchableOpacity style={styles.seeMoreButton} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.seeMoreButton} 
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('Deals')}
+            >
               <Text style={styles.seeMoreText}>See more</Text>
               <Ionicons name="chevron-forward" size={16} color="#0eb177" />
             </TouchableOpacity>
@@ -239,6 +245,11 @@ export default function CustomerHome({ navigation }: any) {
         <View style={{ height: 100 }} />
       </ScrollView>
 
+      {/* Floating Chatbot */}
+      <TouchableOpacity style={styles.floatingChatbot} activeOpacity={0.8}>
+        <Ionicons name="chatbubble-ellipses" size={24} color="#fff" />
+      </TouchableOpacity>
+
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]} activeOpacity={0.8}>
@@ -272,21 +283,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  logoContainer: {
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: '700',
+  welcomeContainer: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 16,
     color: '#fff',
-    fontFamily: 'Montserrat Alternates',
+    fontWeight: '400',
+    opacity: 0.9,
+    marginBottom: 4,
+  },
+  userName: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: '700',
   },
   headerIcons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     gap: 16,
-    marginBottom: 20,
   },
   headerIconButton: {
     width: 40,
@@ -585,6 +605,22 @@ const styles = StyleSheet.create({
     height: 16,
     backgroundColor: '#fff',
     borderRadius: 1,
+  },
+  floatingChatbot: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#51bc7d',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   bottomNavigation: {
     position: 'absolute',
