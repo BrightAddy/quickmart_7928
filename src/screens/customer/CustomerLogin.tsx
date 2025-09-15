@@ -61,8 +61,8 @@ export default function CustomerLogin({ navigation }: Props) {
   }, []);
 
   const handleLogin = () => {
-    // Mock success: navigate to customer home
-    navigation.replace('CustomerHome');
+    // Mock success: navigate to customer tabs
+    navigation.replace('CustomerTabs');
   };
 
   return (

@@ -253,24 +253,7 @@ export default function CustomerHome({ navigation }: any) {
       <Chatbot isVisible={isOpen} onClose={toggleChat} />
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNavigation}>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} activeOpacity={0.8}>
-          <Ionicons name="home" size={24} color="#007AFF" />
-          <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="cube" size={24} color="#8B4513" />
-          <Text style={styles.navText}>Orders</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="cart" size={24} color="#333" />
-          <Text style={styles.navText}>Cart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="person" size={24} color="#333" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Removed the custom bottom navigation bar here */}
     </SafeAreaView>
   );
 }
