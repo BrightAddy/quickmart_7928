@@ -34,6 +34,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
     cart,
     getCartTotal,
     switchLanguage,
+    isTyping,
   } = useChatbot();
 
   const [inputText, setInputText] = useState('');
@@ -413,6 +414,16 @@ export const Chatbot: React.FC<ChatbotProps> = ({ isVisible, onClose }) => {
               {renderMessage(message)}
             </View>
           ))}
+          {isTyping && (
+            <View style={styles.typingIndicator}>
+              <View style={styles.typingDots}>
+                <View style={[styles.typingDot, styles.typingDot1]} />
+                <View style={[styles.typingDot, styles.typingDot2]} />
+                <View style={[styles.typingDot, styles.typingDot3]} />
+              </View>
+              <Text style={styles.typingText}>Bot is typing...</Text>
+            </View>
+          )}
         </ScrollView>
 
         {/* Cart Summary */}
@@ -798,5 +809,41 @@ const styles = StyleSheet.create({
     backgroundColor: '#3742fa',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    marginVertical: 8,
+  },
+  typingDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  typingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#999',
+    marginHorizontal: 2,
+  },
+  typingDot1: {
+    animationDelay: '0s',
+  },
+  typingDot2: {
+    animationDelay: '0.2s',
+  },
+  typingDot3: {
+    animationDelay: '0.4s',
+  },
+  typingText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
   },
 });

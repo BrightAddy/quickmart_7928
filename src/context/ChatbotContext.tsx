@@ -33,6 +33,7 @@ interface ChatbotContextType {
   currentLanguage: Language;
   isOpen: boolean;
   cart: CartItem[];
+  isTyping: boolean;
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
   sendMessage: (text: string) => void;
   toggleChat: () => void;
@@ -249,6 +250,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [currentLanguage, setCurrentLanguage] = useState<Language>('english');
   const [isOpen, setIsOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const newMessage: ChatMessage = {
@@ -267,8 +269,12 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
       type: 'text',
     });
 
+    // Show typing indicator
+    setIsTyping(true);
+
     // Simulate AI response delay
     setTimeout(() => {
+      setIsTyping(false);
       processUserMessage(text);
     }, 1000);
   }, [addMessage]);
@@ -321,8 +327,108 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     }
 
+    // Cart management
+    if (lowerText.includes('cart') || lowerText.includes('basket')) {
+      if (lowerText.includes('view') || lowerText.includes('show') || lowerText.includes('see')) {
+        if (cart.length === 0) {
+          addMessage({
+            text: translations[currentLanguage].cartEmpty,
+            isUser: false,
+            type: 'text',
+          });
+        } else {
+          addMessage({
+            text: `Your cart has ${cart.length} items. Total: ₵${getCartTotal().toFixed(2)}`,
+            isUser: false,
+            type: 'cart_update',
+          });
+        }
+        return;
+      }
+      if (lowerText.includes('empty') || lowerText.includes('clear')) {
+        setCart([]);
+        addMessage({
+          text: "Cart cleared! What would you like to add?",
+          isUser: false,
+          type: 'text',
+        });
+        return;
+      }
+    }
+
+    // Checkout requests
+    if (lowerText.includes('checkout') || lowerText.includes('pay') || lowerText.includes('order')) {
+      if (cart.length === 0) {
+        addMessage({
+          text: "Your cart is empty! Let me help you find some products first.",
+          isUser: false,
+          type: 'text',
+        });
+      } else {
+        addMessage({
+          text: `Ready to checkout! Your total is ₵${getCartTotal().toFixed(2)}. I'll take you to the payment screen.`,
+          isUser: false,
+          type: 'text',
+        });
+      }
+      return;
+    }
+
+    // Product search by name
+    const searchTerms = lowerText.split(' ').filter(word => word.length > 2);
+    const matchingProducts = sampleProducts.filter(product => 
+      searchTerms.some(term => 
+        product.name.toLowerCase().includes(term) || 
+        product.category.toLowerCase().includes(term)
+      )
+    );
+
+    if (matchingProducts.length > 0) {
+      addMessage({
+        text: `I found ${matchingProducts.length} products matching "${text}":`,
+        isUser: false,
+        type: 'product_suggestion',
+        data: matchingProducts.slice(0, 4),
+      });
+      return;
+    }
+
+    // Specific product requests
+    if (lowerText.includes('vegetables') || lowerText.includes('veggies') || lowerText.includes('carrot') || lowerText.includes('tomato') || lowerText.includes('spinach')) {
+      const vegetables = sampleProducts.filter(p => p.category === 'Vegetables');
+      addMessage({
+        text: "Here are some fresh vegetables:",
+        isUser: false,
+        type: 'product_suggestion',
+        data: vegetables,
+      });
+      return;
+    }
+
+    if (lowerText.includes('fruit') || lowerText.includes('banana') || lowerText.includes('apple')) {
+      const fruits = sampleProducts.filter(p => p.category === 'Fruits');
+      addMessage({
+        text: "Here are some fresh fruits:",
+        isUser: false,
+        type: 'product_suggestion',
+        data: fruits,
+      });
+      return;
+    }
+
+    if (lowerText.includes('milk') || lowerText.includes('dairy') || lowerText.includes('bread')) {
+      const dairy = sampleProducts.filter(p => p.category === 'Dairy' || p.category === 'Bakery');
+      addMessage({
+        text: "Here are some dairy and bakery items:",
+        isUser: false,
+        type: 'product_suggestion',
+        data: dairy,
+      });
+      return;
+    }
+
     // Shopping requests
-    if (lowerText.includes('shop') || lowerText.includes('buy') || lowerText.includes('add') || lowerText.includes('cart')) {
+    if (lowerText.includes('shop') || lowerText.includes('buy') || lowerText.includes('add') || lowerText.includes('need') || lowerText.includes('want')) {
       addMessage({
         text: translations[currentLanguage].shopForMe,
         isUser: false,
@@ -343,7 +449,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     // Best deals request
-    if (lowerText.includes('deal') || lowerText.includes('offer') || lowerText.includes('discount')) {
+    if (lowerText.includes('deal') || lowerText.includes('offer') || lowerText.includes('discount') || lowerText.includes('sale')) {
       const deals = getPersonalizedDeals();
       addMessage({
         text: translations[currentLanguage].bestDeals,
@@ -354,13 +460,33 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return;
     }
 
-    // Generic response
+    // Help requests
+    if (lowerText.includes('help') || lowerText.includes('what can you do') || lowerText.includes('commands')) {
+      addMessage({
+        text: "I can help you:\n• Find products by name or category\n• Add items to your cart\n• Show deals and discounts\n• Check your cart\n• Process checkout\n\nJust tell me what you're looking for!",
+        isUser: false,
+        type: 'text',
+      });
+      return;
+    }
+
+    // Greetings
+    if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey')) {
+      addMessage({
+        text: "Hello! I'm your shopping assistant. What can I help you find today?",
+        isUser: false,
+        type: 'text',
+      });
+      return;
+    }
+
+    // Generic response with suggestions
     addMessage({
-      text: translations[currentLanguage].shopForMe,
+      text: "I'm here to help you shop! You can ask me to:\n• Find specific products\n• Show deals\n• Check your cart\n• Help with checkout\n\nWhat would you like to do?",
       isUser: false,
       type: 'text',
     });
-  }, [currentLanguage, addMessage, switchLanguage]);
+  }, [currentLanguage, addMessage, switchLanguage, cart, getCartTotal, getPersonalizedDeals]);
 
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
@@ -428,6 +554,7 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     currentLanguage,
     isOpen,
     cart,
+    isTyping,
     addMessage,
     sendMessage,
     toggleChat,
