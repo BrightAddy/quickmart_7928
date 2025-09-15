@@ -143,10 +143,11 @@ function ProductCard({ product, onPress }: any) {
   return (
     <TouchableOpacity style={styles.productCard} onPress={onPress} activeOpacity={0.9}>
       <KenteAccent style={{ top: -10, right: -10 }} />
-      <Image source={{ uri: product.imageUrl }} style={styles.productImage} />
-      <Text style={styles.productName}>{product.name}</Text>
+      <Image source={{ uri: (product.imageUrl || product.image) }} style={styles.productImage} />
+      <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
       <Text style={styles.productPrice}>GHS {product.price.toFixed(2)}</Text>
       <Text style={styles.productMeta}>{product.rating} ★ {product.inStock ? 'In Stock' : 'Out of Stock'}</Text>
+      <View style={{ flexGrow: 1 }} />
 
       {qty > 0 ? (
         <View style={styles.stepperBar}>
@@ -162,7 +163,7 @@ function ProductCard({ product, onPress }: any) {
         <TouchableOpacity
           style={[styles.addBtn, !canAdd && { backgroundColor: '#ccc' }]}
           disabled={!canAdd}
-          onPress={() => addItem({ id: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl, category: product.category, unitLabel: '1 KG' }, 1)}
+          onPress={() => addItem({ id: product.id, name: product.name, price: product.price, imageUrl: (product.imageUrl || product.image), category: product.category, unitLabel: '1 KG' }, 1)}
         >
           <Text style={{ color: 'white', fontWeight: 'bold' }}>Add to Cart</Text>
         </TouchableOpacity>
@@ -247,7 +248,9 @@ export default function StoreBrowse({ navigation, route }: any) {
         columnWrapperStyle={{ gap: 12, paddingHorizontal: 8 }}
         contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         renderItem={({ item }) => (
-          <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { product: item })} />
+          <View style={styles.cardContainer}>
+            <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { product: item })} />
+          </View>
         )}
         ListEmptyComponent={loading ? (
           <View style={{ alignItems: 'center', marginTop: 40 }}>
@@ -292,9 +295,10 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#2E7D32' },
   chipText: { color: '#222', fontWeight: 'bold' },
   chipTextActive: { color: 'white' },
-  productCard: { backgroundColor: 'white', borderRadius: 16, padding: 12, flex: 1, alignItems: 'center', marginBottom: 8, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  productImage: { width: 90, height: 90, borderRadius: 12, backgroundColor: '#fafafa' },
-  productName: { fontWeight: 'bold', fontSize: 15, color: '#222', marginTop: 8 },
+  cardContainer: { flex: 1, maxWidth: '48%' },
+  productCard: { backgroundColor: 'white', borderRadius: 16, padding: 12, flex: 1, alignItems: 'stretch', marginBottom: 8, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, minHeight: 240 },
+  productImage: { width: 90, height: 90, borderRadius: 12, backgroundColor: '#fafafa', alignSelf: 'center' },
+  productName: { fontWeight: 'bold', fontSize: 15, color: '#222', marginTop: 8, minHeight: 38 },
   productPrice: { color: '#2E7D32', fontWeight: 'bold', marginTop: 2 },
   productMeta: { fontSize: 13, color: '#888', marginTop: 2 },
   addBtn: { backgroundColor: '#2E7D32', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8, marginTop: 8 },
