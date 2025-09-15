@@ -20,7 +20,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   HelpCenter: undefined;
   Wishlist: undefined;
-  Search: undefined;
+  Search: { initialQuery?: string } | undefined;
   Deals: undefined;
   LoyaltyPoints: undefined;
   Referral: undefined;

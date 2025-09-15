@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Chatbot } from '../../components/Chatbot';
@@ -62,11 +62,29 @@ const promotionalBanners = [
   },
 ];
 
+// New vertical nearby stores (diverse)
+const nearbyStoresData = [
+  { id: 'ns1', name: 'Sunrise Supermarket', type: 'Supermarket', rating: 4.6, eta: '10-20 min', distance: '0.7 km', image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' },
+  { id: 'ns2', name: 'MedCare Pharmacy', type: 'Pharmacy', rating: 4.8, eta: '15-25 min', distance: '1.1 km', image: 'https://images.pexels.com/photos/3985167/pexels-photo-3985167.jpeg?auto=compress&fit=crop&w=400&q=80' },
+  { id: 'ns3', name: 'City Fresh Mart', type: 'Grocery', rating: 4.5, eta: '12-22 min', distance: '1.4 km', image: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' },
+  { id: 'ns4', name: 'StyleHub Boutique', type: 'Clothing', rating: 4.3, eta: '20-30 min', distance: '2.3 km', image: 'https://images.pexels.com/photos/2983464/pexels-photo-2983464.jpeg?auto=compress&fit=crop&w=400&q=80' },
+  { id: 'ns5', name: 'GreenLeaf Organics', type: 'Organic Store', rating: 4.7, eta: '18-28 min', distance: '1.9 km', image: 'https://images.pexels.com/photos/586744/pexels-photo-586744.jpeg?auto=compress&fit=crop&w=400&q=80' },
+  { id: 'ns6', name: 'Tech n’ Phones', type: 'Electronics', rating: 4.2, eta: '25-35 min', distance: '3.1 km', image: 'https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&fit=crop&w=400&q=80' },
+];
+
 export default function CustomerHome({ navigation }: any) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState(new Set());
   const { toggleChat, isOpen } = useChatbot();
+
+  // Animations for vertical nearby stores
+  const nearbyAnims = nearbyStoresData.map(() => new Animated.Value(0));
+
+  React.useEffect(() => {
+    const animations = nearbyAnims.map((a, idx) => Animated.timing(a, { toValue: 1, duration: 450, delay: 80 * idx, useNativeDriver: true }));
+    Animated.stagger(80, animations).start();
+  }, []);
 
   const toggleFavorite = (id: number) => {
     setFavorites(prev => {
@@ -98,10 +116,10 @@ export default function CustomerHome({ navigation }: any) {
           </View>
           {/* Right: Gear and Bell icons */}
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.iconCircle}>
+            <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('UserPreferences')}>
               <Ionicons name="settings-sharp" size={22} color="#555" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconCircle}>
+            <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('Notifications')}>
               <Ionicons name="notifications" size={22} color="#555" />
               <View style={styles.redDot} />
             </TouchableOpacity>
@@ -113,13 +131,16 @@ export default function CustomerHome({ navigation }: any) {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBarPill}>
-            <Ionicons name="search" size={20} color="#bdbdbd" />
+            <TouchableOpacity onPress={() => navigation.navigate('Search', { initialQuery: searchQuery })}>
+              <Ionicons name="search" size={20} color="#bdbdbd" />
+            </TouchableOpacity>
             <TextInput
               style={styles.searchInput}
               placeholder="Search for groceries, stores…"
               placeholderTextColor="#bdbdbd"
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onSubmitEditing={() => navigation.navigate('Search', { initialQuery: searchQuery })}
             />
           </View>
         </View>
@@ -136,8 +157,8 @@ export default function CustomerHome({ navigation }: any) {
           {/* Right: Banana image */}
           <Image source={bananaImg} style={styles.promoBannerImage} resizeMode="cover" />
         </View>
-        {/* Nearby Stores Section Title */}
-        <Text style={styles.sectionTitleBlack}>Nearby Stores</Text>
+        {/* Featured Stores (horizontal) */}
+        <Text style={styles.sectionTitleBlack}>Featured for You</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storesScroll}>
           <View style={styles.storesRow}>
             {/* Store Card 1 */}
@@ -211,6 +232,35 @@ export default function CustomerHome({ navigation }: any) {
                   </TouchableOpacity>
                 </View>
         </ScrollView>
+
+        {/* Nearby Stores (Vertical) */}
+        <Text style={styles.sectionTitleBlack}>Nearby Stores</Text>
+        <View style={{ paddingHorizontal: 20, gap: 12, marginBottom: 24 }}>
+          {nearbyStoresData.map((s, index) => (
+            <Animated.View
+              key={s.id}
+              style={{
+                opacity: nearbyAnims[index],
+                transform: [{ translateY: nearbyAnims[index].interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }],
+              }}
+            >
+              <TouchableOpacity
+                style={styles.nearbyCard}
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: s.id, name: s.name, rating: s.rating, deliveryTime: s.eta, distance: s.distance, image: s.image } })}
+              >
+                <Image source={{ uri: s.image }} style={styles.nearbyImage} />
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={styles.nearbyName}>{s.name}</Text>
+                    <View style={styles.typeChip}><Text style={styles.typeChipText}>{s.type}</Text></View>
+                  </View>
+                  <Text style={styles.nearbyMeta}>{s.rating} ★ • {s.eta} • {s.distance}</Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </View>
 
         {/* Quick Reorder Section Title */}
         <Text style={styles.sectionTitleBlack}>Quick Reorder</Text>
@@ -808,6 +858,46 @@ const styles = StyleSheet.create({
   storeTagText: {
     color: '#1CA77C',
     fontSize: 11,
+    fontWeight: '600',
+  },
+  nearbyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  nearbyImage: {
+    width: 68,
+    height: 68,
+    borderRadius: 12,
+    backgroundColor: '#eee',
+  },
+  nearbyName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 4,
+  },
+  nearbyMeta: {
+    fontSize: 12,
+    color: '#7D8B97',
+  },
+  typeChip: {
+    backgroundColor: '#F2F3F5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  typeChipText: {
+    fontSize: 11,
+    color: '#444',
     fontWeight: '600',
   },
   quickReorderScroll: {

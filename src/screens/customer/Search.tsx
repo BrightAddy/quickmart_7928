@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, TextInput, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Screen, Title, Body } from '../../components/UI';
 import { useTheme } from '../../theme/theme';
+import { useProducts } from '../../context/ProductsContext';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/types';
 
 const trendingQueries = ['Rice', 'Plantain', 'Palm Oil', 'Tomatoes', 'Yam'];
 const recentQueriesInitial = ['Fan Milk', 'Titus Sardine'];
 
-export default function Search() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Search'>;
+
+export default function Search({ route }: Props) {
   const { colors } = useTheme();
-  const [query, setQuery] = useState('');
+  const { searchProducts } = useProducts();
+  const [query, setQuery] = useState(route?.params?.initialQuery || '');
   const [recentQueries, setRecentQueries] = useState<string[]>(recentQueriesInitial);
 
-  const results = query
-    ? [
-        { id: '1', name: `${query} (5kg)`, price: 'GHS 25.00' },
-        { id: '2', name: `${query} Premium`, price: 'GHS 32.50' },
-        { id: '3', name: `${query} Budget`, price: 'GHS 18.90' },
-      ]
-    : [];
+  const results = useMemo(() => {
+    if (!query.trim()) return [] as any[];
+    // Global search across all stores
+    return searchProducts(query.trim());
+  }, [query, searchProducts]);
+
+  useEffect(() => {
+    if (route?.params?.initialQuery) {
+      setQuery(route.params.initialQuery);
+    }
+  }, [route?.params?.initialQuery]);
 
   const onSubmit = () => {
     if (!query.trim()) return;
@@ -69,12 +79,12 @@ export default function Search() {
 
         {!!query && (
           <FlatList
-            data={results}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
+            data={results as any}
+            keyExtractor={(item: any) => String(item.id)}
+            renderItem={({ item }: any) => (
               <View style={[styles.resultItem, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.resultTitle, { color: colors.onSurface }]}>{item.name}</Text>
-                <Text style={{ color: colors.primary, fontWeight: '700' }}>{item.price}</Text>
+                <Text style={{ color: colors.primary, fontWeight: '700' }}>GHS {Number(item.price).toFixed(2)}</Text>
               </View>
             )}
             ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
