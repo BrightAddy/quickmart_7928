@@ -106,43 +106,30 @@ export default function CustomerHome({ navigation }: any) {
               <View style={styles.redDot} />
             </TouchableOpacity>
           </View>
+          </View>
         </View>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBarPill}>
-          <Ionicons name="search" size={20} color="#bdbdbd" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for groceries, stores…"
-            placeholderTextColor="#bdbdbd"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-      </View>
-
-      {/* Location Section */}
-      <View style={styles.locationContainer}>
-        <View style={styles.locationLeft}>
-          <Ionicons name="location" size={16} color="#fff" />
-          <Text style={styles.sentToText}>Delivering to</Text>
-        </View>
-        <View style={styles.locationRight}>
-          <Text style={styles.addressText}>East Legon, Accra, Ghana</Text>
-          <Ionicons name="chevron-down" size={20} color="#fff" />
-        </View>
-      </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBarPill}>
+            <Ionicons name="search" size={20} color="#bdbdbd" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search for groceries, stores…"
+              placeholderTextColor="#bdbdbd"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
         {/* Promotional Banner */}
         <View style={styles.promoBannerCard}>
           {/* Left: Text and badge */}
           <View style={styles.promoBannerLeft}>
             <View style={styles.promoBadge}>
               <Text style={styles.promoBadgeText}>20% OFF</Text>
-            </View>
+          </View>
             <Text style={styles.promoBannerTitle}>Fresh Yam & Plantain</Text>
             <Text style={styles.promoBannerSubtitle}>Get 20% off on fresh produce</Text>
           </View>
@@ -151,28 +138,79 @@ export default function CustomerHome({ navigation }: any) {
         </View>
         {/* Nearby Stores Section Title */}
         <Text style={styles.sectionTitleBlack}>Nearby Stores</Text>
-        <View style={styles.storesRow}>
-          {/* Store Card 1 */}
-          <View style={styles.storeCard}>
-            <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
-            <Text style={styles.storeName}>Kofi's Fresh Market</Text>
-            <Text style={styles.storeRating}>4.8 ★ • 15-25 min • 0.8 km</Text>
-            <View style={styles.storeTagsRow}>
-              <View style={styles.storeTag}><Text style={styles.storeTagText}>Fresh Produce</Text></View>
-              <View style={styles.storeTag}><Text style={styles.storeTagText}>Local Items</Text></View>
-            </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storesScroll}>
+          <View style={styles.storesRow}>
+            {/* Store Card 1 */}
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 1, name: "Kofi's Fresh Market", rating: 4.8, deliveryTime: "15-25 min", distance: "0.8 km", image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+              <View style={styles.storeImageContainer}>
+                <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
+                <TouchableOpacity 
+                  style={styles.favoriteButton}
+                  onPress={() => toggleFavorite(1)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons 
+                    name={favorites.has(1) ? "heart" : "heart-outline"} 
+                    size={20} 
+                    color={favorites.has(1) ? "#e91e63" : "#fff"} 
+                  />
+                </TouchableOpacity>
           </View>
-          {/* Store Card 2 */}
-          <View style={styles.storeCard}>
-            <Image source={{ uri: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
-            <Text style={styles.storeName}>Ama's Grocery</Text>
-            <Text style={styles.storeRating}>4.6 ★ • 20-30 min • 1.2 km</Text>
-            <View style={styles.storeTagsRow}>
-              <View style={styles.storeTag}><Text style={styles.storeTagText}>Groceries</Text></View>
-              <View style={styles.storeTag}><Text style={styles.storeTagText}>Household</Text></View>
-            </View>
+              <Text style={styles.storeName}>Kofi's Fresh Market</Text>
+              <Text style={styles.storeRating}>4.8 ★ • 15-25 min • 0.8 km</Text>
+              <View style={styles.storeTagsRow}>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Fresh Produce</Text></View>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Local Items</Text></View>
+                </View>
+              </TouchableOpacity>
+            {/* Store Card 2 */}
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 2, name: "Ama's Grocery", rating: 4.6, deliveryTime: "20-30 min", distance: "1.2 km", image: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+              <View style={styles.storeImageContainer}>
+                <Image source={{ uri: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
+            <TouchableOpacity 
+                  style={styles.favoriteButton}
+                  onPress={() => toggleFavorite(2)}
+              activeOpacity={0.8}
+                >
+                  <Ionicons 
+                    name={favorites.has(2) ? "heart" : "heart-outline"} 
+                    size={20} 
+                    color={favorites.has(2) ? "#e91e63" : "#fff"} 
+                  />
+            </TouchableOpacity>
           </View>
-        </View>
+              <Text style={styles.storeName}>Ama's Grocery</Text>
+              <Text style={styles.storeRating}>4.6 ★ • 20-30 min • 1.2 km</Text>
+              <View style={styles.storeTagsRow}>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Groceries</Text></View>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Household</Text></View>
+              </View>
+            </TouchableOpacity>
+            {/* Store Card 3 */}
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 3, name: "Fresh Mart", rating: 4.7, deliveryTime: "10-20 min", distance: "0.5 km", image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+              <View style={styles.storeImageContainer}>
+                <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
+                  <TouchableOpacity 
+                    style={styles.favoriteButton}
+                  onPress={() => toggleFavorite(3)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons 
+                    name={favorites.has(3) ? "heart" : "heart-outline"} 
+                      size={20} 
+                    color={favorites.has(3) ? "#e91e63" : "#fff"} 
+                    />
+                  </TouchableOpacity>
+                  </View>
+              <Text style={styles.storeName}>Fresh Mart</Text>
+              <Text style={styles.storeRating}>4.7 ★ • 10-20 min • 0.5 km</Text>
+              <View style={styles.storeTagsRow}>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Organic</Text></View>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Fresh</Text></View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+        </ScrollView>
 
         {/* Quick Reorder Section Title */}
         <Text style={styles.sectionTitleBlack}>Quick Reorder</Text>
@@ -182,20 +220,20 @@ export default function CustomerHome({ navigation }: any) {
             <View style={styles.quickReorderMiddle}>
               <Text style={styles.quickReorderStoreName}>Kofi's Fresh Market</Text>
               <Text style={styles.quickReorderSubtitle}>Rice (5kg), Palm Oil (1L)</Text>
-            </View>
+                </View>
             <View style={styles.quickReorderRight}>
               <Text style={styles.quickReorderPrice}>GHS 85.50</Text>
               <TouchableOpacity style={styles.reorderButton} activeOpacity={0.8}>
                 <Text style={styles.reorderButtonText}>Reorder</Text>
               </TouchableOpacity>
-            </View>
+        </View>
           </View>
           <View style={styles.quickReorderCard}>
             <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.quickReorderImage} />
             <View style={styles.quickReorderMiddle}>
               <Text style={styles.quickReorderStoreName}>Ama's Grocery</Text>
               <Text style={styles.quickReorderSubtitle}>Tomatoes (2kg), Onions (1kg)</Text>
-            </View>
+                  </View>
             <View style={styles.quickReorderRight}>
               <Text style={styles.quickReorderPrice}>GHS 45.20</Text>
               <TouchableOpacity style={styles.reorderButton} activeOpacity={0.8}>
@@ -203,7 +241,7 @@ export default function CustomerHome({ navigation }: any) {
               </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
+          </ScrollView>
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -217,19 +255,19 @@ export default function CustomerHome({ navigation }: any) {
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]} activeOpacity={0.8}>
-          <Ionicons name="home" size={24} color="#51bc7d" />
+          <Ionicons name="home" size={24} color="#007AFF" />
           <Text style={[styles.navText, styles.navTextActive]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="heart" size={24} color="#999" />
-          <Text style={styles.navText}>Favorites</Text>
+          <Ionicons name="cube" size={24} color="#8B4513" />
+          <Text style={styles.navText}>Orders</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="cart" size={24} color="#999" />
+          <Ionicons name="cart" size={24} color="#333" />
           <Text style={styles.navText}>Cart</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} activeOpacity={0.8}>
-          <Ionicons name="person" size={24} color="#999" />
+          <Ionicons name="person" size={24} color="#333" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
@@ -291,7 +329,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#eb5757',
   },
   searchContainer: {
-    marginBottom: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 20,
   },
   searchBar: {
     backgroundColor: '#fff',
@@ -311,34 +351,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#333',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  locationLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  sentToText: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-  },
-  locationRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '600',
-    textAlign: 'right',
   },
   scrollView: {
     flex: 1,
@@ -572,22 +584,21 @@ const styles = StyleSheet.create({
   },
   bottomNavigation: {
     position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
-    borderRadius: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 16,
+    paddingBottom: 34,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    elevation: 12,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 8,
   },
   navItem: {
     alignItems: 'center',
@@ -598,11 +609,11 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#999',
+    color: '#333',
     fontWeight: '500',
   },
   navTextActive: {
-    color: '#51bc7d',
+    color: '#007AFF',
     fontWeight: '600',
   },
   headerWhite: {
@@ -692,9 +703,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 18,
     marginHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 18,
-    minHeight: 90,
+    marginBottom: 24,
+    minHeight: 100,
   },
   promoBannerLeft: {
     flex: 1,
@@ -737,40 +747,64 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     marginHorizontal: 20,
-    marginBottom: 14,
-    marginTop: 2,
+    marginBottom: 16,
+    marginTop: 0,
+  },
+  storesScroll: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    marginBottom: 24,
   },
   storesRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginBottom: 18,
     gap: 16,
   },
   storeCard: {
-    flex: 1,
+    width: 240,
+    height: 200,
     backgroundColor: '#fff',
     borderRadius: 18,
-    padding: 12,
+    padding: 16,
     alignItems: 'flex-start',
+    justifyContent: 'space-between',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
   },
+  storeImageContainer: {
+    position: 'relative',
+    width: '100%',
+    marginBottom: 8,
+  },
   storeImage: {
     width: '100%',
-    height: 80,
+    height: 90,
     borderRadius: 14,
-    marginBottom: 10,
     backgroundColor: '#eee',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   storeName: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 2,
+    marginBottom: 3,
   },
   storeRating: {
     fontSize: 12,
@@ -779,12 +813,13 @@ const styles = StyleSheet.create({
   },
   storeTagsRow: {
     flexDirection: 'row',
-    gap: 7,
+    gap: 8,
+    flexWrap: 'wrap',
   },
   storeTag: {
     backgroundColor: '#D6F5E3',
-    borderRadius: 12,
-    paddingHorizontal: 10,
+    borderRadius: 10,
+    paddingHorizontal: 8,
     paddingVertical: 3,
   },
   storeTagText: {
@@ -795,7 +830,7 @@ const styles = StyleSheet.create({
   quickReorderScroll: {
     paddingLeft: 20,
     paddingRight: 20,
-    marginBottom: 18,
+    marginBottom: 24,
   },
   quickReorderCard: {
     flexDirection: 'row',

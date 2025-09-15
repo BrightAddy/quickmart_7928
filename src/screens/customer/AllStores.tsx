@@ -321,9 +321,13 @@ function FilterSection({ selectedType, onFilterChange }: { selectedType: string;
   );
 }
 
-function StoreCard({ store, onToggleFavorite }: { store: any; onToggleFavorite: (id: string) => void }) {
+function StoreCard({ store, onToggleFavorite, navigation }: { store: any; onToggleFavorite: (id: string) => void; navigation: any }) {
   return (
-    <TouchableOpacity style={styles.storeCard} activeOpacity={0.9}>
+    <TouchableOpacity 
+      style={styles.storeCard} 
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('StoreBrowse', { storeData: store })}
+    >
       <View style={styles.storeImageContainer}>
         <Image source={{ uri: store.image }} style={styles.storeImage} />
         <LinearGradient
@@ -415,6 +419,7 @@ export default function AllStores({ navigation }: any) {
           <StoreCard 
             store={item} 
             onToggleFavorite={toggleFavorite}
+            navigation={navigation}
           />
         )}
         style={styles.storesList}
