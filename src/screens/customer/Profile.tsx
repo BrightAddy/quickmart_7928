@@ -136,12 +136,12 @@ export default function Profile({ navigation }: any) {
   );
 
   return (
-    <Screen style={{ flex: 1 }}>
+    <Screen style={{ flex: 1, paddingTop: Math.max(12, insets.top), paddingBottom: Math.max(12, insets.bottom) }}>
       <KenteAccent style={{ top: 10, right: 10 }} animated />
       
       <ScrollView 
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        contentContainerStyle={{ paddingBottom: Math.max(24, insets.bottom + 24) }}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Header */}

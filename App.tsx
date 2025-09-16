@@ -27,6 +27,12 @@ import Referral from './src/screens/customer/Referral';
 import CustomerTabs from './src/navigation/CustomerTabs';
 import ShopperStack from './src/navigation/ShopperStack';
 import ShopperTabs from './src/navigation/ShopperTabs';
+import { withShopperTheme } from './src/navigation/withShopperTheme';
+// wrap shopper screens with orange theme
+const ShopperLoginThemed = withShopperTheme(ShopperLogin as any);
+const ShopperSignupThemed = withShopperTheme(ShopperSignup as any);
+const ShopperTabsThemed = withShopperTheme(ShopperTabs as any);
+const ShopperHomeThemed = withShopperTheme(ShopperStack as any);
 import StoreOwnerTabs from './src/navigation/StoreOwnerTabs';
 import OrderTracking from './src/screens/customer/OrderTracking';
 import PaymentMethods from './src/screens/customer/PaymentMethods';
@@ -65,8 +71,8 @@ export default function App() {
                       <Stack.Screen name="UserRoleSelection" component={UserRoleSelection} />
                       <Stack.Screen name="CustomerLogin" component={CustomerLogin} />
                       <Stack.Screen name="CustomerSignup" component={CustomerSignup} />
-                      <Stack.Screen name="ShopperLogin" component={ShopperLogin} />
-                      <Stack.Screen name="ShopperSignup" component={ShopperSignup} />
+                      <Stack.Screen name="ShopperLogin" component={ShopperLoginThemed} />
+                      <Stack.Screen name="ShopperSignup" component={ShopperSignupThemed} />
                       <Stack.Screen name="StoreOwnerLogin" component={StoreOwnerLogin} />
                       <Stack.Screen name="StoreOwnerSignup" component={StoreOwnerSignup} />
                       <Stack.Screen name="CustomerHome" component={CustomerHome} />
@@ -75,8 +81,8 @@ export default function App() {
                       <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
                       <Stack.Screen name="HelpCenter" component={HelpCenter} />
                       <Stack.Screen name="Referral" component={Referral} />
-                      <Stack.Screen name="ShopperHome" component={ShopperStack} />
-                      <Stack.Screen name="ShopperTabs" component={ShopperTabs} />
+                      <Stack.Screen name="ShopperHome" component={ShopperHomeThemed} />
+                      <Stack.Screen name="ShopperTabs" component={ShopperTabsThemed} />
                       <Stack.Screen name="StoreOwnerHome" component={StoreOwnerTabs} />
                       <Stack.Screen name="OrderTracking" component={OrderTracking} />
                       <Stack.Screen name="PaymentMethods" component={PaymentMethods} />

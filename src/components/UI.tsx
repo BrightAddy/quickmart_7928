@@ -1,6 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { TouchableOpacity, Modal, Animated, Easing, StyleSheet, View as RNView, Text as RNText, TextInput, FlatList, ViewProps, TextProps, PanResponder, Dimensions } from 'react-native';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { TouchableOpacity, Modal, Animated, Easing, StyleSheet, View as RNView, Text as RNText, TextInput, FlatList, ViewProps, TextProps, PanResponder, Dimensions, Image } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/theme';
+import { useCart } from '../context/CartContext';
+import { useProducts } from '../context/ProductsContext';
+import { buildUnifiedCatalog } from '../services/catalog';
+import { createTextSearchService as createCatalogTextSearch } from '../services/search/textSearch';
+import { createIntentParser, createAssistantOrchestrator, createCartService, createStockService } from '../services/assistant/stubs';
+import { Audio } from 'expo-av';
 
 // Ghanaian-inspired loading animation component
 export const GhanaianLoader: React.FC<{ size?: number }> = ({ size = 40 }) => {
@@ -231,9 +238,16 @@ export const GhanaGradient: React.FC<{ style?: any; children?: React.ReactNode }
 
 export const Screen: React.FC<ViewProps> = ({ style, ...props }) => {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
     <RNView
-      style={[{ flex: 1, backgroundColor: colors.background, padding: 16 }, style]}
+      style={[{
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingTop: Math.max(12, insets.top),
+        paddingBottom: Math.max(12, insets.bottom),
+        paddingHorizontal: 16,
+      }, style]}
       {...props}
     />
   );
@@ -272,8 +286,9 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
   const offsetRef = useRef({ x: initialX, y: initialY });
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_evt, gesture) => Math.abs(gesture.dx) + Math.abs(gesture.dy) > 3,
+      // Do NOT capture taps so Touchable can handle onPress
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_evt, gesture) => Math.abs(gesture.dx) + Math.abs(gesture.dy) > 4,
       onPanResponderGrant: () => {
         // no-op, using absolute offsets model
       },
@@ -290,7 +305,6 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
         const clampedY = Math.max(8, Math.min(rawY, window.height - BUTTON_SIZE - 8));
         const centerX = rawX + BUTTON_SIZE / 2;
         const targetX = centerX < window.width / 2 ? leftEdge : rightEdge;
-        const traveled = Math.abs(gesture.dx) + Math.abs(gesture.dy);
 
         Animated.spring(position, {
           toValue: { x: targetX, y: clampedY },
@@ -299,7 +313,6 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
           useNativeDriver: false,
         }).start(() => {
           offsetRef.current = { x: targetX, y: clampedY };
-          if (traveled < 6) onPress();
         });
       },
       onPanResponderTerminationRequest: () => false,
@@ -358,6 +371,7 @@ export const FloatingChatbotButton: React.FC<{ onPress: () => void }> = ({ onPre
           elevation: 8
         }}
         activeOpacity={0.85}
+        onPress={onPress}
       >
         <RNText style={{ fontSize: 28, color: 'white' }}>💬</RNText>
       </TouchableOpacity>
@@ -375,10 +389,13 @@ interface ChatMessage {
     type: 'map' | 'product' | 'order';
     data: any;
   };
+  actions?: Array<{ id: string; label: string }>; // optional action buttons
 }
 
 export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ visible, onClose }) => {
   const { colors } = useTheme();
+  const { addItem, updateQty } = useCart();
+  const productsCtx = useProducts();
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       text: 'Hello! How can I help you today?', 
@@ -392,6 +409,82 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
   const [isTyping, setIsTyping] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
   const typingAnim = useRef(new Animated.Value(0)).current;
+  const [selecting, setSelecting] = useState<{ candidate: any; qty: number; variant?: Record<string, string> } | null>(null);
+  const [imageScanVisible, setImageScanVisible] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const personalizationRef = useRef<{ categoryClicks: Record<string, number>; storeClicks: Record<string, number> }>({ categoryClicks: {}, storeClicks: {} });
+
+  // Services wiring
+  const textSearch = useMemo(() => createCatalogTextSearch(() => buildUnifiedCatalog(productsCtx as any)), [productsCtx]);
+  const cartService = useMemo(() => createCartService({ addItem, updateQty }), [addItem, updateQty]);
+  const stockService = useMemo(() => createStockService(() => buildUnifiedCatalog(productsCtx as any)), [productsCtx]);
+  const parser = useMemo(() => createIntentParser(), []);
+  const orchestrator = useMemo(() => createAssistantOrchestrator(textSearch, cartService, stockService), [textSearch, cartService, stockService]);
+
+  // Voice helpers
+  const speakText = async (text: string) => {
+    try {
+      const Speech = await import('expo-speech');
+      // @ts-ignore optional module
+      Speech.speak(text, { language: 'en' });
+    } catch {}
+  };
+
+  const applyPersonalization = (products: any[]): any[] => {
+    try {
+      const { categoryClicks, storeClicks } = personalizationRef.current;
+      const scored = products.map((p: any) => {
+        const cat = (p.category || '').toLowerCase();
+        const catClicks = categoryClicks[cat] || 0;
+        const storeClicksCount = storeClicks[p.storeId] || 0;
+        const base = typeof p.confidence === 'number' ? p.confidence : 0.5;
+        const score = base + Math.log1p(catClicks) * 0.15 + Math.log1p(storeClicksCount) * 0.1;
+        return { p, score };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored.map(s => s.p);
+    } catch {
+      return products;
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      if (status !== 'granted') {
+        const errMsg: ChatMessage = { text: 'Microphone permission is required for voice input.', from: 'bot', type: 'text', timestamp: new Date() };
+        setMessages(prev => [errMsg, ...prev]);
+        return;
+      }
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const rec = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      setRecording(rec.recording);
+      setIsRecording(true);
+    } catch (e) {
+      const errMsg: ChatMessage = { text: 'Unable to start recording. Please try again.', from: 'bot', type: 'text', timestamp: new Date() };
+      setMessages(prev => [errMsg, ...prev]);
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+    try {
+      setIsRecording(false);
+      await recording.stopAndUnloadAsync();
+      setRecording(null);
+      // Simulated ASR: prefill input and auto-send
+      const simulated = 'Find fresh tomatoes';
+      setInput(simulated);
+      // slight delay to ensure state update, then send
+      setTimeout(() => {
+        sendMessage();
+      }, 50);
+    } catch (e) {
+      const errMsg: ChatMessage = { text: 'Recording failed to process.', from: 'bot', type: 'text', timestamp: new Date() };
+      setMessages(prev => [errMsg, ...prev]);
+    }
+  };
 
   const languageLabels = {
     en: 'English',
@@ -551,25 +644,73 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
     };
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
-    
-    const userMsg: ChatMessage = { 
-      text: input, 
-      from: 'user', 
-      timestamp: new Date(),
-      type: 'text'
-    };
+    const text = input;
+    const userMsg: ChatMessage = { text, from: 'user', timestamp: new Date(), type: 'text' };
     setMessages(prev => [userMsg, ...prev]);
     setInput('');
     setIsTyping(true);
-    
-    // Simulate AI processing time
-    setTimeout(() => {
-      const botResponse = generateSmartResponse(input);
-      setMessages(prev => [botResponse, ...prev]);
+
+    try {
+      const parsed = await parser.parse({ text });
+      const result = await orchestrator.handle(parsed);
+
+      if (result.action?.type === 'SHOW_PRODUCTS') {
+        const personalized = applyPersonalization(result.action.products || []);
+        const productCards = personalized.slice(0, 8).map((p: any) => ({
+          name: p.name,
+          price: `GH₵ ${Number(p.price).toFixed(2)}`,
+          image: p.imageUrl || '🛒',
+          _candidate: p,
+        }));
+        const msg: ChatMessage = {
+          text: productCards.length ? 'Here are some matches:' : 'No matches found for your request.',
+          from: 'bot',
+          type: 'visual',
+          timestamp: new Date(),
+          visualData: { type: 'product', data: productCards }
+        };
+        setMessages(prev => [msg, ...prev]);
+        speakText(productCards.length ? 'I found some matches.' : 'No matches found.');
+
+        // Pharmacy guardrail disclaimer when medicines/OTC are present
+        const hasPharmacy = (result.action.products || []).some((p: any) => {
+          const c = (p.category || '').toLowerCase();
+          return c === 'medicines' || c === 'otc' || c === 'supplements' || c === 'first aid' || c === 'personal care';
+        });
+        if (hasPharmacy) {
+          const disclaimer: ChatMessage = {
+            text: 'Note: We only support OTC items in-app. Prescription medicines require pharmacist verification. This assistant does not provide medical advice.',
+            from: 'bot',
+            type: 'text',
+            timestamp: new Date(),
+            actions: [{ id: 'request_pharmacist', label: 'Request pharmacist callback' }]
+          };
+          setMessages(prev => [disclaimer, ...prev]);
+        }
+      } else if (result.action?.type === 'MESSAGE') {
+        const msg: ChatMessage = { text: result.action.text, from: 'bot', type: 'text', timestamp: new Date() };
+        setMessages(prev => [msg, ...prev]);
+        speakText(result.action.text);
+      } else if (result.action?.type === 'SPLIT_PROPOSAL') {
+        const p = result.action.proposal;
+        const text = `I recommend splitting your basket across ${p.stores.length} stores. Delivery total GH₵ ${p.totalDelivery}.`;
+        const details = p.stores.map(s => `${s.storeName}: ${s.itemCount} items, ${s.eta}, fee GH₵ ${s.deliveryFee}`).join('\n');
+        const msg: ChatMessage = { text: text + '\n' + details, from: 'bot', type: 'text', timestamp: new Date() };
+        setMessages(prev => [msg, ...prev]);
+        speakText('I recommend splitting your basket across multiple stores.');
+      } else {
+        const fallback = generateSmartResponse(text);
+        setMessages(prev => [fallback, ...prev]);
+        speakText(fallback.text);
+      }
+    } catch (e) {
+      const errMsg: ChatMessage = { text: 'Sorry, something went wrong. Please try again.', from: 'bot', type: 'text', timestamp: new Date() };
+      setMessages(prev => [errMsg, ...prev]);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => (
@@ -585,6 +726,20 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
       }}>
         {item.text}
       </RNText>
+      {item.actions && item.actions.length > 0 && (
+        <RNView style={{ flexDirection: 'row', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+          {item.actions.map(a => (
+            <TouchableOpacity key={a.id} style={[chatbotStyles.actionBtn, { borderColor: colors.primary }]} onPress={() => {
+              if (a.id === 'request_pharmacist') {
+                const confirm: ChatMessage = { text: 'Okay! A pharmacist will contact you shortly to verify your request.', from: 'bot', type: 'text', timestamp: new Date() };
+                setMessages(prev => [confirm, ...prev]);
+              }
+            }}>
+              <RNText style={[chatbotStyles.actionBtnText, { color: colors.primary }]}>{a.label}</RNText>
+            </TouchableOpacity>
+          ))}
+        </RNView>
+      )}
       
       {/* Visual aids for bot messages */}
       {item.type === 'visual' && item.visualData && (
@@ -601,15 +756,35 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
           {item.visualData.type === 'product' && (
             <RNView style={chatbotStyles.productGrid}>
               {item.visualData.data.map((product: any, index: number) => (
-                <RNView key={index} style={[chatbotStyles.productCard, { backgroundColor: colors.background }]}>
-                  <RNText style={{ fontSize: 20, marginBottom: 4 }}>{product.image}</RNText>
+                <TouchableOpacity
+                  key={index}
+                  style={[chatbotStyles.productCard, { backgroundColor: colors.background }]}
+                  onPress={() => {
+                    const c = product._candidate;
+                    if (!c) return;
+                    // track personalization signals
+                    try {
+                      const cat = (c.category || '').toLowerCase();
+                      personalizationRef.current.categoryClicks[cat] = (personalizationRef.current.categoryClicks[cat] || 0) + 1;
+                      personalizationRef.current.storeClicks[c.storeId] = (personalizationRef.current.storeClicks[c.storeId] || 0) + 1;
+                    } catch {}
+                    setSelecting({ candidate: c, qty: 1, variant: {} });
+                  }}
+                  activeOpacity={0.8}
+                >
+                  {typeof product.image === 'string' && product.image.startsWith('http') ? (
+                    <Image source={{ uri: product.image }} style={{ width: 56, height: 56, borderRadius: 8, marginBottom: 6, backgroundColor: '#eee' }} />
+                  ) : (
+                    <RNText style={{ fontSize: 24, marginBottom: 6 }}>{product.image || '🛒'}</RNText>
+                  )}
                   <RNText style={{ fontSize: 10, color: colors.onBackground, textAlign: 'center' }}>
                     {product.name}
                   </RNText>
                   <RNText style={{ fontSize: 10, fontWeight: 'bold', color: colors.primary, textAlign: 'center' }}>
                     {product.price}
                   </RNText>
-                </RNView>
+                  <RNText style={{ fontSize: 9, marginTop: 2, color: colors.onSurface + '66', textAlign: 'center' }}>Tap to select</RNText>
+                </TouchableOpacity>
               ))}
             </RNView>
           )}
@@ -698,6 +873,18 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
           )}
           
           <RNView style={[chatbotStyles.inputRow, { borderTopColor: colors.primary + '22' }]}>
+            <TouchableOpacity 
+              style={[chatbotStyles.sendBtn, { backgroundColor: colors.secondary }]}
+              onPress={() => setImageScanVisible(true)}
+            >
+              <RNText style={{ color: colors.onPrimary, fontWeight: 'bold', fontSize: 16 }}>📷</RNText>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[chatbotStyles.sendBtn, { backgroundColor: isRecording ? '#ef4444' : '#f59e0b' }]}
+              onPress={() => isRecording ? stopRecording() : startRecording()}
+            >
+              <RNText style={{ color: colors.onPrimary, fontWeight: 'bold', fontSize: 16 }}>{isRecording ? '■' : '🎤'}</RNText>
+            </TouchableOpacity>
             <TextInput
               style={[chatbotStyles.input, { 
                 color: colors.onSurface, 
@@ -721,6 +908,147 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
             </TouchableOpacity>
           </RNView>
         </Animated.View>
+        {/* Image Scan for visual search */}
+        <ImageScanModal 
+          visible={imageScanVisible} 
+          onClose={() => setImageScanVisible(false)} 
+          onRecognized={async (result: any) => {
+            setImageScanVisible(false);
+            // Acknowledge scan
+            const ack: ChatMessage = { text: `Looking for: ${result.product || result.category}`, from: 'user', type: 'text', timestamp: new Date() };
+            setMessages(prev => [ack, ...prev]);
+            setIsTyping(true);
+            try {
+              const q = (result?.product || result?.category || '').toString();
+              const prods = await textSearch.searchByText(q);
+              const personalized = applyPersonalization(prods || []);
+              const cards = (personalized || []).slice(0, 8).map((p: any) => ({ name: p.name, price: `GH₵ ${Number(p.price).toFixed(2)}`, image: p.imageUrl || '🛒', _candidate: p }));
+              const msg: ChatMessage = { text: cards.length ? 'Closest matches I found:' : 'No close matches found.', from: 'bot', type: 'visual', timestamp: new Date(), visualData: { type: 'product', data: cards } };
+              setMessages(prev => [msg, ...prev]);
+
+              // Pharmacy disclaimer on scan as well
+              const hasPharmacy = (prods || []).some((p: any) => {
+                const c = (p.category || '').toLowerCase();
+                return c === 'medicines' || c === 'otc' || c === 'supplements' || c === 'first aid' || c === 'personal care';
+              });
+              if (hasPharmacy) {
+                const disclaimer: ChatMessage = {
+                  text: 'Note: We only support OTC items in-app. Prescription medicines require pharmacist verification. This assistant does not provide medical advice.',
+                  from: 'bot',
+                  type: 'text',
+                  timestamp: new Date(),
+                  actions: [{ id: 'request_pharmacist', label: 'Request pharmacist callback' }]
+                };
+                setMessages(prev => [disclaimer, ...prev]);
+              }
+            } catch (e) {
+              const err: ChatMessage = { text: 'Scan worked, but search failed. Please try again.', from: 'bot', type: 'text', timestamp: new Date() };
+              setMessages(prev => [err, ...prev]);
+            } finally {
+              setIsTyping(false);
+            }
+          }}
+          mode="customer"
+        />
+        {selecting && (
+          <RNView style={chatbotStyles.selectorOverlay}>
+            <RNView style={[chatbotStyles.selectorCard, { backgroundColor: colors.surface }]}>
+              <RNText style={[chatbotStyles.selectorTitle, { color: colors.onSurface }]}>
+                {selecting.candidate.name}
+              </RNText>
+              <RNText style={{ color: colors.primary, fontWeight: 'bold', marginBottom: 8 }}>
+                GH₵ {Number(selecting.candidate.price).toFixed(2)}
+              </RNText>
+              {(() => {
+                const cat = (selecting.candidate.category || '').toLowerCase();
+                if (cat === 'men' || cat === 'women') {
+                  const sizes = ['S', 'M', 'L', 'XL'];
+                  return (
+                    <RNView style={{ marginBottom: 12 }}>
+                      <RNText style={{ color: colors.onSurface, marginBottom: 6, fontWeight: '600' }}>Size</RNText>
+                      <RNView style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                        {sizes.map(sz => (
+                          <TouchableOpacity
+                            key={sz}
+                            onPress={() => setSelecting(prev => prev ? { ...prev, variant: { ...(prev.variant || {}), size: sz } } : prev)}
+                            style={[chatbotStyles.variantPill, (selecting.variant?.size === sz) && { backgroundColor: colors.primary }]}
+                          >
+                            <RNText style={{ color: (selecting.variant?.size === sz) ? colors.onPrimary : colors.primary, fontWeight: '600' }}>{sz}</RNText>
+                          </TouchableOpacity>
+                        ))}
+                      </RNView>
+                    </RNView>
+                  );
+                }
+                if (cat === 'footwear') {
+                  const sizes = Array.from({ length: 10 }).map((_, i) => String(36 + i));
+                  return (
+                    <RNView style={{ marginBottom: 12 }}>
+                      <RNText style={{ color: colors.onSurface, marginBottom: 6, fontWeight: '600' }}>Size</RNText>
+                      <RNView style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                        {sizes.map(sz => (
+                          <TouchableOpacity
+                            key={sz}
+                            onPress={() => setSelecting(prev => prev ? { ...prev, variant: { ...(prev.variant || {}), size: sz } } : prev)}
+                            style={[chatbotStyles.variantPill, (selecting.variant?.size === sz) && { backgroundColor: colors.primary }]}
+                          >
+                            <RNText style={{ color: (selecting.variant?.size === sz) ? colors.onPrimary : colors.primary, fontWeight: '600' }}>{sz}</RNText>
+                          </TouchableOpacity>
+                        ))}
+                      </RNView>
+                    </RNView>
+                  );
+                }
+                return null;
+              })()}
+              <RNView style={[chatbotStyles.qtyRow, { borderColor: colors.primary + '33' }]}> 
+                <TouchableOpacity style={[chatbotStyles.qtyBtn, { backgroundColor: colors.primary }]} onPress={() => setSelecting(prev => prev ? { ...prev, qty: Math.max(1, prev.qty - 1) } : prev)}>
+                  <RNText style={{ color: colors.onPrimary, fontWeight: '800' }}>−</RNText>
+                </TouchableOpacity>
+                <RNText style={{ minWidth: 40, textAlign: 'center', fontWeight: '800', color: colors.onSurface }}>{selecting.qty}</RNText>
+                <TouchableOpacity style={[chatbotStyles.qtyBtn, { backgroundColor: colors.primary }]} onPress={() => setSelecting(prev => prev ? { ...prev, qty: prev.qty + 1 } : prev)}>
+                  <RNText style={{ color: colors.onPrimary, fontWeight: '800' }}>＋</RNText>
+                </TouchableOpacity>
+              </RNView>
+              <RNView style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+                <TouchableOpacity style={[chatbotStyles.selectorAction, { borderColor: colors.primary }]} onPress={() => setSelecting(null)}>
+                  <RNText style={{ color: colors.primary, fontWeight: 'bold' }}>Cancel</RNText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[chatbotStyles.selectorAction, { backgroundColor: colors.primary }]} 
+                  onPress={() => {
+                    if (!selecting) return;
+                    const c = selecting.candidate;
+                    // Basic pharmacy guardrail: block restricted keywords
+                    const lower = (c.name || '').toLowerCase();
+                    const cat = (c.category || '').toLowerCase();
+                    const restricted = ['antibiotic','amoxicillin','penicillin','codeine','tramadol','morphine','opioid','rx only'];
+                    if (cat === 'medicines' && restricted.some(k => lower.includes(k))) {
+                      const warn: ChatMessage = { text: 'This item may require a valid prescription. A pharmacist must verify before purchase.', from: 'bot', type: 'text', timestamp: new Date() };
+                      setMessages(prev => [warn, ...prev]);
+                      setSelecting(null);
+                      return;
+                    }
+                    const label = selecting.variant?.size ? `1 pc - Size ${selecting.variant.size}` : '1 pc';
+                    addItem({
+                      id: c.id,
+                      name: c.name,
+                      price: c.price,
+                      imageUrl: c.imageUrl || '',
+                      category: c.category,
+                      unitLabel: label,
+                    }, selecting.qty);
+                    const conf: ChatMessage = { text: `Added ${selecting.qty} × ${c.name} to your cart.`, from: 'bot', type: 'text', timestamp: new Date() };
+                    setMessages(prev => [conf, ...prev]);
+                    setSelecting(null);
+                  }}
+                >
+                  <RNText style={{ color: colors.onPrimary, fontWeight: 'bold' }}>Add to Cart</RNText>
+                </TouchableOpacity>
+              </RNView>
+            </RNView>
+          </RNView>
+        )}
       </RNView>
     </Modal>
   );
@@ -1119,7 +1447,7 @@ const imageStyles = StyleSheet.create({
 
 const chatbotStyles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modal: { minHeight: 500, maxHeight: '85%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 12, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 8 },
+  modal: { minHeight: 500, maxHeight: '90%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 12, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 8 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1 },
   headerText: { fontWeight: 'bold', fontSize: 18 },
   headerSubtext: { fontSize: 12, marginTop: 2 },
@@ -1139,6 +1467,15 @@ const chatbotStyles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', padding: 12, gap: 8, borderTopWidth: 1 },
   input: { flex: 1, borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, maxHeight: 100 },
   sendBtn: { borderRadius: 20, padding: 12, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
+  actionBtn: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
+  actionBtnText: { fontSize: 12, fontWeight: '700' },
+  selectorOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' },
+  selectorCard: { width: '88%', borderRadius: 16, padding: 16 },
+  selectorTitle: { fontSize: 16, fontWeight: '700', marginBottom: 6 },
+  qtyRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, borderWidth: 1, borderRadius: 12, paddingVertical: 8 },
+  qtyBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  selectorAction: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 12, borderWidth: 2 },
+  variantPill: { paddingHorizontal: 12, paddingVertical: 6, borderWidth: 2, borderRadius: 999, borderColor: '#2E7D32' },
 });
 
 

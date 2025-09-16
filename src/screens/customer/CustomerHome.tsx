@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, Image, SafeAreaView, StatusBar, Dimensions, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Chatbot } from '../../components/Chatbot';
 import { useChatbot } from '../../context/ChatbotContext';
-import { FloatingChatbotButton } from '../../components/UI';
+import { FloatingChatbotButton, ChatbotModal } from '../../components/UI';
+import GlowingBorderCard from '../../components/GlowingBorderCard';
+import { useProducts } from '../../context/ProductsContext';
 import bananaImg from '../../../assets/images/slide2-shopping.svg';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -72,9 +73,58 @@ const nearbyStoresData = [
   { id: 'ns6', name: 'Tech n’ Phones', type: 'Electronics', rating: 4.2, eta: '25-35 min', distance: '3.1 km', image: 'https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&fit=crop&w=400&q=80' },
 ];
 
+function HomeUnifiedSearch({ navigation }: any) {
+  const { searchProducts, searchStores } = useProducts();
+  const [q, setQ] = React.useState('');
+  const [show, setShow] = React.useState(false);
+  const storeResults = React.useMemo(() => q.trim() ? searchStores(q.trim()).slice(0, 5) : [], [q]);
+  const productResults = React.useMemo(() => q.trim() ? searchProducts(q.trim()).slice(0, 5) : [], [q]);
+  return (
+    <View style={{ marginHorizontal: 20, marginTop: 16, marginBottom: 16, zIndex: 20 }}>
+      <View style={styles.homeSearchRow}>
+        <Ionicons name="search" size={20} color="#8A8F98" />
+        <TextInput
+          style={styles.homeSearchInput}
+          placeholder="Search for products or stores"
+          placeholderTextColor="#8A8F98"
+          value={q}
+          onChangeText={(t) => { setQ(t); setShow(true); }}
+          onFocus={() => setShow(true)}
+          returnKeyType="search"
+        />
+      </View>
+      {show && q.trim().length > 0 && (
+        <View style={styles.homeSearchResults}>
+          <Text style={styles.resultSectionTitle}>Stores</Text>
+          {storeResults.length === 0 ? (
+            <Text style={styles.resultEmpty}>No matching stores</Text>
+          ) : (
+            storeResults.map((s: any) => (
+              <TouchableOpacity key={s.id} style={styles.resultRow} onPress={() => { setShow(false); setQ(''); navigation.navigate('StoreBrowse', { store: { id: s.id, name: s.name, rating: s.rating, deliveryTime: s.deliveryTime, image: s.imageUrl } }); }}>
+                <Text style={styles.resultRowTitle}>{s.name}</Text>
+                <Text style={styles.resultRowMeta}>{(s.categories || []).slice(0, 2).join(' • ')}</Text>
+              </TouchableOpacity>
+            ))
+          )}
+          <Text style={[styles.resultSectionTitle, { marginTop: 12 }]}>Products</Text>
+          {productResults.length === 0 ? (
+            <Text style={styles.resultEmpty}>No matching products</Text>
+          ) : (
+            productResults.map((p: any) => (
+              <TouchableOpacity key={p.id} style={styles.resultRow} onPress={() => { setShow(false); setQ(''); navigation.navigate('ProductDetails', { product: p }); }}>
+                <Text style={styles.resultRowTitle}>{p.name}</Text>
+                <Text style={[styles.resultRowMeta, { color: '#1CA77C', fontWeight: '700' }]}>GHS {Number(p.price).toFixed(2)}</Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
+
 export default function CustomerHome({ navigation }: any) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState(new Set());
   const { toggleChat, isOpen } = useChatbot();
 
@@ -117,10 +167,10 @@ export default function CustomerHome({ navigation }: any) {
           {/* Right: Gear and Bell icons */}
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('UserPreferences')}>
-              <Ionicons name="settings-sharp" size={22} color="#555" />
+              <Ionicons name="settings-sharp" size={24} color="#1CA77C" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconCircle} onPress={() => navigation.navigate('Notifications')}>
-              <Ionicons name="notifications" size={22} color="#555" />
+              <Ionicons name="notifications" size={24} color="#1CA77C" />
               <View style={styles.redDot} />
             </TouchableOpacity>
           </View>
@@ -128,41 +178,34 @@ export default function CustomerHome({ navigation }: any) {
         </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBarPill}>
-            <TouchableOpacity onPress={() => navigation.navigate('Search', { initialQuery: searchQuery })}>
-              <Ionicons name="search" size={20} color="#bdbdbd" />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search for groceries, stores…"
-              placeholderTextColor="#bdbdbd"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={() => navigation.navigate('Search', { initialQuery: searchQuery })}
-            />
-          </View>
-        </View>
+        {/* Unified Search (Stores + Products) */}
+        <HomeUnifiedSearch navigation={navigation} />
         {/* Promotional Banner */}
         <View style={styles.promoBannerCard}>
-          {/* Left: Text and badge */}
+          {/* Left copy */}
           <View style={styles.promoBannerLeft}>
-            <View style={styles.promoBadge}>
-              <Text style={styles.promoBadgeText}>20% OFF</Text>
-          </View>
+            <View style={styles.promoBadgeGreen}>
+              <Text style={styles.promoBadgeGreenText}>20% OFF</Text>
+            </View>
             <Text style={styles.promoBannerTitle}>Fresh Yam & Plantain</Text>
             <Text style={styles.promoBannerSubtitle}>Get 20% off on fresh produce</Text>
           </View>
-          {/* Right: Banana image */}
-          <Image source={bananaImg} style={styles.promoBannerImage} resizeMode="cover" />
+          {/* Right image */}
+          <View style={styles.promoImageWrap}>
+            <Image source={{ uri: 'https://images.pexels.com/photos/5966630/pexels-photo-5966630.jpeg?auto=compress&cs=tinysrgb&w=800' }} style={styles.promoImageRight} />
+          </View>
+          {/* Decorative accent */}
+          <LinearGradient colors={['#F0FFF9', '#E6FBF2']} style={styles.promoRightAccent} />
         </View>
         {/* Featured Stores (horizontal) */}
-        <Text style={styles.sectionTitleBlack}>Featured for You</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitleBlack}>Featured for You</Text>
+          <View style={styles.sectionAccent} />
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storesScroll}>
           <View style={styles.storesRow}>
             {/* Store Card 1 */}
-            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 1, name: "Kofi's Fresh Market", rating: 4.8, deliveryTime: "15-25 min", distance: "0.8 km", image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { store: { id: 'store-001', name: "Kofi's Fresh Market", rating: 4.8, deliveryTime: "15-25 min", distance: "0.8 km", image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
               <View style={styles.storeImageContainer}>
                 <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
                 <TouchableOpacity 
@@ -178,14 +221,14 @@ export default function CustomerHome({ navigation }: any) {
                 </TouchableOpacity>
           </View>
               <Text style={styles.storeName}>Kofi's Fresh Market</Text>
-              <Text style={styles.storeRating}>4.8 ★ • 15-25 min • 0.8 km</Text>
+              <Text style={styles.storeRatingMuted}>4.8 ★ • 15-25 min • 0.8 km</Text>
+              {/* Minimal tags to reduce clutter */}
               <View style={styles.storeTagsRow}>
-                <View style={styles.storeTag}><Text style={styles.storeTagText}>Fresh Produce</Text></View>
-                <View style={styles.storeTag}><Text style={styles.storeTagText}>Local Items</Text></View>
-                </View>
+                <View style={styles.storeTag}><Text style={styles.storeTagText}>Popular</Text></View>
+              </View>
               </TouchableOpacity>
             {/* Store Card 2 */}
-            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 2, name: "Ama's Grocery", rating: 4.6, deliveryTime: "20-30 min", distance: "1.2 km", image: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { store: { id: 'store-002', name: "Ama's Grocery Store", rating: 4.6, deliveryTime: "20-30 min", distance: "1.2 km", image: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
               <View style={styles.storeImageContainer}>
                 <Image source={{ uri: 'https://images.pexels.com/photos/4393667/pexels-photo-4393667.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
             <TouchableOpacity 
@@ -201,14 +244,13 @@ export default function CustomerHome({ navigation }: any) {
             </TouchableOpacity>
           </View>
               <Text style={styles.storeName}>Ama's Grocery</Text>
-              <Text style={styles.storeRating}>4.6 ★ • 20-30 min • 1.2 km</Text>
+              <Text style={styles.storeRatingMuted}>4.6 ★ • 20-30 min • 1.2 km</Text>
               <View style={styles.storeTagsRow}>
                 <View style={styles.storeTag}><Text style={styles.storeTagText}>Groceries</Text></View>
-                <View style={styles.storeTag}><Text style={styles.storeTagText}>Household</Text></View>
               </View>
             </TouchableOpacity>
             {/* Store Card 3 */}
-            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: 3, name: "Fresh Mart", rating: 4.7, deliveryTime: "10-20 min", distance: "0.5 km", image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
+            <TouchableOpacity style={styles.storeCard} activeOpacity={0.9} onPress={() => navigation.navigate('StoreBrowse', { store: { id: 'store-003', name: 'Fresh Market Accra', rating: 4.5, deliveryTime: '25-35 min', distance: '1.5 km', image: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' } })}>
               <View style={styles.storeImageContainer}>
                 <Image source={{ uri: 'https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg?auto=compress&fit=crop&w=400&q=80' }} style={styles.storeImage} />
                   <TouchableOpacity 
@@ -224,17 +266,19 @@ export default function CustomerHome({ navigation }: any) {
                   </TouchableOpacity>
                   </View>
               <Text style={styles.storeName}>Fresh Mart</Text>
-              <Text style={styles.storeRating}>4.7 ★ • 10-20 min • 0.5 km</Text>
+              <Text style={styles.storeRatingMuted}>4.7 ★ • 10-20 min • 0.5 km</Text>
               <View style={styles.storeTagsRow}>
                 <View style={styles.storeTag}><Text style={styles.storeTagText}>Organic</Text></View>
-                <View style={styles.storeTag}><Text style={styles.storeTagText}>Fresh</Text></View>
-                    </View>
+              </View>
                   </TouchableOpacity>
                 </View>
         </ScrollView>
 
         {/* Nearby Stores (Vertical) */}
-        <Text style={styles.sectionTitleBlack}>Nearby Stores</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitleBlack}>Nearby Stores</Text>
+          <View style={[styles.sectionAccent, { width: 46 }]} />
+        </View>
         <View style={{ paddingHorizontal: 20, gap: 12, marginBottom: 24 }}>
           {nearbyStoresData.map((s, index) => (
             <Animated.View
@@ -244,20 +288,22 @@ export default function CustomerHome({ navigation }: any) {
                 transform: [{ translateY: nearbyAnims[index].interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }],
               }}
             >
-              <TouchableOpacity
-                style={styles.nearbyCard}
-                activeOpacity={0.9}
-                onPress={() => navigation.navigate('StoreBrowse', { storeData: { id: s.id, name: s.name, rating: s.rating, deliveryTime: s.eta, distance: s.distance, image: s.image } })}
-              >
-                <Image source={{ uri: s.image }} style={styles.nearbyImage} />
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={styles.nearbyName}>{s.name}</Text>
-                    <View style={styles.typeChip}><Text style={styles.typeChipText}>{s.type}</Text></View>
+              <GlowingBorderCard radius={16} glowColor={'#1CA77C'} thickness={2} durationMs={6500} style={{ borderRadius: 16 }}>
+                <TouchableOpacity
+                  style={styles.nearbyCard}
+                  activeOpacity={0.9}
+                  onPress={() => navigation.navigate('StoreBrowse', { store: { id: s.id, name: s.name, rating: s.rating, deliveryTime: s.eta, distance: s.distance, image: s.image, type: s.type } })}
+                >
+                  <Image source={{ uri: s.image }} style={styles.nearbyImage} />
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={styles.nearbyName}>{s.name}</Text>
+                      <View style={styles.typeChip}><Text style={styles.typeChipText}>{s.type}</Text></View>
+                    </View>
+                    <Text style={styles.nearbyMeta}>{s.rating} ★ • {s.eta} • {s.distance}</Text>
                   </View>
-                  <Text style={styles.nearbyMeta}>{s.rating} ★ • {s.eta} • {s.distance}</Text>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              </GlowingBorderCard>
             </Animated.View>
           ))}
         </View>
@@ -299,8 +345,8 @@ export default function CustomerHome({ navigation }: any) {
       {/* Floating Chat Button - Movable like Assistive Touch */}
       <FloatingChatbotButton onPress={toggleChat} />
 
-      {/* Chatbot Component */}
-      <Chatbot isVisible={isOpen} onClose={toggleChat} />
+      {/* Chatbot Component (new modal) */}
+      <ChatbotModal visible={isOpen} onClose={toggleChat} />
 
       {/* Bottom Navigation */}
       {/* Removed the custom bottom navigation bar here */}
@@ -366,6 +412,38 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 20,
   },
+  homeSearchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    elevation: 4,
+    shadowColor: '#1CA77C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(28,167,124,0.18)',
+  },
+  homeSearchInput: { flex: 1, fontSize: 15, color: '#0F172A', marginLeft: 8, fontWeight: '600' },
+  homeSearchResults: {
+    marginTop: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  resultSectionTitle: { fontWeight: '700', fontSize: 13, color: '#222', marginBottom: 6 },
+  resultEmpty: { color: '#7D8B97', fontSize: 12 },
+  resultRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  resultRowTitle: { fontWeight: '600', color: '#222' },
+  resultRowMeta: { fontSize: 12, color: '#7D8B97' },
   searchBar: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -651,11 +729,11 @@ const styles = StyleSheet.create({
   },
   headerWhite: {
     backgroundColor: '#fff',
-    paddingTop: 18,
+    paddingTop: 22,
     paddingHorizontal: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
+    paddingBottom: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: '#E5E7EB',
   },
   headerRow: {
     flexDirection: 'row',
@@ -671,7 +749,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#C6F1FF',
+    backgroundColor: '#CFF9E6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -700,25 +778,35 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#F2F3F5',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 4,
+    marginLeft: 6,
     position: 'relative',
+    borderWidth: 2,
+    borderColor: 'rgba(28,167,124,0.18)',
+    shadowColor: '#1CA77C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   redDot: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#EB5757',
+    top: 6,
+    right: 6,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: '#EF4444',
     borderWidth: 1,
     borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchBarPill: {
     backgroundColor: '#F2F3F5',
@@ -757,6 +845,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
+  promoBadgeGreen: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#14B86E',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginBottom: 8,
+  },
+  promoBadgeGreenText: { color: '#fff', fontWeight: '800', fontSize: 12, letterSpacing: 0.4 },
   promoBannerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -768,13 +865,9 @@ const styles = StyleSheet.create({
     color: '#7D8B97',
     fontWeight: '400',
   },
-  promoBannerImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
-    marginLeft: 18,
-    backgroundColor: '#D6F5E3',
-  },
+  promoImageWrap: { width: 135, height: 86, borderRadius: 16, overflow: 'hidden', marginLeft: 18 },
+  promoImageRight: { width: '100%', height: '100%' },
+  promoRightAccent: { position: 'absolute', right: 10, top: 10, width: 8, height: 76, borderRadius: 6, opacity: 0.8 },
   sectionTitleBlack: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -782,6 +875,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 16,
     marginTop: 0,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginTop: 8,
+  },
+  sectionAccent: {
+    height: 4,
+    width: 64,
+    borderRadius: 2,
+    backgroundColor: '#1CA77C',
+    opacity: 0.25,
   },
   storesScroll: {
     paddingLeft: 20,
@@ -800,11 +907,13 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    shadowColor: '#000',
+    shadowColor: '#1CA77C',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(28,167,124,0.18)',
   },
   storeImageContainer: {
     position: 'relative',
@@ -839,9 +948,9 @@ const styles = StyleSheet.create({
     color: '#222',
     marginBottom: 3,
   },
-  storeRating: {
+  storeRatingMuted: {
     fontSize: 12,
-    color: '#7D8B97',
+    color: '#9AA6B2',
     marginBottom: 8,
   },
   storeTagsRow: {
@@ -865,7 +974,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 12,
+    padding: 14,
     gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

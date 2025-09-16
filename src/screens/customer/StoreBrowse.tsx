@@ -5,91 +5,7 @@ import { useTheme } from '../../theme/theme';
 import { useCart } from '../../context/CartContext';
 import { useProducts } from '../../context/ProductsContext';
 
-const defaultStoreData = {
-  name: 'Fresh Market Accra',
-  rating: 4.5,
-  deliveryTime: '25-35 min',
-  imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-};
-
-const categories = [
-  'All', 'Fruits', 'Vegetables', 'Dairy', 'Meat', 'Bakery', 'Beverages', 'Snacks'
-];
-
-const allProducts = [
-  {
-    id: 1,
-    name: 'Fresh Bananas',
-    price: 8.5,
-    imageUrl: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Fruits',
-    inStock: true,
-    rating: 4.2,
-  },
-  {
-    id: 2,
-    name: 'Organic Tomatoes',
-    price: 12.0,
-    imageUrl: 'https://images.unsplash.com/photo-1546470427-e26264be0b0d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Vegetables',
-    inStock: true,
-    rating: 4.5,
-  },
-  {
-    id: 3,
-    name: 'Fresh Milk 1L',
-    price: 6.5,
-    imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Dairy',
-    inStock: false,
-    rating: 4.0,
-  },
-  {
-    id: 4,
-    name: 'Chicken Breast',
-    price: 25.0,
-    imageUrl: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Meat',
-    inStock: true,
-    rating: 4.3,
-  },
-  {
-    id: 5,
-    name: 'Whole Wheat Bread',
-    price: 4.5,
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Bakery',
-    inStock: true,
-    rating: 4.1,
-  },
-  {
-    id: 6,
-    name: 'Orange Juice 500ml',
-    price: 7.0,
-    imageUrl: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Beverages',
-    inStock: true,
-    rating: 4.4,
-  },
-  {
-    id: 7,
-    name: 'Plantain Chips',
-    price: 5.5,
-    imageUrl: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Snacks',
-    inStock: true,
-    rating: 4.0,
-  },
-  {
-    id: 8,
-    name: 'Red Onions',
-    price: 3.5,
-    imageUrl: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3',
-    category: 'Vegetables',
-    inStock: true,
-    rating: 4.2,
-  },
-];
+// Categories are derived dynamically from the selected store's products
 
 function StoreHeader({ store }: any) {
   return (
@@ -119,7 +35,7 @@ function SearchBar({ value, onChange, onFilter, onVoice, onImageScan }: any) {
   );
 }
 
-function CategoryChips({ selected, onSelect }: any) {
+function CategoryChips({ selected, onSelect, categories }: any) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 10, marginLeft: 8 }}>
       {categories.map((cat) => (
@@ -210,6 +126,12 @@ export default function StoreBrowse({ navigation, route }: any) {
   // Get products from the shared context
   const storeProducts = getCustomerStoreProducts(store.id);
   
+  // Derive categories dynamically
+  const categories = useMemo(() => {
+    const unique = Array.from(new Set(storeProducts.map((p: any) => p.category)));
+    return ['All', ...unique];
+  }, [storeProducts]);
+  
   const filteredProducts = useMemo(() => {
     let prods = storeProducts;
     if (selectedCat !== 'All') {
@@ -239,7 +161,7 @@ export default function StoreBrowse({ navigation, route }: any) {
               onVoice={() => {}} 
               onImageScan={() => setImageScanVisible(true)}
             />
-            <CategoryChips selected={selectedCat} onSelect={setSelectedCat} />
+            <CategoryChips selected={selectedCat} onSelect={setSelectedCat} categories={categories} />
           </>
         }
         data={filteredProducts}

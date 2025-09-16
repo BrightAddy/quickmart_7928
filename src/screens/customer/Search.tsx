@@ -11,17 +11,19 @@ const recentQueriesInitial = ['Fan Milk', 'Titus Sardine'];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Search'>;
 
-export default function Search({ route }: Props) {
+export default function Search({ route, navigation }: Props) {
   const { colors } = useTheme();
-  const { searchProducts } = useProducts();
+  const { searchProducts, searchStores } = useProducts();
   const [query, setQuery] = useState(route?.params?.initialQuery || '');
   const [recentQueries, setRecentQueries] = useState<string[]>(recentQueriesInitial);
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [] as any[];
-    // Global search across all stores
-    return searchProducts(query.trim());
-  }, [query, searchProducts]);
+  const { productResults, storeResults } = useMemo(() => {
+    if (!query.trim()) return { productResults: [] as any[], storeResults: [] as any[] };
+    return {
+      productResults: searchProducts(query.trim()),
+      storeResults: searchStores(query.trim()),
+    };
+  }, [query, searchProducts, searchStores]);
 
   useEffect(() => {
     if (route?.params?.initialQuery) {
@@ -78,18 +80,53 @@ export default function Search({ route }: Props) {
         )}
 
         {!!query && (
-          <FlatList
-            data={results as any}
-            keyExtractor={(item: any) => String(item.id)}
-            renderItem={({ item }: any) => (
-              <View style={[styles.resultItem, { backgroundColor: colors.surface }]}>
-                <Text style={[styles.resultTitle, { color: colors.onSurface }]}>{item.name}</Text>
-                <Text style={{ color: colors.primary, fontWeight: '700' }}>GHS {Number(item.price).toFixed(2)}</Text>
-              </View>
-            )}
-            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            style={{ marginTop: 16 }}
-          />
+          <View style={{ marginTop: 16, gap: 16 }}>
+            {/* Stores section */}
+            <View>
+              <Body style={{ opacity: 0.8, marginBottom: 8 }}>Stores</Body>
+              {storeResults.length === 0 ? (
+                <Text style={{ color: colors.onSurface + '77' }}>No matching stores</Text>
+              ) : (
+                <FlatList
+                  data={storeResults as any}
+                  keyExtractor={(item: any) => String(item.id)}
+                  renderItem={({ item }: any) => (
+                    <TouchableOpacity
+                      style={[styles.resultItem, { backgroundColor: colors.surface }]}
+                      onPress={() => navigation.navigate('StoreBrowse', { store: { id: item.id, name: item.name, rating: item.rating, deliveryTime: item.deliveryTime, image: item.imageUrl } })}
+                    >
+                      <Text style={[styles.resultTitle, { color: colors.onSurface }]}>{item.name}</Text>
+                      <Text style={{ color: colors.onSurface + '77' }}>{(item.categories || []).slice(0, 2).join(' • ')}</Text>
+                    </TouchableOpacity>
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+              )}
+            </View>
+
+            {/* Products section */}
+            <View>
+              <Body style={{ opacity: 0.8, marginBottom: 8 }}>Products</Body>
+              {productResults.length === 0 ? (
+                <Text style={{ color: colors.onSurface + '77' }}>No matching products</Text>
+              ) : (
+                <FlatList
+                  data={productResults as any}
+                  keyExtractor={(item: any) => String(item.id)}
+                  renderItem={({ item }: any) => (
+                    <TouchableOpacity
+                      style={[styles.resultItem, { backgroundColor: colors.surface }]}
+                      onPress={() => navigation.navigate('ProductDetails', { product: item })}
+                    >
+                      <Text style={[styles.resultTitle, { color: colors.onSurface }]}>{item.name}</Text>
+                      <Text style={{ color: colors.primary, fontWeight: '700' }}>GHS {Number(item.price).toFixed(2)}</Text>
+                    </TouchableOpacity>
+                  )}
+                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                />
+              )}
+            </View>
+          </View>
         )}
       </View>
     </Screen>

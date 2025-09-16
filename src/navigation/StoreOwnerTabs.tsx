@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
-import { useTheme } from '../theme/theme';
+import { useTheme, ThemeOverrideProvider, storeOwnerBlueTheme } from '../theme/theme';
 import Dashboard from '../screens/storeOwner/Dashboard';
 import Orders from '../screens/storeOwner/Orders';
 import Products from '../screens/storeOwner/Products';
@@ -14,14 +14,15 @@ export default function StoreOwnerTabs() {
   const { colors } = useTheme();
 
   return (
+    <ThemeOverrideProvider theme={storeOwnerBlueTheme}>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopColor: ORANGE + '33',
+          borderTopColor: storeOwnerBlueTheme.colors.primary + '33',
         },
-        tabBarActiveTintColor: ORANGE,
+        tabBarActiveTintColor: storeOwnerBlueTheme.colors.primary,
         tabBarInactiveTintColor: '#777',
       }}
     >
@@ -46,6 +47,7 @@ export default function StoreOwnerTabs() {
         options={{ tabBarIcon: () => <Text>⚙️</Text> }}
       />
     </Tab.Navigator>
+    </ThemeOverrideProvider>
   );
 }
 
