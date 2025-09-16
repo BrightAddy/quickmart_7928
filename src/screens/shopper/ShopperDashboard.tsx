@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, Animated, Easing, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '../../components/UI';
 import { useTheme } from '../../theme/theme';
 
@@ -8,6 +9,12 @@ export default function ShopperDashboard({ navigation }: any) {
   const [isOnline, setIsOnline] = useState(false);
   const kpiFade = useRef(new Animated.Value(0)).current;
   const bannerHeight = useRef(new Animated.Value(0)).current;
+  const heroOpacity = useRef(new Animated.Value(0)).current;
+  const heroTranslate = useRef(new Animated.Value(16)).current;
+  const pulseScale = useRef(new Animated.Value(1)).current;
+  const tickerOpacity = useRef(new Animated.Value(0)).current;
+  const [tickerIndex, setTickerIndex] = useState(0);
+  const blobs = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
 
   const kpis = useMemo(() => ([
     { label: 'Earnings', value: '₵120.50' },
@@ -17,6 +24,30 @@ export default function ShopperDashboard({ navigation }: any) {
 
   useEffect(() => {
     Animated.timing(kpiFade, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+    Animated.parallel([
+      Animated.timing(heroOpacity, { toValue: 1, duration: 600, useNativeDriver: true, delay: 150 }),
+      Animated.timing(heroTranslate, { toValue: 0, duration: 600, useNativeDriver: true, delay: 150 }),
+    ]).start();
+
+    blobs.forEach((v, i) => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(v, { toValue: 1, duration: 7000 + i * 500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+          Animated.timing(v, { toValue: 0, duration: 7000 + i * 500, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        ])
+      ).start();
+    });
+
+    const interval = setInterval(() => {
+      Animated.sequence([
+        Animated.timing(tickerOpacity, { toValue: 0, duration: 220, useNativeDriver: true }),
+        Animated.timing(tickerOpacity, { toValue: 1, duration: 420, useNativeDriver: true }),
+      ]).start();
+      setTickerIndex((i) => (i + 1) % 4);
+    }, 2600);
+    Animated.timing(tickerOpacity, { toValue: 1, duration: 600, useNativeDriver: true, delay: 500 }).start();
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -29,6 +60,20 @@ export default function ShopperDashboard({ navigation }: any) {
 
   return (
     <Screen style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Decorative Background Blobs */}
+      <View pointerEvents="none" style={styles.blobsLayer}>
+        {blobs.map((v, i) => {
+          const translateY = v.interpolate({ inputRange: [0, 1], outputRange: [10 * (i + 1), -12 * (i + 1)] });
+          const translateX = v.interpolate({ inputRange: [0, 1], outputRange: [(-1) ** i * 8, (-1) ** (i + 1) * 8] });
+          const scale = v.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1.1] });
+          return (
+            <Animated.View
+              key={i}
+              style={[styles.blob, { top: 40 + i * 90, left: 20 + (i % 3) * 110, transform: [{ translateY }, { translateX }, { scale }], backgroundColor: i % 2 ? colors.primary + '22' : '#FFE0B2' }]}
+            />
+          );
+        })}
+      </View>
       <Animated.View style={[styles.banner, { backgroundColor: isOnline ? '#DCFCE7' : '#F3F4F6', height: bannerHeight }]}> 
         {isOnline && <Text style={[styles.bannerText, { color: '#065F46' }]}>You are Online</Text>}
       </Animated.View>
@@ -40,6 +85,31 @@ export default function ShopperDashboard({ navigation }: any) {
           <Switch value={isOnline} onValueChange={setIsOnline} thumbColor={'#fff'} trackColor={{ false: '#d1d5db', true: colors.primary }} />
         </View>
       </View>
+
+      {/* Hero Card */}
+      <Animated.View style={{ opacity: heroOpacity, transform: [{ translateY: heroTranslate }] }}>
+        <LinearGradient colors={[colors.primary + '1A', '#FFFFFF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.hero, { borderColor: colors.primary + '33' }]}> 
+          <View style={styles.heroLeft}>
+            <Text style={[styles.heroTitle, { color: colors.onBackground }]}>Deliver. Earn. Grow.</Text>
+            <Animated.Text style={[styles.ticker, { color: colors.onSurface + 'CC', opacity: tickerOpacity }]}>
+              {['Earn weekly payouts', 'Flexible shifts', '24/7 support', 'Secure payments'][tickerIndex]}
+            </Animated.Text>
+            <Animated.View style={{ transform: [{ scale: pulseScale }] }}>
+              <TouchableOpacity
+                onPressIn={() => Animated.spring(pulseScale, { toValue: 0.98, useNativeDriver: true }).start()}
+                onPressOut={() => Animated.spring(pulseScale, { toValue: 1, useNativeDriver: true }).start()}
+                onPress={() => setIsOnline(!isOnline)}
+                style={[styles.heroCta, { backgroundColor: colors.primary }]}
+              >
+                <Text style={styles.heroCtaText}>{isOnline ? 'Go Offline' : 'Go Online'}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+          <View style={styles.heroRight}>
+            <Text style={styles.heroEmoji}>🚚</Text>
+          </View>
+        </LinearGradient>
+      </Animated.View>
 
       <Animated.View style={{ opacity: kpiFade, transform: [{ translateY: kpiFade.interpolate({ inputRange: [0,1], outputRange: [10,0] }) }] }}>
         <View style={styles.kpiRow}>
@@ -121,6 +191,16 @@ const styles = StyleSheet.create({
   tile: { width: '47%', borderWidth: 1, borderRadius: 12, padding: 16, alignItems: 'center' },
   tileIcon: { fontSize: 22, marginBottom: 8 },
   tileLabel: { fontSize: 14, fontWeight: '700' },
+  blobsLayer: { position: 'absolute', width: '100%', height: '100%' },
+  blob: { position: 'absolute', width: 120, height: 120, borderRadius: 80, opacity: 0.6 },
+  hero: { marginHorizontal: 16, marginTop: 12, borderRadius: 16, padding: 16, borderWidth: 1, flexDirection: 'row', alignItems: 'center' },
+  heroLeft: { flex: 1 },
+  heroRight: { paddingLeft: 12 },
+  heroEmoji: { fontSize: 44 },
+  heroTitle: { fontSize: 20, fontWeight: '900' },
+  ticker: { marginTop: 4 },
+  heroCta: { marginTop: 12, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', alignSelf: 'flex-start', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
+  heroCtaText: { color: 'white', fontWeight: '800' },
   taskCard: { flexDirection: 'row', borderWidth: 1, borderRadius: 14, marginHorizontal: 16, padding: 14, alignItems: 'center' },
   taskLeft: { flex: 1 },
   taskTitle: { fontSize: 16, fontWeight: '800' },

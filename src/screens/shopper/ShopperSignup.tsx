@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text, ScrollView, Animated, Dimensions } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Text, ScrollView, Animated, Dimensions, Image, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,26 +17,27 @@ function LanguageSelector({ selected, onChange }: { selected: string; onChange: 
   );
 }
 
-function SocialSignup({ onGoogle, onApple }: { onGoogle: () => void; onApple: () => void }) {
-  return (
-    <View style={styles.socialRow}>
-      <TouchableOpacity style={styles.socialBtn} onPress={onGoogle}>
-        <Text style={styles.socialText}>Continue with Google</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.socialBtn} onPress={onApple}>
-        <Text style={styles.socialText}>Continue with Apple</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+// Social signup removed as per security requirements
 
 export default function ShopperSignup({ navigation }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [address, setAddress] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
+  const [ghanaCardNumber, setGhanaCardNumber] = useState('');
+  const [ghanaCardExpiry, setGhanaCardExpiry] = useState('');
+  const [ghanaCardFront, setGhanaCardFront] = useState<string | null>(null);
+  const [ghanaCardBack, setGhanaCardBack] = useState<string | null>(null);
+  const [passportPhoto, setPassportPhoto] = useState<string | null>(null);
+  const [payoutMethod, setPayoutMethod] = useState<'momo' | 'bank'>('momo');
+  const [momoProvider, setMomoProvider] = useState('');
+  const [momoNumber, setMomoNumber] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankAccountName, setBankAccountName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedLang, setSelectedLang] = useState('en');
@@ -74,11 +76,114 @@ export default function ShopperSignup({ navigation }: Props) {
   }, []);
 
   const nextStep = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleSignup();
+    // Step-by-step validation gate
+    switch (currentStep) {
+      case 1: {
+        if (!firstName.trim() || !lastName.trim() || !address.trim()) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Champs requis' : 'Required fields',
+            selectedLang === 'fr'
+              ? 'Veuillez saisir le prénom, le nom et l\'adresse.'
+              : 'Please enter first name, last name, and residential address.'
+          );
+          return;
+        }
+        break;
+      }
+      case 2: {
+        const emailOk = /.+@.+\..+/.test(email.trim());
+        const phoneOk = phone.trim().length >= 7;
+        if (!emailOk || !phoneOk) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Informations de contact invalides' : 'Invalid contact information',
+            selectedLang === 'fr'
+              ? 'Vérifiez votre email et votre numéro de téléphone.'
+              : 'Please check your email and phone number.'
+          );
+          return;
+        }
+        break;
+      }
+      case 3: {
+        if (!vehicleType.trim() || !licenseNumber.trim()) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Détails du véhicule requis' : 'Vehicle details required',
+            selectedLang === 'fr'
+              ? 'Saisissez le type de véhicule et le numéro de permis.'
+              : 'Please enter vehicle type and license number.'
+          );
+        return;
+        }
+        break;
+      }
+      case 4: {
+        if (!ghanaCardNumber.trim() || !ghanaCardFront || !ghanaCardBack) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Informations manquantes' : 'Missing information',
+            selectedLang === 'fr'
+              ? "Veuillez fournir le numéro de la Ghana Card, la photo recto et verso."
+              : 'Please provide the Ghana Card number, and upload both front and back photos.'
+          );
+          return;
+        }
+        break;
+      }
+      case 5: {
+        if (!passportPhoto) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Photo requise' : 'Photo required',
+            selectedLang === 'fr'
+              ? 'Veuillez prendre une photo de type passeport (selfie).'
+              : 'Please take a passport-style live selfie photo.'
+          );
+          return;
+        }
+        break;
+      }
+      case 6: {
+        if (payoutMethod === 'momo') {
+          if (!momoProvider.trim() || !momoNumber.trim()) {
+            Alert.alert(
+              selectedLang === 'fr' ? 'Paiement mobile requis' : 'Mobile money required',
+              selectedLang === 'fr'
+                ? 'Fournissez un opérateur MoMo et un numéro.'
+                : 'Please provide a MoMo provider and a phone number.'
+            );
+            return;
+          }
+        } else {
+          if (!bankName.trim() || !bankAccountName.trim() || !bankAccountNumber.trim()) {
+            Alert.alert(
+              selectedLang === 'fr' ? 'Détails bancaires requis' : 'Bank details required',
+              selectedLang === 'fr'
+                ? 'Fournissez la banque, le nom du compte et le numéro de compte.'
+                : 'Please provide bank name, account name, and account number.'
+            );
+            return;
+          }
+        }
+        break;
+      }
+      case 7: {
+        const strong = password.length >= 8;
+        const match = password === confirmPassword && confirmPassword.length > 0;
+        if (!strong || !match) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Mot de passe invalide' : 'Invalid password',
+            selectedLang === 'fr'
+              ? 'Le mot de passe doit contenir au moins 8 caractères et correspondre.'
+              : 'Password must be at least 8 characters and match confirmation.'
+          );
+          return;
+        }
+        // All validations passed on last step
+        handleSignup();
+        return;
+      }
     }
+
+    // Advance to the next step if validation passed
+    setCurrentStep(currentStep + 1);
   };
 
   const prevStep = () => {
@@ -115,6 +220,12 @@ export default function ShopperSignup({ navigation }: Props) {
           placeholder={selectedLang === 'fr' ? 'Nom de famille' : 'Last Name'}
           value={lastName}
           onChangeText={setLastName}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Adresse résidentielle' : 'Residential Address'}
+          value={address}
+          onChangeText={setAddress}
           style={styles.input}
         />
       </View>
@@ -182,7 +293,239 @@ export default function ShopperSignup({ navigation }: Props) {
     </View>
   );
 
-  const renderStep4 = () => (
+  const requestMediaPermissions = async () => {
+    const lib = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (lib.status !== 'granted') {
+      Alert.alert(
+        selectedLang === 'fr' ? 'Permission requise' : 'Permission required',
+        selectedLang === 'fr' ? "Autorisez l'accès à la galerie pour continuer." : 'Please allow gallery access to continue.'
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const requestCameraPermissions = async () => {
+    const cam = await ImagePicker.requestCameraPermissionsAsync();
+    if (cam.status !== 'granted') {
+      Alert.alert(
+        selectedLang === 'fr' ? 'Permission requise' : 'Permission required',
+        selectedLang === 'fr' ? "Autorisez l'appareil photo pour continuer." : 'Please allow camera access to continue.'
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const chooseImage = async (side: 'front' | 'back') => {
+    Alert.alert(
+      selectedLang === 'fr' ? 'Ajouter une photo' : 'Add Photo',
+      selectedLang === 'fr' ? 'Choisissez une source' : 'Choose a source',
+      [
+        {
+          text: selectedLang === 'fr' ? 'Caméra' : 'Camera',
+          onPress: async () => {
+            const ok = await requestCameraPermissions();
+            if (!ok) return;
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 0.7,
+            });
+            if (!result.canceled && result.assets && result.assets[0]) {
+              const uri = result.assets[0].uri;
+              side === 'front' ? setGhanaCardFront(uri) : setGhanaCardBack(uri);
+            }
+          }
+        },
+        {
+          text: selectedLang === 'fr' ? 'Galerie' : 'Gallery',
+          onPress: async () => {
+            const ok = await requestMediaPermissions();
+            if (!ok) return;
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 0.7,
+            });
+            if (!result.canceled && result.assets && result.assets[0]) {
+              const uri = result.assets[0].uri;
+              side === 'front' ? setGhanaCardFront(uri) : setGhanaCardBack(uri);
+            }
+          }
+        },
+        { text: selectedLang === 'fr' ? 'Annuler' : 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const captureSelfie = async () => {
+    const ok = await requestCameraPermissions();
+    if (!ok) return;
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      cameraType: ImagePicker.CameraType.front,
+    });
+    if (!result.canceled && result.assets && result.assets[0]) {
+      setPassportPhoto(result.assets[0].uri);
+    }
+  };
+
+  const renderStep4GhanaCard = () => (
+    <View style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>
+        {selectedLang === 'fr' ? 'Informations de la Ghana Card' : 'Ghana Card Information'}
+      </Text>
+      <Text style={styles.stepDescription}>
+        {selectedLang === 'fr' 
+          ? "Entrez les détails de votre Ghana Card pour vérification"
+          : 'Enter your Ghana Card details for verification'
+        }
+      </Text>
+      
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Numéro de Ghana Card' : 'Ghana Card Number (e.g., GHA-123456789-0)'}
+          value={ghanaCardNumber}
+          onChangeText={setGhanaCardNumber}
+          style={styles.input}
+          autoCapitalize="characters"
+        />
+        <TextInput
+          placeholder={selectedLang === 'fr' ? 'Date d\'expiration (AAAA-MM)' : 'Expiry Date (YYYY-MM)'}
+          value={ghanaCardExpiry}
+          onChangeText={setGhanaCardExpiry}
+          style={styles.input}
+          keyboardType="numbers-and-punctuation"
+        />
+        <View style={styles.uploadRow}>
+          <TouchableOpacity style={styles.uploadBox} onPress={() => chooseImage('front')}>
+            {ghanaCardFront ? (
+              <Image source={{ uri: ghanaCardFront }} style={styles.uploadPreview} />
+            ) : (
+              <Text style={styles.uploadText}>
+                {selectedLang === 'fr' ? 'Recto Ghana Card' : 'Front of Ghana Card'}
+              </Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.uploadBox} onPress={() => chooseImage('back')}>
+            {ghanaCardBack ? (
+              <Image source={{ uri: ghanaCardBack }} style={styles.uploadPreview} />
+            ) : (
+              <Text style={styles.uploadText}>
+                {selectedLang === 'fr' ? 'Verso Ghana Card' : 'Back of Ghana Card'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+
+  const renderStep5Passport = () => (
+    <View style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>
+        {selectedLang === 'fr' ? 'Photo de passeport en direct' : 'Live Passport Photo'}
+      </Text>
+      <Text style={styles.stepDescription}>
+        {selectedLang === 'fr' 
+          ? "Prenez un selfie clair, bien éclairé, visage centré, sans chapeau."
+          : 'Take a clear, well‑lit selfie with your face centered. No hats or sunglasses.'
+        }
+      </Text>
+      <View style={styles.inputContainer}>
+        <TouchableOpacity style={styles.uploadBox} onPress={captureSelfie}>
+          {passportPhoto ? (
+            <Image source={{ uri: passportPhoto }} style={styles.uploadPreview} />
+          ) : (
+            <Text style={styles.uploadText}>
+              {selectedLang === 'fr' ? 'Touchez pour capturer un selfie' : 'Tap to capture selfie'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderStep6 = () => (
+    <View style={styles.stepContainer}>
+      <Text style={styles.stepTitle}>
+        {selectedLang === 'fr' ? 'Coordonnées de paiement' : 'Payout Details'}
+      </Text>
+      <Text style={styles.stepDescription}>
+        {selectedLang === 'fr'
+          ? 'Choisissez un mode de paiement pour recevoir vos gains.'
+          : 'Choose how you want to receive your earnings.'}
+      </Text>
+      <View style={styles.inputContainer}>
+        <View style={styles.segmentedRow}>
+          <TouchableOpacity
+            onPress={() => setPayoutMethod('momo')}
+            style={[styles.segmentBtn, payoutMethod === 'momo' && styles.segmentBtnActive]}
+          >
+            <Text style={[styles.segmentText, payoutMethod === 'momo' && styles.segmentTextActive]}>
+              {selectedLang === 'fr' ? 'Mobile Money' : 'Mobile Money'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setPayoutMethod('bank')}
+            style={[styles.segmentBtn, payoutMethod === 'bank' && styles.segmentBtnActive]}
+          >
+            <Text style={[styles.segmentText, payoutMethod === 'bank' && styles.segmentTextActive]}>
+              {selectedLang === 'fr' ? 'Banque' : 'Bank'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {payoutMethod === 'momo' ? (
+          <View style={{ gap: 16 }}>
+            <TextInput
+              placeholder={selectedLang === 'fr' ? 'Opérateur (MTN, AirtelTigo, Vodafone)' : 'Provider (MTN, AirtelTigo, Vodafone)'}
+              value={momoProvider}
+              onChangeText={setMomoProvider}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder={selectedLang === 'fr' ? 'Numéro Mobile Money' : 'Mobile Money Number'}
+              value={momoNumber}
+              onChangeText={setMomoNumber}
+              style={styles.input}
+              keyboardType="phone-pad"
+            />
+          </View>
+        ) : (
+          <View style={{ gap: 16 }}>
+            <TextInput
+              placeholder={selectedLang === 'fr' ? 'Nom de la banque' : 'Bank Name'}
+              value={bankName}
+              onChangeText={setBankName}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder={selectedLang === 'fr' ? 'Nom du titulaire du compte' : 'Account Name'}
+              value={bankAccountName}
+              onChangeText={setBankAccountName}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder={selectedLang === 'fr' ? 'Numéro de compte' : 'Account Number'}
+              value={bankAccountNumber}
+              onChangeText={setBankAccountNumber}
+              style={styles.input}
+              keyboardType="number-pad"
+            />
+          </View>
+        )}
+      </View>
+    </View>
+  );
+
+  const renderStep7 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
         {selectedLang === 'fr' ? 'Sécurité' : 'Security'}
@@ -218,7 +561,10 @@ export default function ShopperSignup({ navigation }: Props) {
       case 1: return renderStep1();
       case 2: return renderStep2();
       case 3: return renderStep3();
-      case 4: return renderStep4();
+      case 4: return renderStep4GhanaCard();
+      case 5: return renderStep5Passport();
+      case 6: return renderStep6();
+      case 7: return renderStep7();
       default: return renderStep1();
     }
   };
@@ -263,7 +609,7 @@ export default function ShopperSignup({ navigation }: Props) {
 
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2, 3, 4, 5, 6, 7].map((step) => (
             <View
               key={step}
               style={[
@@ -300,7 +646,7 @@ export default function ShopperSignup({ navigation }: Props) {
           
           <TouchableOpacity onPress={nextStep} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>
-              {currentStep === 4 
+              {currentStep === 7 
                 ? (selectedLang === 'fr' ? 'Créer le compte' : 'Create Account')
                 : (selectedLang === 'fr' ? 'Suivant' : 'Next')
               }
@@ -308,16 +654,7 @@ export default function ShopperSignup({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Social Signup */}
-        <View style={styles.socialSection}>
-          <Text style={styles.socialDivider}>
-            {selectedLang === 'fr' ? 'ou' : 'or'}
-          </Text>
-          <SocialSignup
-            onGoogle={() => alert('Google signup will be available soon')}
-            onApple={() => alert('Apple signup will be available soon')}
-          />
-        </View>
+        {/* Social signup intentionally removed */}
 
         {/* Login Link */}
         <View style={styles.loginSection}>
@@ -505,36 +842,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-  socialSection: {
-    paddingHorizontal: 30,
-    paddingBottom: 20,
-  },
-  socialDivider: {
-    textAlign: 'center',
-    color: '#666',
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  socialRow: {
+  // Social styles removed
+  segmentedRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
+    backgroundColor: 'rgba(255,152,0,0.08)',
+    borderRadius: 12,
+    padding: 6,
+    gap: 6,
   },
-  socialBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
-  socialText: {
-    color: '#333',
+  segmentBtnActive: {
+    backgroundColor: '#FF9800',
+  },
+  segmentText: {
+    color: '#FF9800',
     fontWeight: '600',
-    fontSize: 14,
+  },
+  segmentTextActive: {
+    color: 'white',
   },
   loginSection: {
     alignItems: 'center',
@@ -547,5 +878,37 @@ const styles = StyleSheet.create({
   loginLink: {
     color: '#FF9800',
     fontWeight: 'bold',
+  },
+  uploadRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  uploadBox: {
+    flex: 1,
+    height: 120,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 152, 0, 0.3)',
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  uploadText: {
+    color: '#999',
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  uploadPreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 14,
+  },
+  selfieHelp: {
+    color: '#666',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
