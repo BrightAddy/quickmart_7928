@@ -151,7 +151,7 @@ export default function ShopperSignup({ navigation }: Props) {
             );
             return;
           }
-        } else {
+    } else {
           if (!bankName.trim() || !bankAccountName.trim() || !bankAccountNumber.trim()) {
             Alert.alert(
               selectedLang === 'fr' ? 'Détails bancaires requis' : 'Bank details required',
@@ -177,7 +177,7 @@ export default function ShopperSignup({ navigation }: Props) {
           return;
         }
         // All validations passed on last step
-        handleSignup();
+      handleSignup();
         return;
       }
     }
