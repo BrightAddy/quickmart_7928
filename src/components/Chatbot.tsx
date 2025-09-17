@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Dimensions,
   Image,
+  ImageStyle,
   Animated,
   KeyboardAvoidingView,
   Platform,
@@ -485,7 +486,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: screenHeight * 0.8,
+    height: screenHeight * 0.9,
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -640,7 +641,7 @@ const styles = StyleSheet.create({
   productImage: {
     width: '100%',
     height: 80,
-  },
+  } as ImageStyle,
   productInfo: {
     padding: 8,
   },
@@ -714,7 +715,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 8,
     marginBottom: 4,
-  },
+  } as ImageStyle,
   cartItemName: {
     fontSize: 10,
     color: '#333',
@@ -833,13 +834,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   typingDot1: {
-    animationDelay: '0s',
+    // animationDelay: '0s', // Not supported in React Native styles
   },
   typingDot2: {
-    animationDelay: '0.2s',
+    // animationDelay: '0.2s', // Not supported in React Native styles
   },
   typingDot3: {
-    animationDelay: '0.4s',
+    // animationDelay: '0.4s', // Not supported in React Native styles
   },
   typingText: {
     fontSize: 12,

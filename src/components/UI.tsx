@@ -544,105 +544,6 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
     }
   }, [isTyping]);
 
-  const generateSmartResponse = (userMessage: string): ChatMessage => {
-    const lowerMsg = userMessage.toLowerCase();
-    
-    // Order tracking responses
-    if (lowerMsg.includes('order') || lowerMsg.includes('delivery') || lowerMsg.includes('track')) {
-      const responses = {
-        en: "I can help you track your order! Your delivery is currently on its way. Here's the live location:",
-        tw: "Metumi aboa wo ma wo nhwɛ wo order! Wo delivery reba ɛnnɛ. Hwɛ location ha:",
-        ga: "Mi mate ŋu akpe wɔ order tracking! Wɔ delivery gbɛɛ lɛ. Yɛ location lɛ ni:",
-        ew: "Mate ŋu akpe wò be nàkpɔ wò order! Wò delivery le mɔ dzi gbɔna. Teƒe si wòle la nye:"
-      };
-      return {
-        text: responses[lang],
-        from: 'bot',
-        type: 'visual',
-        timestamp: new Date(),
-        visualData: {
-          type: 'map',
-          data: { lat: 5.6037, lng: -0.1870, address: 'Accra, Ghana' }
-        }
-      };
-    }
-
-    // Product help
-    if (lowerMsg.includes('product') || lowerMsg.includes('item') || lowerMsg.includes('find')) {
-      const responses = {
-        en: "I can help you find products! Here are some popular items:",
-        tw: "Metumi aboa wo ma wo nya nneɛma! Yei ne nneɛma a nnipa pɛ pii:",
-        ga: "Mi mate ŋu akpe wɔ nɛ mi nya nɛɛma! Lɛɛ nɛɛma lɛ nnipa lɔɔ pii:",
-        ew: "Mate ŋu akpe wò nàdi nusiwo! Nusi siwo amewo lɔ̃na wu la woe nye:"
-      };
-      return {
-        text: responses[lang],
-        from: 'bot',
-        type: 'visual',
-        timestamp: new Date(),
-        visualData: {
-          type: 'product',
-          data: [
-            { name: 'Fresh Tomatoes', price: 'GH₵ 5.50', image: '🍅' },
-            { name: 'Rice (5kg)', price: 'GH₵ 25.00', image: '🍚' },
-            { name: 'Palm Oil', price: 'GH₵ 15.00', image: '🫒' }
-          ]
-        }
-      };
-    }
-
-    // Payment help
-    if (lowerMsg.includes('payment') || lowerMsg.includes('pay') || lowerMsg.includes('money')) {
-      const responses = {
-        en: "I can help with payments! We accept Mobile Money (MTN MoMo, Vodafone Cash), cards, and cash on delivery.",
-        tw: "Metumi aboa wo wɔ payment ho! Yɛgye Mobile Money (MTN MoMo, Vodafone Cash), cards, ne cash on delivery.",
-        ga: "Mi mate ŋu akpe wɔ payment ho! Mi gbe Mobile Money (MTN MoMo, Vodafone Cash), cards, kɛ cash on delivery.",
-        ew: "Mate ŋu akpe wò le ga xexe me! Míexɔa Mobile Money (MTN MoMo, Vodafone Cash), kaɖiwo, kple ga si woaxe le aƒe me."
-      };
-      return {
-        text: responses[lang],
-        from: 'bot',
-        type: 'text',
-        timestamp: new Date()
-      };
-    }
-
-    // Default responses
-    const defaultResponses = {
-      en: [
-        'I understand! Let me help you with that.',
-        'Sure, I can assist you with your QuickMart needs.',
-        'Let me check that for you right away!',
-        'Great question! Here\'s what I can help with...'
-      ],
-      tw: [
-        'Mete ase! Ma me mmoa wo.',
-        'Ampa, metumi aboa wo wɔ QuickMart ho.',
-        'Ma me nhwɛ ma wo ntɛmntɛm!',
-        'Asɛm pa! Yei ne deɛ metumi aboa wo...'
-      ],
-      ga: [
-        'Mi tɛ! Ma mi akpe wɔ.',
-        'Ampa, mi mate ŋu akpe wɔ QuickMart ho.',
-        'Ma mi lɔɔ lɛ ma wɔ ntɛmntɛm!',
-        'Asɛm fɛɛ! Lɛɛ mi mate ŋu akpe wɔ...'
-      ],
-      ew: [
-        'Mese egɔme! Na makpe wò.',
-        'Nyateƒe, mate ŋu akpe wò le QuickMart ŋuti.',
-        'Na makpɔe na wò enumake!',
-        'Biabia nyui! Nu si ŋu mate ŋu akpe wò le enye...'
-      ]
-    };
-
-    const randomResponse = defaultResponses[lang][Math.floor(Math.random() * defaultResponses[lang].length)];
-    return {
-      text: randomResponse,
-      from: 'bot',
-      type: 'text',
-      timestamp: new Date()
-    };
-  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -652,65 +553,18 @@ export const ChatbotModal: React.FC<{ visible: boolean; onClose: () => void }> =
     setInput('');
     setIsTyping(true);
 
-    try {
-      const parsed = await parser.parse({ text });
-      const result = await orchestrator.handle(parsed);
+    // Simulate thinking delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (result.action?.type === 'SHOW_PRODUCTS') {
-        const personalized = applyPersonalization(result.action.products || []);
-        const productCards = personalized.slice(0, 8).map((p: any) => ({
-          name: p.name,
-          price: `GH₵ ${Number(p.price).toFixed(2)}`,
-          image: p.imageUrl || '🛒',
-          _candidate: p,
-        }));
-        const msg: ChatMessage = {
-          text: productCards.length ? 'Here are some matches:' : 'No matches found for your request.',
-          from: 'bot',
-          type: 'visual',
-          timestamp: new Date(),
-          visualData: { type: 'product', data: productCards }
-        };
-        setMessages(prev => [msg, ...prev]);
-        speakText(productCards.length ? 'I found some matches.' : 'No matches found.');
-
-        // Pharmacy guardrail disclaimer when medicines/OTC are present
-        const hasPharmacy = (result.action.products || []).some((p: any) => {
-          const c = (p.category || '').toLowerCase();
-          return c === 'medicines' || c === 'otc' || c === 'supplements' || c === 'first aid' || c === 'personal care';
-        });
-        if (hasPharmacy) {
-          const disclaimer: ChatMessage = {
-            text: 'Note: We only support OTC items in-app. Prescription medicines require pharmacist verification. This assistant does not provide medical advice.',
-            from: 'bot',
-            type: 'text',
-            timestamp: new Date(),
-            actions: [{ id: 'request_pharmacist', label: 'Request pharmacist callback' }]
-          };
-          setMessages(prev => [disclaimer, ...prev]);
-        }
-      } else if (result.action?.type === 'MESSAGE') {
-        const msg: ChatMessage = { text: result.action.text, from: 'bot', type: 'text', timestamp: new Date() };
-        setMessages(prev => [msg, ...prev]);
-        speakText(result.action.text);
-      } else if (result.action?.type === 'SPLIT_PROPOSAL') {
-        const p = result.action.proposal;
-        const text = `I recommend splitting your basket across ${p.stores.length} stores. Delivery total GH₵ ${p.totalDelivery}.`;
-        const details = p.stores.map(s => `${s.storeName}: ${s.itemCount} items, ${s.eta}, fee GH₵ ${s.deliveryFee}`).join('\n');
-        const msg: ChatMessage = { text: text + '\n' + details, from: 'bot', type: 'text', timestamp: new Date() };
-        setMessages(prev => [msg, ...prev]);
-        speakText('I recommend splitting your basket across multiple stores.');
-      } else {
-        const fallback = generateSmartResponse(text);
-        setMessages(prev => [fallback, ...prev]);
-        speakText(fallback.text);
-      }
-    } catch (e) {
-      const errMsg: ChatMessage = { text: 'Sorry, something went wrong. Please try again.', from: 'bot', type: 'text', timestamp: new Date() };
-      setMessages(prev => [errMsg, ...prev]);
-    } finally {
-      setIsTyping(false);
-    }
+    // Show API key requirement message instead of generating responses
+    const apiKeyMessage: ChatMessage = {
+      text: 'Chatbot functionality requires API key configuration. Please contact support to enable this feature.',
+      from: 'bot',
+      type: 'text',
+      timestamp: new Date()
+    };
+    setMessages(prev => [apiKeyMessage, ...prev]);
+    setIsTyping(false);
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => (
@@ -1447,7 +1301,7 @@ const imageStyles = StyleSheet.create({
 
 const chatbotStyles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modal: { minHeight: 500, maxHeight: '90%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 12, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 8 },
+  modal: { height: '90%', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 12, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.15, shadowRadius: 8 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1 },
   headerText: { fontWeight: 'bold', fontSize: 18 },
   headerSubtext: { fontSize: 12, marginTop: 2 },
