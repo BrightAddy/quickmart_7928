@@ -33,6 +33,7 @@ export type RootStackParamList = {
   OrderTracking: { order: any };
   EditProfile: undefined;
   Profile: undefined;
+  ShopperChat: undefined;
 };
 
 

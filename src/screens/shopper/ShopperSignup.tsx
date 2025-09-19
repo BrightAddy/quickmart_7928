@@ -27,6 +27,7 @@ export default function ShopperSignup({ navigation }: Props) {
   const [phone, setPhone] = useState('');
   const [vehicleType, setVehicleType] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
+  const [showVehicleDropdown, setShowVehicleDropdown] = useState(false);
   const [ghanaCardNumber, setGhanaCardNumber] = useState('');
   const [ghanaCardExpiry, setGhanaCardExpiry] = useState('');
   const [ghanaCardFront, setGhanaCardFront] = useState<string | null>(null);
@@ -75,6 +76,11 @@ export default function ShopperSignup({ navigation }: Props) {
     ]).start();
   }, []);
 
+  // Close dropdown when step changes
+  useEffect(() => {
+    setShowVehicleDropdown(false);
+  }, [currentStep]);
+
   const nextStep = () => {
     // Step-by-step validation gate
     switch (currentStep) {
@@ -105,14 +111,24 @@ export default function ShopperSignup({ navigation }: Props) {
         break;
       }
       case 3: {
-        if (!vehicleType.trim() || !licenseNumber.trim()) {
+        if (!vehicleType.trim()) {
           Alert.alert(
-            selectedLang === 'fr' ? 'Détails du véhicule requis' : 'Vehicle details required',
+            selectedLang === 'fr' ? 'Type de véhicule requis' : 'Vehicle type required',
             selectedLang === 'fr'
-              ? 'Saisissez le type de véhicule et le numéro de permis.'
-              : 'Please enter vehicle type and license number.'
+              ? 'Veuillez sélectionner un type de véhicule.'
+              : 'Please select a vehicle type.'
           );
-        return;
+          return;
+        }
+        // Only require license number for vehicles that need it
+        if (vehicleType !== 'No Vehicle' && !licenseNumber.trim()) {
+          Alert.alert(
+            selectedLang === 'fr' ? 'Numéro de permis requis' : 'License number required',
+            selectedLang === 'fr'
+              ? 'Veuillez saisir le numéro de permis pour ce type de véhicule.'
+              : 'Please enter license number for this vehicle type.'
+          );
+          return;
         }
         break;
       }
@@ -264,6 +280,12 @@ export default function ShopperSignup({ navigation }: Props) {
     </View>
   );
 
+  const vehicleOptions = [
+    { value: 'Car', label: selectedLang === 'fr' ? 'Voiture' : 'Car' },
+    { value: 'Motorcycle', label: selectedLang === 'fr' ? 'Moto' : 'Motorcycle' },
+    { value: 'No Vehicle', label: selectedLang === 'fr' ? 'Aucun véhicule' : 'No Vehicle' },
+  ];
+
   const renderStep3 = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.stepTitle}>
@@ -277,18 +299,76 @@ export default function ShopperSignup({ navigation }: Props) {
       </Text>
       
       <View style={styles.inputContainer}>
-        <TextInput
-          placeholder={selectedLang === 'fr' ? 'Type de véhicule' : 'Vehicle Type (Car, Bike, etc.)'}
-          value={vehicleType}
-          onChangeText={setVehicleType}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder={selectedLang === 'fr' ? 'Numéro de licence' : 'License Number'}
-          value={licenseNumber}
-          onChangeText={setLicenseNumber}
-          style={styles.input}
-        />
+        {/* Vehicle Type Dropdown */}
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            style={[styles.dropdownButton, showVehicleDropdown && styles.dropdownButtonOpen]}
+            onPress={() => setShowVehicleDropdown(!showVehicleDropdown)}
+          >
+            <Text style={[styles.dropdownButtonText, !vehicleType && styles.placeholderText]}>
+              {vehicleType 
+                ? vehicleOptions.find(option => option.value === vehicleType)?.label
+                : (selectedLang === 'fr' ? 'Sélectionner le type de véhicule' : 'Select Vehicle Type')
+              }
+            </Text>
+            <Text style={styles.dropdownArrow}>{showVehicleDropdown ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+          
+          {showVehicleDropdown && (
+            <View style={styles.dropdownList}>
+              {vehicleOptions.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.dropdownItem,
+                    vehicleType === option.value && styles.dropdownItemSelected
+                  ]}
+                  onPress={() => {
+                    setVehicleType(option.value);
+                    setShowVehicleDropdown(false);
+                    // Clear license number if no vehicle is selected
+                    if (option.value === 'No Vehicle') {
+                      setLicenseNumber('');
+                    }
+                  }}
+                >
+                  <Text style={[
+                    styles.dropdownItemText,
+                    vehicleType === option.value && styles.dropdownItemTextSelected
+                  ]}>
+                    {option.label}
+                  </Text>
+                  {vehicleType === option.value && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* License Number - Only show for vehicles that require it */}
+        {(vehicleType && vehicleType !== 'No Vehicle') && (
+          <TextInput
+            placeholder={selectedLang === 'fr' ? 'Numéro de licence' : 'License Number'}
+            value={licenseNumber}
+            onChangeText={setLicenseNumber}
+            style={styles.input}
+          />
+        )}
+
+        {/* Info text for no vehicle option */}
+        {vehicleType === 'No Vehicle' && (
+          <View style={styles.infoContainer}>
+            <Text style={styles.infoIcon}>ℹ️</Text>
+            <Text style={styles.infoText}>
+              {selectedLang === 'fr' 
+                ? 'Aucun numéro de licence requis pour cette option.'
+                : 'No license number required for this option.'
+              }
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -910,5 +990,109 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 8,
+  },
+  // Dropdown styles
+  dropdownContainer: {
+    position: 'relative',
+    zIndex: 1000,
+  },
+  dropdownButton: {
+    borderWidth: 2,
+    borderColor: 'rgba(255, 152, 0, 0.2)',
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  dropdownButtonOpen: {
+    borderColor: '#FF9800',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    color: '#000',
+    flex: 1,
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  dropdownArrow: {
+    fontSize: 12,
+    color: '#FF9800',
+    marginLeft: 8,
+  },
+  dropdownList: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: '#FF9800',
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 1001,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 152, 0, 0.1)',
+  },
+  dropdownItemSelected: {
+    backgroundColor: 'rgba(255, 152, 0, 0.05)',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+    color: '#000',
+    flex: 1,
+  },
+  dropdownItemTextSelected: {
+    color: '#FF9800',
+    fontWeight: '600',
+  },
+  checkmark: {
+    fontSize: 16,
+    color: '#FF9800',
+    fontWeight: 'bold',
+  },
+  // Info container styles
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  infoIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#1976D2',
+    flex: 1,
+    lineHeight: 20,
   },
 });

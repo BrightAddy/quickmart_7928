@@ -20,6 +20,9 @@ export interface Order {
   store: string;
   address: string;
   paymentMethod: string;
+  deliveryMethod?: string;
+  deliveryMethodEmoji?: string;
+  estimatedDeliveryTime?: string;
   status: 'pending' | 'confirmed' | 'preparing' | 'on_the_way' | 'delivered' | 'cancelled';
   createdAt: Date;
   estimatedDelivery?: Date;

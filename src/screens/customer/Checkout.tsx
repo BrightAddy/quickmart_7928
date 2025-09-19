@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert, Animated, Image } from 'react-native';
 import { Screen } from '../../components/UI';
 import { useTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +35,7 @@ export default function Checkout({ route, navigation }: any) {
 
   const [selectedAddress, setSelectedAddress] = useState('home');
   const [selectedPayment, setSelectedPayment] = useState('momo');
+  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState('shop_for_me');
   const [editAddressModal, setEditAddressModal] = useState(false);
   const [editPaymentModal, setEditPaymentModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -56,6 +57,32 @@ export default function Checkout({ route, navigation }: any) {
     { id: 'visa', type: 'card', name: 'Visacard', masked: '**** 7206', logo: '💳' },
     { id: 'momo', type: 'mobile', name: 'MTN MoMo', masked: '024 •• 92', logo: '📱' },
   ]);
+
+  // Mock distance calculation (in real app, this would be calculated based on store and delivery address)
+  const deliveryDistance = 2.5; // km
+
+  const deliveryMethods = [
+    { 
+      id: 'shop_for_me', 
+      name: 'Shop for Me', 
+      emoji: '🛒', 
+      description: 'Our shopper will buy your items and deliver them',
+      estimatedTime: '30-45 mins',
+      recommended: true,
+      disabled: false,
+      details: 'Shopper visits store, selects items, and delivers to you'
+    },
+    { 
+      id: 'pick_and_drop', 
+      name: 'Pick and Drop', 
+      emoji: '📦', 
+      description: 'You\'ve already shopped, we\'ll just pick up and deliver',
+      estimatedTime: '15-25 mins',
+      recommended: false,
+      disabled: false,
+      details: 'Quick pickup from your location and delivery to destination'
+    }
+  ];
 
   const showSuccessAnimation = (message: string) => {
     setSuccessMessage(message);
@@ -107,6 +134,9 @@ export default function Checkout({ route, navigation }: any) {
       imageUrl: item.imageUrl
     }));
 
+    // Get selected delivery method
+    const selectedDeliveryMethodData = deliveryMethods.find(method => method.id === selectedDeliveryMethod);
+    
     // Add order to context
     addOrder({
       items: orderItems,
@@ -117,6 +147,9 @@ export default function Checkout({ route, navigation }: any) {
       store: 'Kofi\'s Fresh Market', // This could be dynamic based on the store
       address: selectedAddressData.address,
       paymentMethod: selectedPaymentData.name,
+      deliveryMethod: selectedDeliveryMethodData?.name || 'Shop for Me',
+      deliveryMethodEmoji: selectedDeliveryMethodData?.emoji || '🛒',
+      estimatedDeliveryTime: selectedDeliveryMethodData?.estimatedTime || '30-45 mins',
       status: 'pending'
     });
 
@@ -133,7 +166,7 @@ export default function Checkout({ route, navigation }: any) {
 
   const handleGoBack = () => {
     setShowOrderSuccess(false);
-    navigation.navigate('CustomerHome');
+    navigation.navigate('CustomerTabs', { screen: 'Home' });
   };
 
   const handleEditAddress = (address: Address) => {
@@ -294,6 +327,30 @@ export default function Checkout({ route, navigation }: any) {
           </View>
         </View>
 
+        {/* Order Items */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
+          <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Order Items</Text>
+          <View style={{ gap: 12, marginTop: 12 }}>
+            {items.map((item) => (
+              <View key={item.id} style={[styles.orderItemCard, { backgroundColor: colors.surface, borderColor: colors.primary + '22' }]}>
+                <Image source={{ uri: item.imageUrl }} style={styles.orderItemImage} />
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={[styles.orderItemName, { color: colors.onSurface }]}>{item.name}</Text>
+                  <Text style={[styles.orderItemCategory, { color: colors.onSurface + '66' }]}>{item.category}</Text>
+                  <Text style={[styles.orderItemPrice, { color: colors.primary }]}>
+                    GHS {item.price.toFixed(2)} × {item.qty} {item.unitLabel}
+                  </Text>
+                </View>
+                <View style={styles.orderItemRight}>
+                  <Text style={[styles.orderItemTotal, { color: colors.onSurface }]}>
+                    GHS {(item.price * item.qty).toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* Payment */}
         <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
           <View style={styles.rowBetween}>
@@ -317,6 +374,68 @@ export default function Checkout({ route, navigation }: any) {
               />
             ))}
           </ScrollView>
+        </View>
+
+        {/* Delivery Method Selection */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 24 }}>
+          <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Delivery Method</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.onSurface + '88' }]}>
+            Choose how you'd like your order to be handled
+          </Text>
+          <View style={{ gap: 12, marginTop: 12 }}>
+            {deliveryMethods.map((method) => (
+              <TouchableOpacity
+                key={method.id}
+                onPress={() => !method.disabled && setSelectedDeliveryMethod(method.id)}
+                disabled={method.disabled}
+                style={[
+                  styles.deliveryMethodCard,
+                  {
+                    backgroundColor: method.disabled ? colors.surface + '50' : colors.surface,
+                    borderColor: selectedDeliveryMethod === method.id ? colors.primary : '#e5e7eb',
+                    borderWidth: selectedDeliveryMethod === method.id ? 2 : 1,
+                    opacity: method.disabled ? 0.5 : 1
+                  }
+                ]}
+              >
+                <View style={styles.deliveryMethodLeft}>
+                  <View style={styles.deliveryMethodIcon}>
+                    <Text style={styles.deliveryMethodEmoji}>{method.emoji}</Text>
+                  </View>
+                  <View style={styles.deliveryMethodInfo}>
+                    <View style={styles.deliveryMethodHeader}>
+                      <Text style={[styles.deliveryMethodName, { color: colors.onBackground }]}>
+                        {method.name}
+                      </Text>
+                      {method.recommended && (
+                        <View style={[styles.recommendedBadge, { backgroundColor: colors.primary }]}>
+                          <Text style={[styles.recommendedText, { color: colors.onPrimary }]}>Recommended</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.deliveryMethodDescription, { color: colors.onSurface + '88' }]}>
+                      {method.description}
+                    </Text>
+                    <Text style={[styles.deliveryMethodDetails, { color: colors.onSurface + '66' }]}>
+                      {method.details}
+                    </Text>
+                    <Text style={[styles.deliveryMethodTime, { color: colors.primary }]}>
+                      ETA: {method.estimatedTime}
+                    </Text>
+                  </View>
+                </View>
+                <View style={[
+                  styles.deliveryMethodRadio,
+                  {
+                    backgroundColor: selectedDeliveryMethod === method.id ? colors.primary : 'transparent',
+                    borderColor: selectedDeliveryMethod === method.id ? colors.primary : '#d1d5db'
+                  }
+                ]}>
+                  {selectedDeliveryMethod === method.id && <Text style={{ color: 'white', fontSize: 12 }}>✓</Text>}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
@@ -884,6 +1003,116 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     alignItems: 'center'
+  },
+  orderItemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  orderItemImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  orderItemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  orderItemCategory: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  orderItemPrice: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  orderItemRight: {
+    alignItems: 'flex-end',
+  },
+  orderItemTotal: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    marginTop: 4,
+    lineHeight: 20
+  },
+  deliveryMethodCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 100
+  },
+  deliveryMethodLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1
+  },
+  deliveryMethodIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f8f9fa',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12
+  },
+  deliveryMethodEmoji: {
+    fontSize: 24
+  },
+  deliveryMethodInfo: {
+    flex: 1
+  },
+  deliveryMethodHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4
+  },
+  deliveryMethodName: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginRight: 8
+  },
+  recommendedBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginLeft: 8
+  },
+  recommendedText: {
+    fontSize: 10,
+    fontWeight: '600'
+  },
+  deliveryMethodDescription: {
+    fontSize: 14,
+    marginBottom: 4,
+    fontWeight: '500'
+  },
+  deliveryMethodDetails: {
+    fontSize: 12,
+    marginBottom: 4,
+    fontStyle: 'italic'
+  },
+  deliveryMethodTime: {
+    fontSize: 12,
+    fontWeight: '600'
+  },
+  deliveryMethodRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12
   }
 });
 

@@ -36,17 +36,17 @@ const initialItems = [
 function CartItemCard({ item, onDelete, onQuantityChanged }: any) {
   return (
     <View style={styles.itemCard}>
-      <Image source={{ uri: item.image }} style={styles.itemImage} />
+      <Image source={{ uri: item.imageUrl || item.image }} style={styles.itemImage} />
       <View style={{ flex: 1, marginLeft: 12 }}>
         <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemMeta}>Fruits</Text>
-        <Text style={styles.itemPrice}>GHS {item.price.toFixed(2)}<Text style={{ color: '#94a3b8', fontSize: 12 }}> / KG</Text></Text>
+        <Text style={styles.itemMeta}>{item.category}</Text>
+        <Text style={styles.itemPrice}>GHS {item.price.toFixed(2)}<Text style={{ color: '#94a3b8', fontSize: 12 }}> / {item.unitLabel}</Text></Text>
       </View>
       <View style={styles.rightCol}>
         <TouchableOpacity style={styles.deleteIcon} onPress={onDelete}><Text style={{ color: 'white', fontWeight: '900' }}>×</Text></TouchableOpacity>
         <View style={styles.stepperChip}>
           <TouchableOpacity onPress={() => onQuantityChanged(Math.max(1, item.qty - 1))} style={styles.stepperBtn}><Text style={styles.stepperBtnText}>−</Text></TouchableOpacity>
-          <Text style={styles.stepperQty}>{item.qty} KG</Text>
+          <Text style={styles.stepperQty}>{item.qty} {item.unitLabel}</Text>
           <TouchableOpacity onPress={() => onQuantityChanged(item.qty + 1)} style={styles.stepperBtn}><Text style={styles.stepperBtnText}>＋</Text></TouchableOpacity>
         </View>
       </View>

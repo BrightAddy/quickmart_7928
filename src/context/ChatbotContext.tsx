@@ -261,6 +261,27 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMessages(prev => [...prev, newMessage]);
   }, []);
 
+  const switchLanguage = useCallback((language: Language) => {
+    setCurrentLanguage(language);
+    // Update welcome message in new language
+    setMessages(prev => prev.map(msg => 
+      msg.id === '1' ? { ...msg, text: translations[language].welcome } : msg
+    ));
+  }, []);
+
+  const getCartTotal = useCallback(() => {
+    return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  }, [cart]);
+
+  const getPersonalizedDeals = useCallback(() => {
+    // Simulate personalized deals based on cart and preferences
+    const cartCategories = cart.map(item => item.product.category);
+    const deals = sampleProducts.filter(product => 
+      product.discount && product.discount > 20
+    );
+    return deals.slice(0, 4);
+  }, [cart]);
+
   const sendMessage = useCallback(async (text: string) => {
     // Add user message
     addMessage({
@@ -492,14 +513,6 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsOpen(prev => !prev);
   }, []);
 
-  const switchLanguage = useCallback((language: Language) => {
-    setCurrentLanguage(language);
-    // Update welcome message in new language
-    setMessages(prev => prev.map(msg => 
-      msg.id === '1' ? { ...msg, text: translations[language].welcome } : msg
-    ));
-  }, []);
-
   const addToCart = useCallback((product: Product, quantity: number = 1) => {
     setCart(prev => {
       const existingItem = prev.find(item => item.product.id === product.id);
@@ -535,19 +548,6 @@ export const ChatbotProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ));
     }
   }, [removeFromCart]);
-
-  const getCartTotal = useCallback(() => {
-    return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
-  }, [cart]);
-
-  const getPersonalizedDeals = useCallback(() => {
-    // Simulate personalized deals based on cart and preferences
-    const cartCategories = cart.map(item => item.product.category);
-    const deals = sampleProducts.filter(product => 
-      product.discount && product.discount > 20
-    );
-    return deals.slice(0, 4);
-  }, [cart]);
 
   const value: ChatbotContextType = {
     messages,

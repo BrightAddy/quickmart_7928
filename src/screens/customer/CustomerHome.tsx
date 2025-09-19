@@ -6,7 +6,7 @@ import { useChatbot } from '../../context/ChatbotContext';
 import { FloatingChatbotButton, ChatbotModal } from '../../components/UI';
 import GlowingBorderCard from '../../components/GlowingBorderCard';
 import { useProducts } from '../../context/ProductsContext';
-import bananaImg from '../../../assets/images/slide2-shopping.svg';
+// import bananaImg from '../../../assets/images/slide2-shopping.svg'; // SVG not supported in React Native
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -925,22 +925,6 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 14,
     backgroundColor: '#eee',
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   storeName: {
     fontSize: 15,

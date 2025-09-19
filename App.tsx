@@ -47,9 +47,11 @@ import LoyaltyPoints from './src/screens/customer/LoyaltyPoints';
 import ManageAddresses from './src/screens/customer/ManageAddresses';
 import { ProductsProvider } from './src/context/ProductsContext';
 import { ChatbotProvider } from './src/context/ChatbotContext';
+import { ShopperChatProvider } from './src/context/ShopperChatContext';
 import AllStores from './src/screens/customer/AllStores';
 import Search from './src/screens/customer/Search';
 import Deals from './src/screens/customer/Deals';
+import ShopperChat from './src/screens/shopper/ShopperChat';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -59,9 +61,10 @@ export default function App() {
       <SafeAreaProvider>
         <ThemeProvider>
           <ChatbotProvider>
-            <ProductsProvider>
-              <CartProvider>
-                <OrderProvider>
+            <ShopperChatProvider>
+              <ProductsProvider>
+                <CartProvider>
+                  <OrderProvider>
                   <NavigationContainer>
                     <StatusBar style="dark" />
                     <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
@@ -96,11 +99,13 @@ export default function App() {
                       <Stack.Screen name="Search" component={Search} />
                       <Stack.Screen name="AllStores" component={AllStores} />
                       <Stack.Screen name="Deals" component={Deals} />
+                      <Stack.Screen name="ShopperChat" component={ShopperChat} />
                     </Stack.Navigator>
                   </NavigationContainer>
-                </OrderProvider>
-              </CartProvider>
-            </ProductsProvider>
+                  </OrderProvider>
+                </CartProvider>
+              </ProductsProvider>
+            </ShopperChatProvider>
           </ChatbotProvider>
         </ThemeProvider>
       </SafeAreaProvider>

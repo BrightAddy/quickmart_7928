@@ -90,14 +90,14 @@ export default function Dashboard() {
           <View style={[styles.metricCard, { backgroundColor: colors.surface, borderColor: ORANGE + '33' }]}>
             <View style={styles.cardHeader}>
               <View style={styles.cardIcon}>
-                <Text style={styles.salesIcon}>$</Text>
+                <Text style={styles.salesIcon}>💰</Text>
               </View>
               <View style={styles.trendSection}>
                 <Text style={styles.trendIcon}>📈</Text>
                 <Text style={styles.trendText}>+12.5%</Text>
               </View>
             </View>
-            <Text style={[styles.metricValue, { color: colors.onBackground }]}>GHC₵2,450.75</Text>
+            <Text style={[styles.metricValue, { color: colors.onBackground }]}>₵2,450.75</Text>
             <Text style={[styles.metricLabel, { color: colors.onSurface + '88' }]}>Today's Sales</Text>
           </View>
 
@@ -242,12 +242,14 @@ export default function Dashboard() {
               <View style={styles.orderHeader}>
                 <View style={styles.orderIdSection}>
                   <Text style={[styles.orderId, { color: colors.onBackground }]}>#ORD-2024-0156</Text>
-                  <Text style={[styles.orderStatus, { color: ORANGE }]}>Pending</Text>
                 </View>
                 <View style={styles.orderAmountSection}>
-                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>GHC85.50</Text>
+                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>₵85.50</Text>
                   <Text style={[styles.orderTime, { color: colors.onSurface + '66' }]}>2 min ago</Text>
                 </View>
+              </View>
+              <View style={styles.orderStatusRow}>
+                <Text style={[styles.orderStatus, { color: ORANGE }]}>Pending</Text>
               </View>
               
               <View style={styles.customerInfo}>
@@ -297,12 +299,14 @@ export default function Dashboard() {
               <View style={styles.orderHeader}>
                 <View style={styles.orderIdSection}>
                   <Text style={[styles.orderId, { color: colors.onBackground }]}>#ORD-2024-0155</Text>
-                  <Text style={[styles.orderStatus, { color: '#2196F3' }]}>In Progress</Text>
                 </View>
                 <View style={styles.orderAmountSection}>
-                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>GHC₵125.75</Text>
+                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>₵125.75</Text>
                   <Text style={[styles.orderTime, { color: colors.onSurface + '66' }]}>8 min ago</Text>
                 </View>
+              </View>
+              <View style={styles.orderStatusRow}>
+                <Text style={[styles.orderStatus, { color: '#2196F3' }]}>In Progress</Text>
               </View>
               
               <View style={styles.customerInfo}>
@@ -345,12 +349,14 @@ export default function Dashboard() {
               <View style={styles.orderHeader}>
                 <View style={styles.orderIdSection}>
                   <Text style={[styles.orderId, { color: colors.onBackground }]}>#ORD-2024-0154</Text>
-                  <Text style={[styles.orderStatus, { color: '#4CAF50' }]}>Ready</Text>
                 </View>
                 <View style={styles.orderAmountSection}>
-                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>GHC₵67.25</Text>
+                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>₵67.25</Text>
                   <Text style={[styles.orderTime, { color: colors.onSurface + '66' }]}>15 min ago</Text>
                 </View>
+              </View>
+              <View style={styles.orderStatusRow}>
+                <Text style={[styles.orderStatus, { color: '#4CAF50' }]}>Ready</Text>
               </View>
               
               <View style={styles.customerInfo}>
@@ -390,13 +396,15 @@ export default function Dashboard() {
               <View style={styles.orderHeader}>
                 <View style={styles.orderIdSection}>
                   <Text style={[styles.orderId, { color: colors.onBackground }]}>#ORD-2024-0153</Text>
-                  <View style={[styles.statusPill, { backgroundColor: '#f0f0f0' }]}>
-                    <Text style={[styles.statusPillText, { color: '#666' }]}>Done</Text>
-                  </View>
                 </View>
                 <View style={styles.orderAmountSection}>
-                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>GHC₵156.00</Text>
+                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>₵156.00</Text>
                   <Text style={[styles.orderTime, { color: colors.onSurface + '66' }]}>1 hour ago</Text>
+                </View>
+              </View>
+              <View style={styles.orderStatusRow}>
+                <View style={[styles.statusPill, { backgroundColor: '#f0f0f0' }]}>
+                  <Text style={[styles.statusPillText, { color: '#666' }]}>Done</Text>
                 </View>
               </View>
               
@@ -433,12 +441,14 @@ export default function Dashboard() {
               <View style={styles.orderHeader}>
                 <View style={styles.orderIdSection}>
                   <Text style={[styles.orderId, { color: colors.onBackground }]}>#ORD-2024-0152</Text>
-                  <Text style={[styles.orderStatus, { color: '#FF4444' }]}>Cancelled</Text>
                 </View>
                 <View style={styles.orderAmountSection}>
-                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>GHC₵89.50</Text>
+                  <Text style={[styles.orderAmount, { color: colors.onBackground }]}>₵89.50</Text>
                   <Text style={[styles.orderTime, { color: colors.onSurface + '66' }]}>2 hours ago</Text>
                 </View>
+              </View>
+              <View style={styles.orderStatusRow}>
+                <Text style={[styles.orderStatus, { color: '#FF4444' }]}>Cancelled</Text>
               </View>
               
               <View style={styles.customerInfo}>
@@ -776,14 +786,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   orderIdSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
     flex: 1,
   },
   orderId: {
     fontSize: Math.max(16, screenWidth * 0.04),
     fontWeight: '600',
+  },
+  orderStatusRow: {
+    marginBottom: 12,
   },
   orderStatus: {
     fontSize: Math.max(14, screenWidth * 0.035),

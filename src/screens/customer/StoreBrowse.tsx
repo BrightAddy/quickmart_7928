@@ -38,7 +38,7 @@ function SearchBar({ value, onChange, onFilter, onVoice, onImageScan }: any) {
 function CategoryChips({ selected, onSelect, categories }: any) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 10, marginLeft: 8 }}>
-      {categories.map((cat) => (
+      {categories.map((cat: string) => (
         <TouchableOpacity
           key={cat}
           style={[styles.chip, selected === cat && styles.chipActive]}
