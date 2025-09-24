@@ -14,6 +14,8 @@ export type RootStackParamList = {
   CustomerTabs: undefined;
   ShopperTabs: undefined;
   StoreOwnerHome: undefined;
+  AddProduct: undefined;
+  Restock: undefined;
   AllStores: undefined;
   StoreBrowse: { store: any };
   UserPreferences: undefined;

@@ -34,6 +34,8 @@ const ShopperSignupThemed = withShopperTheme(ShopperSignup as any);
 const ShopperTabsThemed = withShopperTheme(ShopperTabs as any);
 const ShopperHomeThemed = withShopperTheme(ShopperStack as any);
 import StoreOwnerTabs from './src/navigation/StoreOwnerTabs';
+import AddProduct from './src/screens/storeOwner/AddProduct';
+import Restock from './src/screens/storeOwner/Restock';
 import OrderTracking from './src/screens/customer/OrderTracking';
 import PaymentMethods from './src/screens/customer/PaymentMethods';
 import UserPreferencesScreen from './src/screens/general/UserPreferencesScreen';
@@ -87,6 +89,8 @@ export default function App() {
                       <Stack.Screen name="ShopperHome" component={ShopperHomeThemed} />
                       <Stack.Screen name="ShopperTabs" component={ShopperTabsThemed} />
                       <Stack.Screen name="StoreOwnerHome" component={StoreOwnerTabs} />
+                      <Stack.Screen name="AddProduct" component={AddProduct} />
+                      <Stack.Screen name="Restock" component={Restock} />
                       <Stack.Screen name="OrderTracking" component={OrderTracking} />
                       <Stack.Screen name="PaymentMethods" component={PaymentMethods} />
                       <Stack.Screen name="UserPreferences" component={UserPreferencesScreen} />

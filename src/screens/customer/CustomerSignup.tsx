@@ -16,18 +16,6 @@ function LanguageSelector({ selected, onChange }: { selected: string; onChange: 
   );
 }
 
-function SocialSignup({ onGoogle, onApple }: { onGoogle: () => void; onApple: () => void }) {
-  return (
-    <View style={styles.socialRow}>
-      <TouchableOpacity style={styles.socialBtn} onPress={onGoogle}>
-        <Text style={styles.socialText}>Continue with Google</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.socialBtn} onPress={onApple}>
-        <Text style={styles.socialText}>Continue with Apple</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 export default function CustomerSignup({ navigation }: Props) {
   const [firstName, setFirstName] = useState('');
@@ -276,16 +264,6 @@ export default function CustomerSignup({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Social Signup */}
-        <View style={styles.socialSection}>
-          <Text style={styles.socialDivider}>
-            {selectedLang === 'fr' ? 'ou' : 'or'}
-          </Text>
-          <SocialSignup
-            onGoogle={() => alert('Google signup will be available soon')}
-            onApple={() => alert('Apple signup will be available soon')}
-          />
-        </View>
 
         {/* Login Link */}
         <View style={styles.loginSection}>
@@ -472,37 +450,6 @@ const styles = StyleSheet.create({
     color: '#2E7D32',
     fontWeight: '600',
     fontSize: 16,
-  },
-  socialSection: {
-    paddingHorizontal: 30,
-    paddingBottom: 20,
-  },
-  socialDivider: {
-    textAlign: 'center',
-    color: '#666',
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  socialRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  socialBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  socialText: {
-    color: '#333',
-    fontWeight: '600',
-    fontSize: 14,
   },
   loginSection: {
     alignItems: 'center',

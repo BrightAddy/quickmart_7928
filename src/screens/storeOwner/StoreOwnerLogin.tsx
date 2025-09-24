@@ -16,18 +16,6 @@ function LanguageSelector({ selected, onChange }: { selected: string; onChange: 
   );
 }
 
-function SocialLogin({ onGoogle, onApple }: { onGoogle: () => void; onApple: () => void }) {
-  return (
-    <View style={styles.socialRow}>
-      <TouchableOpacity style={styles.socialBtn} onPress={onGoogle}>
-        <Text style={styles.socialText}>Continue with Google</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.socialBtn} onPress={onApple}>
-        <Text style={styles.socialText}>Continue with Apple</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 export default function StoreOwnerLogin({ navigation }: Props) {
   const [identifier, setIdentifier] = useState('');
@@ -165,10 +153,6 @@ export default function StoreOwnerLogin({ navigation }: Props) {
             </TouchableOpacity>
           </View>
 
-          <SocialLogin
-            onGoogle={() => alert('Google login will be available soon')}
-            onApple={() => alert('Apple login will be available soon')}
-          />
 
           <View style={styles.signupSection}>
             <Text style={styles.signupText}>
@@ -344,28 +328,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '700',
     fontSize: 18,
-  },
-  socialRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 24,
-  },
-  socialBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  socialText: {
-    color: '#333',
-    fontWeight: '600',
-    fontSize: 14,
   },
   signupSection: {
     alignItems: 'center',

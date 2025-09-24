@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Alert } from 'react-native';
-import { useTheme } from '@/theme/theme';
+import { useTheme } from '../../theme/theme';
 
 const ORANGE = '#FF7A00';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-export default function Dashboard() {
+export default function Dashboard({ navigation }: any) {
   const { colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [storeStatus, setStoreStatus] = useState('Open');
@@ -19,7 +19,19 @@ export default function Dashboard() {
   };
 
   const handleQuickAction = (action: string) => {
-    Alert.alert('Quick Action', `${action} action triggered!`);
+    switch (action) {
+      case 'Add Product':
+        navigation.navigate('AddProduct');
+        break;
+      case 'Restock':
+        navigation.navigate('Restock');
+        break;
+      case 'Update Hours':
+        Alert.alert('Update Hours', 'Opening store hours settings...');
+        break;
+      default:
+        Alert.alert('Quick Action', `${action} action triggered!`);
+    }
   };
 
   const handleOrderAction = (orderId: string, action: string) => {
