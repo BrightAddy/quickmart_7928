@@ -102,6 +102,7 @@ export default function CustomerLogin({ navigation }: Props) {
               placeholder={selectedLang === 'tw' ? 'Telefon anaa Email' : 'Phone or Email'}
               value={identifier}
               onChangeText={setIdentifier}
+              placeholderTextColor="#64748B"
               style={styles.input}
               autoCapitalize="none"
             />
@@ -110,6 +111,7 @@ export default function CustomerLogin({ navigation }: Props) {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
+              placeholderTextColor="#64748B"
               style={styles.input}
             />
             
@@ -253,8 +255,8 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: '900',
+    color: '#0F172A',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -270,6 +272,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: 'white',
     fontSize: 16,
+    color: '#0F172A',
+    fontWeight: '600',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
