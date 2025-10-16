@@ -19,7 +19,7 @@ function StoreHeader({ store }: any) {
   );
 }
 
-function SearchBar({ value, onChange, onFilter, onVoice, onImageScan }: any) {
+function SearchBar({ value, onChange, onImageScan }: any) {
   return (
     <View style={styles.searchBarBox}>
       <TextInput
@@ -28,8 +28,6 @@ function SearchBar({ value, onChange, onFilter, onVoice, onImageScan }: any) {
         value={value}
         onChangeText={onChange}
       />
-      <TouchableOpacity onPress={onFilter} style={styles.searchIcon}><Text>🔍</Text></TouchableOpacity>
-      <TouchableOpacity onPress={onVoice} style={styles.searchIcon}><Text>🎤</Text></TouchableOpacity>
       <TouchableOpacity onPress={onImageScan} style={styles.searchIcon}><Text>📷</Text></TouchableOpacity>
     </View>
   );
@@ -157,8 +155,6 @@ export default function StoreBrowse({ navigation, route }: any) {
             <SearchBar 
               value={search} 
               onChange={setSearch} 
-              onFilter={() => {}} 
-              onVoice={() => {}} 
               onImageScan={() => setImageScanVisible(true)}
             />
             <CategoryChips selected={selectedCat} onSelect={setSelectedCat} categories={categories} />

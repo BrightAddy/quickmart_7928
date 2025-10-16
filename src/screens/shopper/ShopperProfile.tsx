@@ -8,9 +8,9 @@ export default function ShopperProfile({ navigation }: any) {
 
   const [availability, setAvailability] = useState<boolean>(false);
   const [profile, setProfile] = useState(() => ({
-    name: 'Ama Boateng',
-    phone: '+233 24 123 4567',
-    email: 'ama.boateng@example.com',
+    name: 'Bright Addy',
+    phone: '+233 558680795',
+    email: 'brightaddy40@gmail.com',
     rating: 4.9,
   }));
   const [vehicle, setVehicle] = useState(() => ({ type: 'Motorbike', plate: 'GR-1234-22' }));
@@ -272,11 +272,13 @@ function PreferencesForm({ initial, onSave, onCancel, colors }: { initial: { not
 
 const styles = StyleSheet.create({
   header: {
-    paddingTop: 32,
-    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingHorizontal: 20,
     paddingBottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   avatar: {
     width: 64,
